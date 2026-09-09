@@ -236,3 +236,8 @@ div:has(> div.dynamicTableDiv):not(.invisible) {
         --torrent-state-color: var(--color-torrent-state-error);
     }
 }
+
+#torrentsTableDiv.torrentStatesColors.progressBarFollowsTextColor
+    tr:not(.selected, :hover) {
+    --progressbar-fill: var(--torrent-state-color);
+}

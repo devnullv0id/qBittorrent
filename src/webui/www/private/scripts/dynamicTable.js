@@ -1214,6 +1214,7 @@ window.qBittorrent.DynamicTable ??= (() => {
             super.setup(dynamicTableDivId, dynamicTableFixedHeaderDivId, contextMenu);
             const useTorrentStatesColors = (clientData.get("use_torrent_states_colors") ?? true) === true;
             this.dynamicTableDiv.classList.toggle("torrentStatesColors", useTorrentStatesColors);
+            this.dynamicTableDiv.classList.toggle("progressBarFollowsTextColor", clientData.get("progress_bar_follows_text_color") === true);
         }
 
         setupVirtualList() {

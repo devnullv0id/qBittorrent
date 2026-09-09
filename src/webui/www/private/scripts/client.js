@@ -73,6 +73,7 @@ window.qBittorrent.Client ??= (() => {
             "display_density",
             "full_url_tracker_column",
             "hide_zero_status_filters",
+            "progress_bar_follows_text_color",
             "qbt_selected_log_levels",
             "search_in_filter",
             "show_filters_sidebar",

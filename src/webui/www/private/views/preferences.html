@@ -53,8 +53,12 @@
             <label for="useAltRowColorsInput">QBT_TR(Use alternating row colors)QBT_TR[CONTEXT=OptionsDialog]</label>
         </div>
         <div class="formRow" style="margin-bottom: 3px;">
-            <input type="checkbox" id="useTorrentStatesColorsInput">
+            <input type="checkbox" id="useTorrentStatesColorsInput" onclick="qBittorrent.Preferences.updateProgressBarFollowsTextColorEnabled();">
             <label for="useTorrentStatesColorsInput">QBT_TR(Use different text colors by torrent states)QBT_TR[CONTEXT=OptionsDialog]</label>
+        </div>
+        <div class="formRow" style="margin-bottom: 3px;">
+            <input type="checkbox" id="progressBarFollowsTextColorInput">
+            <label for="progressBarFollowsTextColorInput">QBT_TR(Make progress bars follow text colors)QBT_TR[CONTEXT=OptionsDialog]</label>
         </div>
         <fieldset class="settings">
             <legend>QBT_TR(Action on double-click)QBT_TR[CONTEXT=OptionsDialog]</legend>
@@ -2013,6 +2017,7 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
                 updateFileLogBackupEnabled: updateFileLogBackupEnabled,
                 updateFileLogDeleteEnabled: updateFileLogDeleteEnabled,
                 updateStoreSearchJobsEnabled: updateStoreSearchJobsEnabled,
+                updateProgressBarFollowsTextColorEnabled: updateProgressBarFollowsTextColorEnabled,
                 updateDeleteCancelledTorrentEnabled: updateDeleteCancelledTorrentEnabled,
                 updateTempDirEnabled: updateTempDirEnabled,
                 updateTorrentBackupControls: updateTorrentBackupControls,
@@ -2092,6 +2097,11 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
         const updateStoreSearchJobsEnabled = () => {
             const enabled = document.getElementById("storeSearchJobs").checked;
             document.getElementById("storeSearchJobResults").disabled = !enabled;
+        };
+
+        const updateProgressBarFollowsTextColorEnabled = () => {
+            const enabled = document.getElementById("useTorrentStatesColorsInput").checked;
+            document.getElementById("progressBarFollowsTextColorInput").disabled = !enabled;
         };
 
         const updateDeleteCancelledTorrentEnabled = () => {
@@ -2525,6 +2535,7 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
                     const dblclickFilter = clientData.get("dblclick_filter") ?? "1";
                     const useAltRowColors = clientData.get("use_alt_row_colors");
                     const useTorrentStatesColors = clientData.get("use_torrent_states_colors") ?? true;
+                    const progressBarFollowsTextColor = clientData.get("progress_bar_follows_text_color");
                     const addTorrentWindowEnabled = clientData.get("add_new_torrent_dialog_enabled") ?? true;
 
                     // Behavior tab
@@ -2560,6 +2571,8 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
                     qBittorrent.Preferences.updateStoreSearchJobsEnabled();
                     document.getElementById("useAltRowColorsInput").checked = useAltRowColors === true;
                     document.getElementById("useTorrentStatesColorsInput").checked = useTorrentStatesColors === true;
+                    document.getElementById("progressBarFollowsTextColorInput").checked = progressBarFollowsTextColor === true;
+                    updateProgressBarFollowsTextColorEnabled();
                     document.getElementById("filelog_checkbox").checked = pref.file_log_enabled;
                     document.getElementById("filelog_save_path_input").value = pref.file_log_path;
                     document.getElementById("filelog_backup_checkbox").checked = pref.file_log_backup_enabled;
@@ -3027,6 +3040,7 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
             settings["store_search_job_results"] = document.getElementById("storeSearchJobResults").checked;
             clientData.use_alt_row_colors = document.getElementById("useAltRowColorsInput").checked;
             clientData.use_torrent_states_colors = document.getElementById("useTorrentStatesColorsInput").checked;
+            clientData.progress_bar_follows_text_color = document.getElementById("progressBarFollowsTextColorInput").checked;
             settings["file_log_enabled"] = document.getElementById("filelog_checkbox").checked;
             settings["file_log_path"] = document.getElementById("filelog_save_path_input").value;
             settings["file_log_backup_enabled"] = document.getElementById("filelog_backup_checkbox").checked;
