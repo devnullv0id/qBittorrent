@@ -419,6 +419,10 @@ void AppController::preferencesAction()
     data[u"confirm_merge_trackers"_s] = pref->confirmMergeTrackers();
     // Ask about downloading torrents linked inside a torrent
     data[u"recursive_download_enabled"_s] = pref->isRecursiveDownloadEnabled();
+#if defined(Q_OS_WIN)
+    // Show the console window of an external program run on torrent added/completion
+    data[u"auto_run_console_enabled"_s] = pref->isAutoRunConsoleEnabled();
+#endif
     // Recheck completed torrents
     data[u"recheck_completed_torrents"_s] = pref->recheckTorrentsOnCompletion();
     // Customize application instance name
@@ -1083,6 +1087,11 @@ void AppController::setPreferencesAction()
     // Ask about downloading torrents linked inside a torrent
     if (hasKey(u"recursive_download_enabled"_s))
         pref->setRecursiveDownloadEnabled(it.value().toBool());
+#if defined(Q_OS_WIN)
+    // Show the console window of an external program run on torrent added/completion
+    if (hasKey(u"auto_run_console_enabled"_s))
+        pref->setAutoRunConsoleEnabled(it.value().toBool());
+#endif
     // Recheck completed torrents
     if (hasKey(u"recheck_completed_torrents"_s))
         pref->recheckTorrentsOnCompletion(it.value().toBool());

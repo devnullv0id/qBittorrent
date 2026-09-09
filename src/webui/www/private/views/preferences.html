@@ -487,6 +487,10 @@ QBT_TR((best choice if supported))QBT_TR[CONTEXT=OptionsDialog] QBT_TR(Default p
             <label id="autorunLabel" for="autorun_checkbox">QBT_TR(Run on torrent finished:)QBT_TR[CONTEXT=OptionsDialog]</label>
             <input type="text" id="autorunProg_txt" aria-labelledby="autorunLabel" style="width: 100%;">
         </div>
+        <div class="formRow" id="autoRunConsoleRow" style="margin-bottom: 3px;">
+            <input type="checkbox" id="autoRunConsoleEnabled">
+            <label for="autoRunConsoleEnabled">QBT_TR(Show console window)QBT_TR[CONTEXT=OptionsDialog]</label>
+        </div>
         <div style="font-style: italic;">QBT_TR(Supported parameters (case sensitive):)QBT_TR[CONTEXT=OptionsDialog]
             <ul>
                 <li>QBT_TR(%N: Torrent name)QBT_TR[CONTEXT=OptionsDialog]</li>
@@ -2642,6 +2646,10 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
                     // Run an external program on torrent finished
                     document.getElementById("autorun_checkbox").checked = pref.autorun_enabled;
                     document.getElementById("autorunProg_txt").value = pref.autorun_program;
+                    if (pref.auto_run_console_enabled === undefined)
+                        document.getElementById("autoRunConsoleRow").style.display = "none";
+                    else
+                        document.getElementById("autoRunConsoleEnabled").checked = pref.auto_run_console_enabled;
                     updateAutoRun();
 
                     // Connection tab
@@ -3058,6 +3066,8 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
             settings["autorun_on_torrent_added_program"] = document.getElementById("autorunOnTorrentAddedProgram").value;
             // Run an external program on torrent finished
             settings["autorun_enabled"] = document.getElementById("autorun_checkbox").checked;
+            if (document.getElementById("autoRunConsoleRow").style.display !== "none")
+                settings["auto_run_console_enabled"] = document.getElementById("autoRunConsoleEnabled").checked;
             settings["autorun_program"] = document.getElementById("autorunProg_txt").value;
 
             // Connection tab
