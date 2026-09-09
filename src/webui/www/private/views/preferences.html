@@ -909,6 +909,14 @@ QBT_TR((best choice if supported))QBT_TR[CONTEXT=OptionsDialog] QBT_TR(Default p
                     </td>
                 </tr>
                 <tr>
+                    <td colspan="2">
+                        <input type="radio" id="shareLimitsModeAny" name="shareLimitsMode" value="MatchAny" checked>
+                        <label for="shareLimitsModeAny">QBT_TR(Any of the above)QBT_TR[CONTEXT=OptionsDialog]</label>
+                        <input type="radio" id="shareLimitsModeAll" name="shareLimitsMode" value="MatchAll">
+                        <label for="shareLimitsModeAll">QBT_TR(All the above)QBT_TR[CONTEXT=OptionsDialog]</label>
+                    </td>
+                </tr>
+                <tr>
                     <td style="text-align: right;"><label for="maxRatioSelect">QBT_TR(then)QBT_TR[CONTEXT=OptionsDialog]</label></td>
                     <td>
                         <select id="maxRatioSelect">
@@ -2749,6 +2757,7 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
                             break;
                     }
                     document.getElementById("maxRatioSelect").getChildren("option")[maxRatioAct].selected = true;
+                    document.getElementById((pref.share_limits_mode === "MatchAll") ? "shareLimitsModeAll" : "shareLimitsModeAny").checked = true;
                     updateMaxRatioTimeEnabled();
 
                     // Add trackers
@@ -3227,6 +3236,7 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
             settings["max_inactive_seeding_time_enabled"] = document.getElementById("maxInactiveSeedingTimeCheckbox").checked;
             settings["max_inactive_seeding_time"] = maxInactiveSeedingTime;
             settings["max_ratio_act"] = Number(document.getElementById("maxRatioSelect").value);
+            settings["share_limits_mode"] = document.getElementById("shareLimitsModeAll").checked ? "MatchAll" : "MatchAny";
 
             // Add trackers
             settings["add_trackers_enabled"] = document.getElementById("add_trackers_checkbox").checked;
