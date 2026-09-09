@@ -160,6 +160,7 @@ void AppController::preferencesAction()
     // Search
     data[u"store_search_jobs"_s] = pref->storeSearchJobs();
     data[u"store_search_job_results"_s] = pref->storeSearchJobResults();
+    data[u"search_history_length"_s] = pref->searchHistoryLength();
     // Log file
     data[u"file_log_enabled"_s] = app()->isFileLoggerEnabled();
     data[u"file_log_path"_s] = app()->fileLoggerPath().toString();
@@ -587,6 +588,8 @@ void AppController::setPreferencesAction()
         pref->setStoreSearchJobs(it.value().toBool());
     if (hasKey(u"store_search_job_results"_s))
         pref->setStoreSearchJobResults(it.value().toBool());
+    if (hasKey(u"search_history_length"_s))
+        pref->setSearchHistoryLength(it.value().toInt());
     // Log file
     if (hasKey(u"file_log_enabled"_s))
         app()->setFileLoggerEnabled(it.value().toBool());

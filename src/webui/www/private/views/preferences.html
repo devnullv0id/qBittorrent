@@ -987,6 +987,14 @@ QBT_TR((best choice if supported))QBT_TR[CONTEXT=OptionsDialog] QBT_TR(Default p
 
 <div id="SearchTab" class="PrefTab invisible">
     <fieldset class="settings">
+        <legend>QBT_TR(Search UI)QBT_TR[CONTEXT=OptionsDialog]</legend>
+        <div class="formRow" style="margin-bottom: 3px;">
+            <label for="searchHistoryLength">QBT_TR(History length)QBT_TR[CONTEXT=OptionsDialog]</label>
+            <input type="number" id="searchHistoryLength" min="0" max="99" step="1" style="width: 6em; margin-left: 10px;">
+        </div>
+    </fieldset>
+
+    <fieldset class="settings">
         <legend>
             <input type="checkbox" id="storeSearchJobs" onclick="qBittorrent.Preferences.updateStoreSearchJobsEnabled();">
             <label for="storeSearchJobs">QBT_TR(Store opened tabs)QBT_TR[CONTEXT=OptionsDialog]</label>
@@ -2585,6 +2593,7 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
                     document.getElementById("confirmTorrentDeletion").checked = pref.confirm_torrent_deletion;
                     document.getElementById("storeSearchJobs").checked = pref.store_search_jobs;
                     document.getElementById("storeSearchJobResults").checked = pref.store_search_job_results;
+                    document.getElementById("searchHistoryLength").value = pref.search_history_length;
                     qBittorrent.Preferences.updateStoreSearchJobsEnabled();
                     document.getElementById("useAltRowColorsInput").checked = useAltRowColors === true;
                     document.getElementById("useTorrentStatesColorsInput").checked = useTorrentStatesColors === true;
@@ -3058,6 +3067,7 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
             settings["confirm_torrent_deletion"] = document.getElementById("confirmTorrentDeletion").checked;
             settings["store_search_jobs"] = document.getElementById("storeSearchJobs").checked;
             settings["store_search_job_results"] = document.getElementById("storeSearchJobResults").checked;
+            settings["search_history_length"] = Number(document.getElementById("searchHistoryLength").value);
             clientData.use_alt_row_colors = document.getElementById("useAltRowColorsInput").checked;
             clientData.use_torrent_states_colors = document.getElementById("useTorrentStatesColorsInput").checked;
             clientData.progress_bar_follows_text_color = document.getElementById("progressBarFollowsTextColorInput").checked;

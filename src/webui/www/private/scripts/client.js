@@ -77,6 +77,7 @@ window.qBittorrent.Client ??= (() => {
             "hide_zero_values_mode",
             "progress_bar_follows_text_color",
             "qbt_selected_log_levels",
+            "search_history",
             "search_in_filter",
             "show_filters_sidebar",
             "show_log_viewer",

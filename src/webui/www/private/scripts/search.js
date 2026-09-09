@@ -52,6 +52,7 @@ window.qBittorrent.Search ??= (() => {
     let selectedCategory = "QBT_TR(All categories)QBT_TR[CONTEXT=SearchEngineWidget]";
     let selectedPlugin = "enabled";
     let prevSelectedPlugin;
+    let searchHistory = [];
 
     let searchResultsTable;
     /** @type Map<number, {
@@ -127,6 +128,7 @@ window.qBittorrent.Search ??= (() => {
 
     const init = () => {
         document.getElementById("searchInTorrentName").value = (window.qBittorrent.ClientData.get("search_in_filter") === "names") ? "names" : "everywhere";
+        loadSearchHistory();
         const searchResultsTableContextMenu = new window.qBittorrent.ContextMenu.ContextMenu({
             targets: "#searchResultsTableDiv tbody tr",
             menu: "searchResultsTableMenu",
@@ -504,6 +506,9 @@ window.qBittorrent.Search ??= (() => {
 
                 const responseJSON = await response.json();
                 const searchId = responseJSON.id;
+                // the pattern joins the history only once a search actually starts, as it does
+                // in SearchWidget::searchButtonClicked()
+                updateSearchHistory(pattern);
                 createSearchTab(searchId, pattern, category, plugins);
                 updateSearchButtonState();
             });
@@ -591,6 +596,56 @@ window.qBittorrent.Search ??= (() => {
         else {
             stopSearch(currentSearchId);
         }
+    };
+
+    const searchHistoryLength = () => {
+        const length = window.qBittorrent.Cache.preferences.get().search_history_length ?? 50;
+        return Math.min(Math.max(Number(length), 0), 99);
+    };
+
+    const renderSearchHistory = () => {
+        const options = searchHistory.map((pattern) => new Option(pattern));
+        document.getElementById("searchPatternHistory").replaceChildren(...options);
+    };
+
+    const updateSearchHistory = (pattern) => {
+        const historyLength = searchHistoryLength();
+        if (historyLength <= 0) {
+            if (searchHistory.length > 0) {
+                searchHistory = [];
+                storeSearchHistory();
+                renderSearchHistory();
+            }
+            return;
+        }
+
+        if (searchHistory.includes(pattern))
+            return;
+
+        searchHistory.push(pattern);
+        if (searchHistory.length > historyLength)
+            searchHistory.splice(0, (searchHistory.length - historyLength));
+
+        storeSearchHistory();
+        renderSearchHistory();
+    };
+
+    const storeSearchHistory = () => {
+        // don't await this
+        window.qBittorrent.ClientData.set({ search_history: searchHistory }).catch(console.error);
+    };
+
+    const loadSearchHistory = () => {
+        const stored = window.qBittorrent.ClientData.get("search_history");
+        searchHistory = Array.isArray(stored) ? stored : [];
+
+        const historyLength = searchHistoryLength();
+        if (searchHistory.length > historyLength) {
+            searchHistory.splice(0, (searchHistory.length - historyLength));
+            storeSearchHistory();
+        }
+
+        renderSearchHistory();
     };
 
     const openSearchTorrentDescriptionUrl = () => {
