@@ -362,6 +362,63 @@ window.qBittorrent.TorrentContent ??= (() => {
             torrentFilesTable.reselectRows(selectedFiles);
     };
 
+    // Equally distribute the selected items into groups and for each group assign
+    // a download priority that will apply to each item. The number of groups
+    // depends on how many "download priority" are available to be assigned.
+    const filesPriorityByOrderMenuClicked = () => {
+        const selectedRowIds = new Set(torrentFilesTable.selectedRowsIds());
+        if (selectedRowIds.size === 0)
+            return;
+
+        // the priorities follow the order the rows are shown in, not the order they were selected in.
+        // The tree is read directly rather than through the rendered rows, so that a row selected
+        // before its folder was collapsed still counts, as it does in the GUI and in the sibling
+        // priority actions
+        const selectedRows = torrentFilesTable.getFileTreeArray()
+            .map((node) => node.rowId.toString())
+            .filter((rowId) => selectedRowIds.has(rowId));
+
+        const priorities = [FilePriority.Maximum, FilePriority.High, FilePriority.Normal];
+        const groupSize = Math.max(Math.floor(selectedRows.length / priorities.length), 1);
+
+        const groups = priorities.map(() => []);
+        for (const [i, rowId] of selectedRows.entries())
+            groups[Math.min(Math.floor(i / groupSize), (priorities.length - 1))].push(rowId);
+
+        // a selected folder expands into rows a later group also covers, and the requests are
+        // not ordered, so the later group claims them first and the three stay disjoint
+        const claimedRowIds = new Set();
+        const claimedFileIds = new Set();
+        for (let i = (groups.length - 1); i >= 0; --i) {
+            if (groups[i].length === 0)
+                continue;
+
+            const uniqueRowIds = new Set();
+            const uniqueFileIds = new Set();
+            for (const rowId of groups[i]) {
+                const rows = getAllChildren(rowId, Number(torrentFilesTable.getRowFileId(rowId)));
+                for (const childRowId of rows.rowIds) {
+                    if (!claimedRowIds.has(childRowId))
+                        uniqueRowIds.add(childRowId);
+                }
+                for (const fileId of rows.fileIds) {
+                    if (!claimedFileIds.has(fileId))
+                        uniqueFileIds.add(fileId);
+                }
+            }
+            for (const rowId of uniqueRowIds)
+                claimedRowIds.add(rowId);
+            for (const fileId of uniqueFileIds)
+                claimedFileIds.add(fileId);
+            // a group left with nothing but folder rows carries no file to prioritize
+            if ([...uniqueFileIds].some((fileId) => !isFolder(fileId)))
+                setFilePriority([...uniqueRowIds.keys()], [...uniqueFileIds.keys()], priorities[i]);
+        }
+
+        for (const id of selectedRows)
+            updateParentFolder(id);
+    };
+
     const filesPriorityMenuClicked = (priority) => {
         const selectedRows = torrentFilesTable.selectedRowsIds();
         if (selectedRows.length === 0)
@@ -509,6 +566,9 @@ window.qBittorrent.TorrentContent ??= (() => {
                 },
                 FilePrioMaximum: (element, ref) => {
                     filesPriorityMenuClicked(FilePriority.Maximum);
+                },
+                FilePrioByShownFileOrder: (element, ref) => {
+                    filesPriorityByOrderMenuClicked();
                 }
             },
             offsets: {

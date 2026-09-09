@@ -2601,6 +2601,10 @@ window.qBittorrent.DynamicTable ??= (() => {
 
         populateTable(root) {
             this.fileTree.setRoot(root);
+            // the caller rebuilds the tree in file index order, while getFilteredAndSortedRows()
+            // skips sorting whenever the rows are unchanged. Sort here so that reading the tree
+            // always gives the order the rows are shown in.
+            this.#sortNodesByColumn(root, this.columns[this.sortedColumn]);
             for (const node of root.children)
                 this.#addNodeToTable(node, 0, root);
         }
