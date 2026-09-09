@@ -272,7 +272,7 @@ const initializeWindows = () => {
             closable: true,
             paddingVertical: 0,
             paddingHorizontal: 0,
-            width: loadWindowWidth(id, 730),
+            width: loadWindowWidth(id, 830),
             height: loadWindowHeight(id, 600),
             onResize: window.qBittorrent.Misc.createDebounceHandler(500, (e) => {
                 saveWindowSize(id);

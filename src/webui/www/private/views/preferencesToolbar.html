@@ -16,6 +16,9 @@
         <li id="PrefBittorrentLink">
             <a><img alt="QBT_TR(BitTorrent)QBT_TR[CONTEXT=OptionsDialog]" src="images/preferences-bittorrent.svg" width="16" height="16">QBT_TR(BitTorrent)QBT_TR[CONTEXT=OptionsDialog]</a>
         </li>
+        <li id="PrefSearchLink">
+            <a><img alt="QBT_TR(Search)QBT_TR[CONTEXT=OptionsDialog]" src="images/edit-find.svg" width="16" height="16">QBT_TR(Search)QBT_TR[CONTEXT=OptionsDialog]</a>
+        </li>
         <li id="PrefRSSLink">
             <a><img alt="QBT_TR(RSS)QBT_TR[CONTEXT=OptionsDialog]" src="images/application-rss.svg" width="16" height="16">QBT_TR(RSS)QBT_TR[CONTEXT=OptionsDialog]</a>
         </li>
@@ -54,6 +57,9 @@
         });
         document.getElementById("PrefBittorrentLink").addEventListener("click", (e) => {
             showTab(document.getElementById("BittorrentTab"));
+        });
+        document.getElementById("PrefSearchLink").addEventListener("click", (e) => {
+            showTab(document.getElementById("SearchTab"));
         });
         document.getElementById("PrefRSSLink").addEventListener("click", (e) => {
             showTab(document.getElementById("RSSTab"));

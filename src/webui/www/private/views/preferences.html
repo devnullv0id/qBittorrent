@@ -125,18 +125,6 @@
     </fieldset>
 
     <fieldset class="settings">
-        <legend>QBT_TR(Search)QBT_TR[CONTEXT=OptionsDialog]</legend>
-        <div class="formRow" style="margin-bottom: 3px;">
-            <input type="checkbox" id="storeSearchJobs" onclick="qBittorrent.Preferences.updateStoreSearchJobsEnabled();">
-            <label for="storeSearchJobs">QBT_TR(Save search tabs)QBT_TR[CONTEXT=OptionsDialog]</label>
-        </div>
-        <div class="formRow" style="margin-bottom: 3px; margin-left: 30px;">
-            <input type="checkbox" id="storeSearchJobResults">
-            <label for="storeSearchJobResults">QBT_TR(Also save search results)QBT_TR[CONTEXT=OptionsDialog]</label>
-        </div>
-    </fieldset>
-
-    <fieldset class="settings">
         <legend>
             <input type="checkbox" id="filelog_checkbox" onclick="qBittorrent.Preferences.updateFileLogEnabled();">
             <label for="filelog_checkbox">QBT_TR(Log Files)QBT_TR[CONTEXT=OptionsDialog]</label>
@@ -993,6 +981,19 @@ QBT_TR((best choice if supported))QBT_TR[CONTEXT=OptionsDialog] QBT_TR(Default p
                 <legend id="fetchedTrackersFromURLLabel">QBT_TR(Fetched trackers)QBT_TR[CONTEXT=OptionsDialog]</legend>
                 <textarea id="addTrackersURLListTextarea" aria-labelledby="fetchedTrackersFromURLLabel" rows="5" cols="70" readonly></textarea>
             </fieldset>
+        </div>
+    </fieldset>
+</div>
+
+<div id="SearchTab" class="PrefTab invisible">
+    <fieldset class="settings">
+        <legend>
+            <input type="checkbox" id="storeSearchJobs" onclick="qBittorrent.Preferences.updateStoreSearchJobsEnabled();">
+            <label for="storeSearchJobs">QBT_TR(Store opened tabs)QBT_TR[CONTEXT=OptionsDialog]</label>
+        </legend>
+        <div class="formRow" style="margin-bottom: 3px; margin-left: 30px;">
+            <input type="checkbox" id="storeSearchJobResults">
+            <label for="storeSearchJobResults">QBT_TR(Also store search results)QBT_TR[CONTEXT=OptionsDialog]</label>
         </div>
     </fieldset>
 </div>
