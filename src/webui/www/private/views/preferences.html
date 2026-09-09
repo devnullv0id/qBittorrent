@@ -60,6 +60,14 @@
             <input type="checkbox" id="progressBarFollowsTextColorInput">
             <label for="progressBarFollowsTextColorInput">QBT_TR(Make progress bars follow text colors)QBT_TR[CONTEXT=OptionsDialog]</label>
         </div>
+        <div class="formRow" style="margin-bottom: 3px;">
+            <input type="checkbox" id="hideZeroValuesInput" onclick="qBittorrent.Preferences.updateHideZeroValuesEnabled();">
+            <label id="hideZeroValuesLabel" for="hideZeroValuesInput">QBT_TR(Hide zero and infinity values)QBT_TR[CONTEXT=OptionsDialog]</label>
+            <select id="hideZeroValuesModeSelect" style="margin-left: 10px;" aria-labelledby="hideZeroValuesLabel">
+                <option value="0">QBT_TR(Always)QBT_TR[CONTEXT=OptionsDialog]</option>
+                <option value="1">QBT_TR(Stopped torrents only)QBT_TR[CONTEXT=OptionsDialog]</option>
+            </select>
+        </div>
         <fieldset class="settings">
             <legend>QBT_TR(Action on double-click)QBT_TR[CONTEXT=OptionsDialog]</legend>
             <table>
@@ -2017,6 +2025,7 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
                 updateFileLogBackupEnabled: updateFileLogBackupEnabled,
                 updateFileLogDeleteEnabled: updateFileLogDeleteEnabled,
                 updateStoreSearchJobsEnabled: updateStoreSearchJobsEnabled,
+                updateHideZeroValuesEnabled: updateHideZeroValuesEnabled,
                 updateProgressBarFollowsTextColorEnabled: updateProgressBarFollowsTextColorEnabled,
                 updateDeleteCancelledTorrentEnabled: updateDeleteCancelledTorrentEnabled,
                 updateTempDirEnabled: updateTempDirEnabled,
@@ -2097,6 +2106,11 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
         const updateStoreSearchJobsEnabled = () => {
             const enabled = document.getElementById("storeSearchJobs").checked;
             document.getElementById("storeSearchJobResults").disabled = !enabled;
+        };
+
+        const updateHideZeroValuesEnabled = () => {
+            const enabled = document.getElementById("hideZeroValuesInput").checked;
+            document.getElementById("hideZeroValuesModeSelect").disabled = !enabled;
         };
 
         const updateProgressBarFollowsTextColorEnabled = () => {
@@ -2536,6 +2550,8 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
                     const useAltRowColors = clientData.get("use_alt_row_colors");
                     const useTorrentStatesColors = clientData.get("use_torrent_states_colors") ?? true;
                     const progressBarFollowsTextColor = clientData.get("progress_bar_follows_text_color");
+                    const hideZeroValues = clientData.get("hide_zero_values");
+                    const hideZeroValuesMode = clientData.get("hide_zero_values_mode") ?? "0";
                     const addTorrentWindowEnabled = clientData.get("add_new_torrent_dialog_enabled") ?? true;
 
                     // Behavior tab
@@ -2573,6 +2589,9 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
                     document.getElementById("useTorrentStatesColorsInput").checked = useTorrentStatesColors === true;
                     document.getElementById("progressBarFollowsTextColorInput").checked = progressBarFollowsTextColor === true;
                     updateProgressBarFollowsTextColorEnabled();
+                    document.getElementById("hideZeroValuesInput").checked = hideZeroValues === true;
+                    document.getElementById("hideZeroValuesModeSelect").value = hideZeroValuesMode;
+                    updateHideZeroValuesEnabled();
                     document.getElementById("filelog_checkbox").checked = pref.file_log_enabled;
                     document.getElementById("filelog_save_path_input").value = pref.file_log_path;
                     document.getElementById("filelog_backup_checkbox").checked = pref.file_log_backup_enabled;
@@ -3041,6 +3060,8 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
             clientData.use_alt_row_colors = document.getElementById("useAltRowColorsInput").checked;
             clientData.use_torrent_states_colors = document.getElementById("useTorrentStatesColorsInput").checked;
             clientData.progress_bar_follows_text_color = document.getElementById("progressBarFollowsTextColorInput").checked;
+            clientData.hide_zero_values = document.getElementById("hideZeroValuesInput").checked;
+            clientData.hide_zero_values_mode = document.getElementById("hideZeroValuesModeSelect").value;
             settings["file_log_enabled"] = document.getElementById("filelog_checkbox").checked;
             settings["file_log_path"] = document.getElementById("filelog_save_path_input").value;
             settings["file_log_backup_enabled"] = document.getElementById("filelog_backup_checkbox").checked;
