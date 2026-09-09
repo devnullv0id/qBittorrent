@@ -115,6 +115,7 @@ let showDownloadPage = () => {};
 let globalLimitFN = () => {};
 let uploadLimitFN = () => {};
 let shareRatioFN = () => {};
+let torrentOptionsFN = () => {};
 let toggleSequentialDownloadFN = () => {};
 let toggleFirstLastPiecePrioFN = () => {};
 let setSuperSeedingFN = () => {};
@@ -368,6 +369,32 @@ const initializeWindows = () => {
             paddingHorizontal: 0,
             width: window.qBittorrent.Dialog.limitWidthToViewport(424),
             height: 100
+        });
+    };
+
+    torrentOptionsFN = () => {
+        const hashes = torrentsTable.selectedRowsIds();
+        if (hashes.length <= 0)
+            return;
+
+        const contentURL = new URL("torrentoptions.html", window.location);
+        contentURL.search = new URLSearchParams({
+            v: "${CACHEID}",
+            hashes: hashes.join("|")
+        });
+        new MochaUI.Window({
+            id: "torrentOptionsPage",
+            icon: "images/qbittorrent-tray.svg",
+            title: "QBT_TR(Torrent Options)QBT_TR[CONTEXT=TorrentOptionsDialog]",
+            loadMethod: "iframe",
+            contentURL: contentURL.toString(),
+            scrollbars: true,
+            resizable: true,
+            maximizable: false,
+            paddingVertical: 0,
+            paddingHorizontal: 0,
+            width: window.qBittorrent.Dialog.limitWidthToViewport(600),
+            height: window.qBittorrent.Dialog.limitHeightToViewport(630)
         });
     };
 
