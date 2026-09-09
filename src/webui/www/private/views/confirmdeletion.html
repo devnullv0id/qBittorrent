@@ -78,7 +78,7 @@
         confirmButton.addEventListener("click", (e) => {
             // Some torrents might be removed when waiting for user input, so refetch the torrent list
             const hashes = isDeletingVisibleTorrents
-                ? torrentsTable.getFilteredTorrentsHashes(selectedStatus, selectedCategory, selectedTag, selectedTracker)
+                ? torrentsTable.getFilteredTorrentsHashes(selectedStatus, selectedCategory, selectedTag, selectedTracker, selectedTrackerStatus)
                 : torrentsTable.selectedRowsIds();
 
             fetch("api/v2/torrents/delete", {

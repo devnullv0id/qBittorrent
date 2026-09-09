@@ -33,6 +33,13 @@
     <ul class="filterList" id="tagFilterList">
     </ul>
 </div>
+<div class="filterWrapper invisible" id="trackerStatusFilterWrapper">
+    <span class="filterTitle">
+        <img src="images/go-down.svg" alt="QBT_TR(Collapse/expand)QBT_TR[CONTEXT=TransferListFiltersWidget]">QBT_TR(Tracker status)QBT_TR[CONTEXT=TransferListFiltersWidget]
+    </span>
+    <ul class="filterList" id="trackerStatusFilterList">
+    </ul>
+</div>
 <div class="filterWrapper">
     <span class="filterTitle">
         <img src="images/go-down.svg" alt="QBT_TR(Collapse/expand)QBT_TR[CONTEXT=TransferListFiltersWidget]">QBT_TR(Trackers)QBT_TR[CONTEXT=TransferListFiltersWidget]
@@ -229,7 +236,12 @@
             },
             onShow: function() {
                 this.startTorrentObserver();
-                setTrackerFilter(this.options.element.id);
+                // the two lists share this menu, so the row has to select in the list it belongs to
+                const { id: filterListID } = this.options.element.closest("ul[id]");
+                if (filterListID === "trackerStatusFilterList")
+                    setTrackerStatusFilter(this.options.element.id);
+                else
+                    setTrackerFilter(this.options.element.id);
             },
             onHide: function() {
                 this.stopTorrentObserver();
@@ -244,6 +256,9 @@
 
         if (localPreferences.get("filter_tag_collapsed") === "true")
             toggleFilterDisplay("tagFilterList");
+
+        if (localPreferences.get("filter_trackerStatus_collapsed") === "true")
+            toggleFilterDisplay("trackerStatusFilterList");
 
         if (localPreferences.get("filter_tracker_collapsed") === "true")
             toggleFilterDisplay("trackerFilterList");
@@ -264,6 +279,9 @@
                     break;
                 case "tagFilterList":
                     setTagFilter(filterItemID);
+                    break;
+                case "trackerStatusFilterList":
+                    setTrackerStatusFilter(filterItemID);
                     break;
                 case "trackerFilterList":
                     setTrackerFilter(filterItemID);
@@ -288,21 +306,31 @@
                     clearCategoryFilter();
                     clearTagFilter();
                     clearTrackerFilter();
+                    clearTrackerStatusFilter();
                     break;
                 case "categoryFilterList":
                     clearStatusFilter();
                     clearTagFilter();
                     clearTrackerFilter();
+                    clearTrackerStatusFilter();
                     break;
                 case "tagFilterList":
                     clearStatusFilter();
                     clearCategoryFilter();
+                    clearTrackerFilter();
+                    clearTrackerStatusFilter();
+                    break;
+                case "trackerStatusFilterList":
+                    clearStatusFilter();
+                    clearCategoryFilter();
+                    clearTagFilter();
                     clearTrackerFilter();
                     break;
                 case "trackerFilterList":
                     clearStatusFilter();
                     clearCategoryFilter();
                     clearTagFilter();
+                    clearTrackerStatusFilter();
                     break;
                 default:
                     console.error(`Unexpected filterListID: ${filterListID}`);
@@ -339,6 +367,7 @@
         const clearCategoryFilter = () => { setCategoryFilter(CATEGORIES_ALL); };
         const clearTagFilter = () => { setTagFilter(TAGS_ALL); };
         const clearTrackerFilter = () => { setTrackerFilter(TRACKERS_ALL); };
+        const clearTrackerStatusFilter = () => { setTrackerStatusFilter(TRACKERS_STATUS_ALL); };
 
         return exports();
     })();

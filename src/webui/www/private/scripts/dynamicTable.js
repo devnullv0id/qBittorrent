@@ -1634,7 +1634,7 @@ window.qBittorrent.DynamicTable ??= (() => {
             };
         }
 
-        applyFilter(row, filterName, category, tag, trackerHost, filterTerms) {
+        applyFilter(row, filterName, category, tag, trackerHost, trackerStatus, filterTerms) {
             const { state, upspeed, dlspeed } = row["full_data"];
             let inactive = false;
 
@@ -1732,6 +1732,26 @@ window.qBittorrent.DynamicTable ??= (() => {
                 }
             }
 
+            switch (trackerStatus) {
+                case TRACKERS_ANNOUNCE_ERROR:
+                    if (!row["full_data"]["has_other_announce_error"])
+                        return false;
+                    break;
+
+                case TRACKERS_ERROR:
+                    if (!row["full_data"]["has_tracker_error"])
+                        return false;
+                    break;
+
+                case TRACKERS_WARNING:
+                    if (!row["full_data"]["has_tracker_warning"])
+                        return false;
+                    break;
+
+                default:
+                    break; // no status filter
+            }
+
             switch (trackerHost) {
                 case TRACKERS_ALL:
                     break; // do nothing
@@ -1789,17 +1809,17 @@ window.qBittorrent.DynamicTable ??= (() => {
             return true;
         }
 
-        getFilteredTorrentsNumber(filterName, category, tag, tracker) {
+        getFilteredTorrentsNumber(filterName, category, tag, tracker, trackerStatus = TRACKERS_STATUS_ALL) {
             let cnt = 0;
 
             for (const row of this.rows.values()) {
-                if (this.applyFilter(row, filterName, category, tag, tracker, null))
+                if (this.applyFilter(row, filterName, category, tag, tracker, trackerStatus, null))
                     ++cnt;
             }
             return cnt;
         }
 
-        getFilteredTorrentsHashes(filterName, category, tag, tracker) {
+        getFilteredTorrentsHashes(filterName, category, tag, tracker, trackerStatus = TRACKERS_STATUS_ALL) {
             const rowsHashes = [];
             const useRegex = document.getElementById("torrentsFilterRegexBox").checked;
             const filterText = document.getElementById("torrentsFilterInput").value.trim().toLowerCase();
@@ -1814,7 +1834,7 @@ window.qBittorrent.DynamicTable ??= (() => {
             }
 
             for (const row of this.rows.values()) {
-                if (this.applyFilter(row, filterName, category, tag, tracker, filterTerms))
+                if (this.applyFilter(row, filterName, category, tag, tracker, trackerStatus, filterTerms))
                     rowsHashes.push(row["rowId"]);
             }
 
@@ -1837,7 +1857,7 @@ window.qBittorrent.DynamicTable ??= (() => {
             }
 
             for (const row of this.rows.values()) {
-                if (this.applyFilter(row, selectedStatus, selectedCategory, selectedTag, selectedTracker, filterTerms)) {
+                if (this.applyFilter(row, selectedStatus, selectedCategory, selectedTag, selectedTracker, selectedTrackerStatus, filterTerms)) {
                     filteredRows.push(row);
                     filteredRows[row.rowId] = row;
                 }

@@ -90,6 +90,10 @@
             <input type="checkbox" id="hideZeroFiltersCheckbox">
             <label for="hideZeroFiltersCheckbox">QBT_TR(Auto hide zero status filters)QBT_TR[CONTEXT=OptionsDialog]</label>
         </div>
+        <div class="formRow" style="margin-bottom: 3px;">
+            <input type="checkbox" id="useSeparateTrackerStatusFilterInput">
+            <label for="useSeparateTrackerStatusFilterInput" title='QBT_TR(Use separate "Tracker status" filter. Otherwise it gets merged with "Trackers" filter.)QBT_TR[CONTEXT=OptionsDialog]'>QBT_TR(Use separate "Tracker status" filter)QBT_TR[CONTEXT=OptionsDialog]</label>
+        </div>
     </fieldset>
 
     <fieldset class="settings">
@@ -2470,6 +2474,7 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
                     const fullUrlTrackerColumn = clientData.get("full_url_tracker_column");
                     const useVirtualList = clientData.get("use_virtual_list") ?? true;
                     const hideZeroStatusFilters = clientData.get("hide_zero_status_filters");
+                    const useSeparateTrackerStatusFilter = clientData.get("use_separate_tracker_status_filter");
                     const dblclickDownload = clientData.get("dblclick_download") ?? "1";
                     const dblclickComplete = clientData.get("dblclick_complete") ?? "1";
                     const dblclickFilter = clientData.get("dblclick_filter") ?? "1";
@@ -2498,6 +2503,7 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
                     document.getElementById("displayFullURLTrackerColumn").checked = fullUrlTrackerColumn === true;
                     document.getElementById("useVirtualList").checked = useVirtualList === true;
                     document.getElementById("hideZeroFiltersCheckbox").checked = hideZeroStatusFilters === true;
+                    document.getElementById("useSeparateTrackerStatusFilterInput").checked = useSeparateTrackerStatusFilter === true;
                     document.getElementById("dblclickDownloadSelect").value = dblclickDownload;
                     document.getElementById("dblclickCompleteSelect").value = dblclickComplete;
                     document.getElementById("dblclickFiltersSelect").value = dblclickFilter;
@@ -2952,6 +2958,7 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
             clientData.use_virtual_list = document.getElementById("useVirtualList").checked;
             clientData.add_new_torrent_dialog_enabled = document.getElementById("addTorrentWindowEnabled").checked;
             clientData.hide_zero_status_filters = document.getElementById("hideZeroFiltersCheckbox").checked;
+            clientData.use_separate_tracker_status_filter = document.getElementById("useSeparateTrackerStatusFilterInput").checked;
             clientData.dblclick_download = document.getElementById("dblclickDownloadSelect").value;
             clientData.dblclick_complete = document.getElementById("dblclickCompleteSelect").value;
             clientData.dblclick_filter = document.getElementById("dblclickFiltersSelect").value;

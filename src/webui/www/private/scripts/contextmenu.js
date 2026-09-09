@@ -625,6 +625,7 @@ window.qBittorrent.ContextMenu ??= (() => {
                 case TRACKERS_ALL:
                 case TRACKERS_ANNOUNCE_ERROR:
                 case TRACKERS_ERROR:
+                case TRACKERS_STATUS_ALL:
                 case TRACKERS_TRACKERLESS:
                 case TRACKERS_WARNING:
                     this.hideItem("deleteTracker");

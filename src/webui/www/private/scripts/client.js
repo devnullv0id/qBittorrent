@@ -84,6 +84,7 @@ window.qBittorrent.Client ??= (() => {
             "speed_in_browser_title_bar",
             "torrent_creator",
             "use_alt_row_colors",
+            "use_separate_tracker_status_filter",
             "use_virtual_list",
         ]);
 
@@ -381,6 +382,7 @@ const TRACKERS_ANNOUNCE_ERROR = "d0b4cad2-9f6f-4e7f-8d4b-f80a103dd436";
 const TRACKERS_ERROR = "b551cfc3-64e9-4393-bc88-5d6ea2fab5cc";
 const TRACKERS_TRACKERLESS = "e24bd469-ea22-404c-8e2e-a17c82f37ea0";
 const TRACKERS_WARNING = "82a702c5-210c-412b-829f-97632d7557e9";
+const TRACKERS_STATUS_ALL = "0f5c6bcb-4f0c-4b0b-9d3a-2b5ef0b2b3ea";
 
 // Map<trackerHost: String, Map<trackerURL: String, torrents: Set>>
 const trackerMap = new Map();
@@ -389,6 +391,8 @@ const clientData = window.qBittorrent.ClientData;
 
 let selectedTracker = localPreferences.get("selected_tracker", TRACKERS_ALL);
 let setTrackerFilter = () => {};
+let selectedTrackerStatus = localPreferences.get("selected_tracker_status", TRACKERS_STATUS_ALL);
+let setTrackerStatusFilter = () => {};
 
 /* All filters */
 let selectedStatus = localPreferences.get("selected_filter", "all");
@@ -535,6 +539,18 @@ window.addEventListener("DOMContentLoaded", async (event) => {
 
         localPreferences.set("selected_tracker", tracker);
         selectedTracker = tracker;
+        highlightSelectedTracker();
+        updateMainData();
+
+        const newHash = torrentsTable.getCurrentTorrentID();
+        handleFilterSelectionChange(currentHash, newHash);
+    };
+
+    setTrackerStatusFilter = (trackerStatus) => {
+        const currentHash = torrentsTable.getCurrentTorrentID();
+
+        localPreferences.set("selected_tracker_status", trackerStatus);
+        selectedTrackerStatus = trackerStatus;
         highlightSelectedTracker();
         updateMainData();
 
@@ -903,12 +919,38 @@ window.addEventListener("DOMContentLoaded", async (event) => {
         for (const el of [...trackerFilterList.children])
             el.remove();
 
+        const useSeparateTrackerStatusFilter = window.qBittorrent.ClientData.get("use_separate_tracker_status_filter") === true;
+        const trackerStatusFilterList = document.getElementById("trackerStatusFilterList");
+        const trackerStatusFilterWrapper = document.getElementById("trackerStatusFilterWrapper");
+        if (trackerStatusFilterList !== null) {
+            for (const el of [...trackerStatusFilterList.children])
+                el.remove();
+            trackerStatusFilterWrapper.classList.toggle("invisible", !useSeparateTrackerStatusFilter);
+        }
+        const statusFilterList = (useSeparateTrackerStatusFilter && (trackerStatusFilterList !== null))
+            ? trackerStatusFilterList
+            : trackerFilterList;
+        // the three rows belong to whichever filter owns them in the current mode, so a
+        // selection made in one mode must not go on filtering unseen from the other
+        let staleSelectionReset = false;
+        if ((statusFilterList === trackerFilterList) && (selectedTrackerStatus !== TRACKERS_STATUS_ALL)) {
+            selectedTrackerStatus = TRACKERS_STATUS_ALL;
+            localPreferences.set("selected_tracker_status", selectedTrackerStatus);
+            staleSelectionReset = true;
+        }
+        else if ((statusFilterList !== trackerFilterList)
+            && ((selectedTracker === TRACKERS_ANNOUNCE_ERROR) || (selectedTracker === TRACKERS_ERROR) || (selectedTracker === TRACKERS_WARNING))) {
+            selectedTracker = TRACKERS_ALL;
+            localPreferences.set("selected_tracker", selectedTracker);
+            staleSelectionReset = true;
+        }
+
         const trackerItemTemplate = document.getElementById("trackerFilterItem");
 
-        const createLink = (host, text, count) => {
+        const createLink = (host, text, count, selected = selectedTracker) => {
             const trackerFilterItem = trackerItemTemplate.content.cloneNode(true).firstElementChild;
             trackerFilterItem.id = host;
-            trackerFilterItem.classList.toggle("selectedFilter", (host === selectedTracker));
+            trackerFilterItem.classList.toggle("selectedFilter", (host === selected));
 
             const span = trackerFilterItem.firstElementChild;
             span.lastChild.textContent = `${text} (${count})`;
@@ -944,10 +986,23 @@ window.addEventListener("DOMContentLoaded", async (event) => {
         }
 
         trackerFilterList.appendChild(createLink(TRACKERS_ALL, "QBT_TR(All)QBT_TR[CONTEXT=TrackerFiltersList]", torrentsTable.getRowSize()));
+        // "Trackerless" stays with the trackers in both modes, as it does in TrackersFilterWidget
         trackerFilterList.appendChild(createLink(TRACKERS_TRACKERLESS, "QBT_TR(Trackerless)QBT_TR[CONTEXT=TrackerFiltersList]", trackerlessCount));
-        trackerFilterList.appendChild(createLink(TRACKERS_ERROR, "QBT_TR(Tracker error)QBT_TR[CONTEXT=TrackerFiltersList]", trackerErrorCount));
-        trackerFilterList.appendChild(createLink(TRACKERS_ANNOUNCE_ERROR, "QBT_TR(Other error)QBT_TR[CONTEXT=TrackerFiltersList]", announceErrorCount));
-        trackerFilterList.appendChild(createLink(TRACKERS_WARNING, "QBT_TR(Warning)QBT_TR[CONTEXT=TrackerFiltersList]", trackerWarningCount));
+        // merged into the Trackers list the rows belong to the single tracker filter; in a section
+        // of their own they are a second, independent filter, as TrackerStatusFilterWidget is
+        const statusSelection = (statusFilterList === trackerFilterList) ? selectedTracker : selectedTrackerStatus;
+        const trackerErrorLink = createLink(TRACKERS_ERROR, "QBT_TR(Tracker error)QBT_TR[CONTEXT=TrackerFiltersList]", trackerErrorCount, statusSelection);
+        const otherErrorLink = createLink(TRACKERS_ANNOUNCE_ERROR, "QBT_TR(Other error)QBT_TR[CONTEXT=TrackerFiltersList]", announceErrorCount, statusSelection);
+        const warningLink = createLink(TRACKERS_WARNING, "QBT_TR(Warning)QBT_TR[CONTEXT=TrackerFiltersList]", trackerWarningCount, statusSelection);
+        // merged into the Trackers list they follow the errors, as in TrackersFilterWidget;
+        // in a section of their own they come after an "All" row, as in TrackerStatusFilterWidget
+        const statusLinks = (statusFilterList === trackerFilterList)
+            ? [trackerErrorLink, otherErrorLink, warningLink]
+            : [createLink(TRACKERS_STATUS_ALL, "QBT_TR(All)QBT_TR[CONTEXT=TrackerFiltersList]", torrentsTable.getRowSize(), statusSelection),
+                warningLink, trackerErrorLink, otherErrorLink
+            ];
+        for (const link of statusLinks)
+            statusFilterList.appendChild(link);
 
         // Sort trackers by hostname
         const sortedList = [];
@@ -968,6 +1023,11 @@ window.addEventListener("DOMContentLoaded", async (event) => {
             trackerFilterList.appendChild(createLink(trackerHost, trackerHost, trackerCount));
 
         window.qBittorrent.Filters.trackersFilterContextMenu.searchAndAddTargets();
+
+        // the list was filtered before this ran, so a selection dropped just above would otherwise
+        // go on hiding torrents until the next sync that reports a change
+        if (staleSelectionReset)
+            torrentsTable.updateTable();
     };
 
     const highlightSelectedTracker = () => {
@@ -977,6 +1037,10 @@ window.addEventListener("DOMContentLoaded", async (event) => {
 
         for (const tracker of trackerFilterList.children)
             tracker.classList.toggle("selectedFilter", (tracker.id === selectedTracker));
+
+        const trackerStatusFilterList = document.getElementById("trackerStatusFilterList");
+        for (const trackerStatus of (trackerStatusFilterList?.children ?? []))
+            trackerStatus.classList.toggle("selectedFilter", (trackerStatus.id === selectedTrackerStatus));
     };
 
     const statusSortOrder = Object.freeze({
