@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>QBT_TR(Please type a RSS feed URL)QBT_TR[CONTEXT=RSSWidget]</title>
+    <title>QBT_TR(RSS Feed Options)QBT_TR[CONTEXT=RSSFeedDialog]</title>
     <link rel="stylesheet" href="css/style.css?v=${CACHEID}" type="text/css">
     <script defer src="scripts/localpreferences.js?v=${CACHEID}"></script>
     <script defer src="scripts/color-scheme.js?v=${CACHEID}"></script>
@@ -26,7 +26,9 @@
 
             const searchParams = new URLSearchParams(window.location.search);
             const currentUrl = searchParams.get("url");
+            const currentRefreshInterval = Math.max(Number(searchParams.get("refreshInterval")), 0);
 
+            document.getElementById("refreshInterval").value = currentRefreshInterval;
             document.getElementById("url").value = currentUrl;
             document.getElementById("url").focus();
             document.getElementById("url").setSelectionRange(0, currentUrl.length);
@@ -42,31 +44,51 @@
                     return;
                 }
 
-                if (newUrl === currentUrl) {
-                    alert("QBT_TR(URL is unchanged)QBT_TR[CONTEXT=RSSWidget]");
+                const newRefreshInterval = Math.max(Number(document.getElementById("refreshInterval").value), 0);
+                const urlChanged = (newUrl !== currentUrl);
+                const refreshIntervalChanged = (newRefreshInterval !== currentRefreshInterval);
+
+                if (!urlChanged && !refreshIntervalChanged) {
+                    alert("QBT_TR(Feed options are unchanged)QBT_TR[CONTEXT=RSSFeedDialog]");
                     return;
                 }
 
                 document.getElementById("submitButton").disabled = true;
 
-                fetch("api/v2/rss/setFeedURL", {
-                        method: "POST",
-                        body: new URLSearchParams({
-                            path: searchParams.get("path"),
-                            url: newUrl
-                        })
-                    })
-                    .then(async (response) => {
-                        if (!response.ok) {
-                            alert((response.status === 409)
-                                ? await response.text()
-                                : "QBT_TR(Unable to update URL)QBT_TR[CONTEXT=RSSWidget]");
+                const path = searchParams.get("path");
+                const post = (endpoint, body) => fetch(`api/v2/rss/${endpoint}`, {
+                    method: "POST",
+                    body: new URLSearchParams(body)
+                });
+
+                // one at a time, in the order the GUI applies them: a failure must not leave the
+                // other change applied behind a failure message
+                (async () => {
+                    if (refreshIntervalChanged) {
+                        const response = await post("setFeedRefreshInterval", { path: path, refreshInterval: newRefreshInterval });
+                        if (!response.ok)
+                            return await response.text();
+                    }
+                    if (urlChanged) {
+                        const response = await post("setFeedURL", { path: path, url: newUrl });
+                        if (!response.ok)
+                            return await response.text();
+                    }
+                    return null;
+                })()
+                .then((error) => {
+                        if (error !== null) {
+                            alert(error || "QBT_TR(Unable to update feed options)QBT_TR[CONTEXT=RSSFeedDialog]");
                             document.getElementById("submitButton").disabled = false;
                             return;
                         }
 
                         window.parent.qBittorrent.Rss.updateRssFeedList(true);
                         window.parent.qBittorrent.Client.closeFrameWindow(window);
+                    })
+                    .catch(() => {
+                        alert("QBT_TR(Unable to update feed options)QBT_TR[CONTEXT=RSSFeedDialog]");
+                        document.getElementById("submitButton").disabled = false;
                     });
             });
         });
@@ -77,6 +99,11 @@
     <div style="padding: 10px 10px 0px 10px;">
         <label for="url" style="font-weight: bold;">QBT_TR(Feed URL:)QBT_TR[CONTEXT=RSSWidget]</label>
         <input type="text" id="url" style="width: 320px;">
+        <div style="display: flex; align-items: center; padding-top: 10px;">
+            <label for="refreshInterval">QBT_TR(Refresh interval:)QBT_TR[CONTEXT=RSSFeedDialog]</label>
+            <input type="number" id="refreshInterval" value="0" step="1" min="0" style="width: 8em; margin-left: 10px;">
+            <span style="margin-left: 5px;">QBT_TR(sec)QBT_TR[CONTEXT=OptionsDialog] <i>QBT_TR(0 = use the global interval)QBT_TR[CONTEXT=RSSFeedDialog]</i></span>
+        </div>
         <div style="text-align: center; padding-top: 10px;">
             <input type="button" value="QBT_TR(Save)QBT_TR[CONTEXT=HttpServer]" id="submitButton">
         </div>

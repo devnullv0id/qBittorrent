@@ -189,7 +189,7 @@
     <li><a href="#update"><img src="images/view-refresh.svg" alt="QBT_TR(Update)QBT_TR[CONTEXT=RSSWidget]"> QBT_TR(Update)QBT_TR[CONTEXT=RSSWidget]</a></li>
     <li><a href="#markRead"><img src="images/task-complete.svg" alt="QBT_TR(Mark items read)QBT_TR[CONTEXT=RSSWidget]"> QBT_TR(Mark items read)QBT_TR[CONTEXT=RSSWidget]</a></li>
     <li class="separator"><a href="#rename"><img src="images/edit-rename.svg" alt="QBT_TR(Rename...)QBT_TR[CONTEXT=RSSWidget]"> QBT_TR(Rename...)QBT_TR[CONTEXT=RSSWidget]</a></li>
-    <li><a href="#edit"><img src="images/edit-rename.svg" alt="QBT_TR(Edit feed URL...)QBT_TR[CONTEXT=RSSWidget]"> QBT_TR(Edit feed URL...)QBT_TR[CONTEXT=RSSWidget]</a></li>
+    <li><a href="#edit"><img src="images/edit-rename.svg" alt="QBT_TR(Feed options...)QBT_TR[CONTEXT=RSSWidget]"> QBT_TR(Feed options...)QBT_TR[CONTEXT=RSSWidget]</a></li>
     <li><a href="#delete"><img src="images/edit-clear.svg" alt="QBT_TR(Delete)QBT_TR[CONTEXT=RSSWidget]"> QBT_TR(Delete)QBT_TR[CONTEXT=RSSWidget]</a></li>
 
     <li class="separator"><a href="#newSubscription"><img src="images/list-add.svg" alt="QBT_TR(New subscription...)QBT_TR[CONTEXT=RSSWidget]"> QBT_TR(New subscription...)QBT_TR[CONTEXT=RSSWidget]</a></li>
@@ -264,7 +264,7 @@
                     },
                     edit: (el) => {
                         const data = rssFeedTable.getRow(rssFeedTable.selectedRows[0]).full_data;
-                        editUrl(data.dataPath, data.dataUrl);
+                        editUrl(data.dataPath, data.dataUrl, data.dataRefreshInterval);
                     },
                     delete: (el) => {
                         const selectedDatapaths = rssFeedTable.selectedRows
@@ -402,8 +402,8 @@
                 scrollbars: false,
                 resizable: false,
                 maximizable: false,
-                width: window.qBittorrent.Dialog.limitWidthToViewport(350),
-                height: 100
+                width: window.qBittorrent.Dialog.limitWidthToViewport(400),
+                height: 160
             });
         };
 
@@ -627,7 +627,8 @@
                         break;
                     }
                     // only non-folders have these properties
-                    if (!newData.isFolder && ((newData.uid !== existingData.dataUid) || (newData.url !== existingData.dataUrl))) {
+                    if (!newData.isFolder && ((newData.uid !== existingData.dataUid) || (newData.url !== existingData.dataUrl)
+                            || ((newData.refreshInterval ?? 0) !== existingData.dataRefreshInterval))) {
                         match = false;
                         break;
                     }
@@ -796,6 +797,7 @@
                             indentation: dataEntry.depth,
                             dataUid: dataEntry.uid,
                             dataUrl: dataEntry.url,
+                            dataRefreshInterval: (dataEntry.refreshInterval ?? 0),
                             dataPath: dataEntry.fullName
                         });
 
@@ -876,24 +878,25 @@
             });
         };
 
-        const editUrl = (path, url) => {
+        const editUrl = (path, url, refreshInterval) => {
             const contentURL = new URL("editfeedurl.html", window.location);
             contentURL.search = new URLSearchParams({
                 v: "${CACHEID}",
                 path: path,
-                url: url
+                url: url,
+                refreshInterval: (refreshInterval ?? 0)
             });
             new MochaUI.Window({
                 id: "editFeedURL",
                 icon: "images/qbittorrent-tray.svg",
-                title: "QBT_TR(Please type a RSS feed URL)QBT_TR[CONTEXT=RSSWidget]",
+                title: "QBT_TR(RSS Feed Options)QBT_TR[CONTEXT=RSSFeedDialog]",
                 loadMethod: "iframe",
                 contentURL: contentURL.toString(),
                 scrollbars: false,
                 resizable: false,
                 maximizable: false,
-                width: window.qBittorrent.Dialog.limitWidthToViewport(350),
-                height: 100
+                width: window.qBittorrent.Dialog.limitWidthToViewport(400),
+                height: 160
             });
         };
 
