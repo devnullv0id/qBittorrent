@@ -85,6 +85,7 @@ window.qBittorrent.Client ??= (() => {
             "torrent_creator",
             "use_alt_row_colors",
             "use_separate_tracker_status_filter",
+            "use_torrent_states_colors",
             "use_virtual_list",
         ]);
 

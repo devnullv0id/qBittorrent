@@ -1188,10 +1188,50 @@ window.qBittorrent.DynamicTable ??= (() => {
         }
     }
 
+    const torrentStateColorClasses = {
+        downloading: "torrentStateDownloading",
+        forcedDL: "torrentStateDownloading",
+        metaDL: "torrentStateDownloading",
+        forcedMetaDL: "torrentStateDownloading",
+        checkingDL: "torrentStateDownloading",
+        checkingUP: "torrentStateDownloading",
+        checkingResumeData: "torrentStateDownloading",
+        moving: "torrentStateDownloading",
+        stalledDL: "torrentStateStalledDownloading",
+        uploading: "torrentStateUploading",
+        forcedUP: "torrentStateUploading",
+        stalledUP: "torrentStateStalledUploading",
+        queuedDL: "torrentStateQueued",
+        queuedUP: "torrentStateQueued",
+        stoppedDL: "torrentStateStoppedDownloading",
+        stoppedUP: "torrentStateStoppedUploading",
+        missingFiles: "torrentStateError",
+        error: "torrentStateError"
+    };
+
     class TorrentsTable extends DynamicTable {
+        setup(dynamicTableDivId, dynamicTableFixedHeaderDivId, contextMenu) {
+            super.setup(dynamicTableDivId, dynamicTableFixedHeaderDivId, contextMenu);
+            const useTorrentStatesColors = (clientData.get("use_torrent_states_colors") ?? true) === true;
+            this.dynamicTableDiv.classList.toggle("torrentStatesColors", useTorrentStatesColors);
+        }
+
         setupVirtualList() {
             super.setupVirtualList();
             this.rowHeight = (clientData.get("display_density") === "compact") ? 18 : 22;
+        }
+
+        updateRow(tr, fullUpdate) {
+            super.updateRow(tr, fullUpdate);
+
+            for (const cssClass of [...tr.classList]) {
+                if (cssClass.startsWith("torrentState"))
+                    tr.classList.remove(cssClass);
+            }
+
+            const stateClass = torrentStateColorClasses[this.rows.get(tr.rowId).full_data.state];
+            if (stateClass !== undefined)
+                tr.classList.add(stateClass);
         }
 
         initColumns() {

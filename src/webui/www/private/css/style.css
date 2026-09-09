@@ -28,6 +28,17 @@
         --color-tracker-not-working: hsl(0deg 100% 65%);
     }
 
+    & #torrentsTableDiv tr {
+        --color-torrent-state-downloading: hsl(137deg 66% 30%);
+        --color-torrent-state-stalled-downloading: hsl(137deg 57% 41%);
+        --color-torrent-state-uploading: hsl(212deg 92% 45%);
+        --color-torrent-state-stalled-uploading: hsl(212deg 92% 45%);
+        --color-torrent-state-queued: hsl(37deg 100% 25%);
+        --color-torrent-state-stopped-downloading: hsl(212deg 10% 38%);
+        --color-torrent-state-stopped-uploading: hsl(261deg 69% 59%);
+        --color-torrent-state-error: hsl(356deg 72% 47%);
+    }
+
     &:not(.dark) {
         color-scheme: light;
     }
@@ -50,6 +61,17 @@
             --color-tracker-working: hsl(142deg 69% 58%);
             --color-tracker-updating: hsl(210deg 88.1% 73.5%);
             --color-tracker-not-working: hsl(0deg 100% 71%);
+        }
+
+        & #torrentsTableDiv tr {
+            --color-torrent-state-downloading: hsl(128deg 49% 49%);
+            --color-torrent-state-stalled-downloading: hsl(132deg 59% 33%);
+            --color-torrent-state-uploading: hsl(212deg 100% 67%);
+            --color-torrent-state-stalled-uploading: hsl(216deg 84% 52%);
+            --color-torrent-state-queued: hsl(37deg 91% 27%);
+            --color-torrent-state-stopped-downloading: hsl(212deg 9% 58%);
+            --color-torrent-state-stopped-uploading: hsl(262deg 89% 71%);
+            --color-torrent-state-error: hsl(3deg 93% 63%);
         }
 
         color-scheme: dark;

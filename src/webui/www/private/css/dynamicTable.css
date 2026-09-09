@@ -199,3 +199,40 @@ div:has(> div.dynamicTableDiv):not(.invisible) {
         color: var(--color-tracker-not-working);
     }
 }
+
+/* Torrent states */
+#torrentsTableDiv.torrentStatesColors tr:not(.selected, :hover) {
+    color: var(--torrent-state-color);
+
+    &.torrentStateDownloading {
+        --torrent-state-color: var(--color-torrent-state-downloading);
+    }
+
+    &.torrentStateStalledDownloading {
+        --torrent-state-color: var(--color-torrent-state-stalled-downloading);
+    }
+
+    &.torrentStateUploading {
+        --torrent-state-color: var(--color-torrent-state-uploading);
+    }
+
+    &.torrentStateStalledUploading {
+        --torrent-state-color: var(--color-torrent-state-stalled-uploading);
+    }
+
+    &.torrentStateQueued {
+        --torrent-state-color: var(--color-torrent-state-queued);
+    }
+
+    &.torrentStateStoppedDownloading {
+        --torrent-state-color: var(--color-torrent-state-stopped-downloading);
+    }
+
+    &.torrentStateStoppedUploading {
+        --torrent-state-color: var(--color-torrent-state-stopped-uploading);
+    }
+
+    &.torrentStateError {
+        --torrent-state-color: var(--color-torrent-state-error);
+    }
+}
