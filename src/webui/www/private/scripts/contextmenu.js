@@ -753,6 +753,18 @@ window.qBittorrent.ContextMenu ??= (() => {
         updateMenuItems() {
             const selectedRows = window.qBittorrent.RssDownloader.rssDownloaderRulesTable.selectedRowsIds();
             this.showItem("addRule");
+
+            const deleteRuleLink = this.menu.querySelector("a[href$='#deleteRule']");
+            if (deleteRuleLink !== null) {
+                const deleteRuleText = (selectedRows.length > 1)
+                    ? "QBT_TR(Delete selected rules)QBT_TR[CONTEXT=AutomatedRssDownloader]"
+                    : "QBT_TR(Delete rule)QBT_TR[CONTEXT=AutomatedRssDownloader]";
+                deleteRuleLink.lastChild.textContent = ` ${deleteRuleText}`;
+                // the icon spells out the same words, so it has to follow the label rather than
+                // keep describing the entry the menu no longer shows
+                deleteRuleLink.firstElementChild.alt = deleteRuleText;
+            }
+
             switch (selectedRows.length) {
                 case 0:
                     // menu when nothing selected
