@@ -271,6 +271,10 @@
             <label for="unwantedfolder_checkbox">QBT_TR(Keep unselected files in ".unwanted" folder)QBT_TR[CONTEXT=OptionsDialog]</label>
         </span>
     </div>
+    <div class="formRow" title="QBT_TR(When a torrent is downloaded, offer to add torrents from any .torrent files found inside it)QBT_TR[CONTEXT=OptionsDialog]">
+        <input type="checkbox" id="recursiveDownloadEnabled">
+        <label for="recursiveDownloadEnabled">QBT_TR(Enable recursive download dialog)QBT_TR[CONTEXT=OptionsDialog]</label>
+    </div>
 
     <fieldset class="settings">
         <legend>QBT_TR(Saving Management)QBT_TR[CONTEXT=HttpServer]</legend>
@@ -2578,6 +2582,7 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
                     document.getElementById("preallocateall_checkbox").checked = pref.preallocate_all;
                     document.getElementById("appendext_checkbox").checked = pref.incomplete_files_ext;
                     document.getElementById("unwantedfolder_checkbox").checked = pref.use_unwanted_folder;
+                    document.getElementById("recursiveDownloadEnabled").checked = pref.recursive_download_enabled;
 
                     // Saving Management
                     document.getElementById("default_tmm_combobox").value = pref.auto_tmm_enabled;
@@ -3012,6 +3017,7 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
             settings["preallocate_all"] = document.getElementById("preallocateall_checkbox").checked;
             settings["incomplete_files_ext"] = document.getElementById("appendext_checkbox").checked;
             settings["use_unwanted_folder"] = document.getElementById("unwantedfolder_checkbox").checked;
+            settings["recursive_download_enabled"] = document.getElementById("recursiveDownloadEnabled").checked;
 
             // Saving Management
             settings["auto_tmm_enabled"] = (document.getElementById("default_tmm_combobox").value === "true");

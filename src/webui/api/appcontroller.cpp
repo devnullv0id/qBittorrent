@@ -417,6 +417,8 @@ void AppController::preferencesAction()
     data[u"confirm_torrent_recheck"_s] = pref->confirmTorrentRecheck();
     // Confirm merging trackers
     data[u"confirm_merge_trackers"_s] = pref->confirmMergeTrackers();
+    // Ask about downloading torrents linked inside a torrent
+    data[u"recursive_download_enabled"_s] = pref->isRecursiveDownloadEnabled();
     // Recheck completed torrents
     data[u"recheck_completed_torrents"_s] = pref->recheckTorrentsOnCompletion();
     // Customize application instance name
@@ -1078,6 +1080,9 @@ void AppController::setPreferencesAction()
     // Confirm merging trackers
     if (hasKey(u"confirm_merge_trackers"_s))
         pref->setConfirmMergeTrackers(it.value().toBool());
+    // Ask about downloading torrents linked inside a torrent
+    if (hasKey(u"recursive_download_enabled"_s))
+        pref->setRecursiveDownloadEnabled(it.value().toBool());
     // Recheck completed torrents
     if (hasKey(u"recheck_completed_torrents"_s))
         pref->recheckTorrentsOnCompletion(it.value().toBool());
