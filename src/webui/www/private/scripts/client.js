@@ -1490,12 +1490,14 @@ window.addEventListener("DOMContentLoaded", async (event) => {
             document.getElementById("showSearchEngineLink").firstElementChild.style.visibility = "visible";
             document.getElementById("mainWindowTabs").classList.remove("invisible");
             document.getElementById("searchTabLink").classList.remove("invisible");
+            document.getElementById("searchPluginsMenuItem").classList.remove("invisible");
             if (!MochaUI.Panels.instances.SearchPanel)
                 addSearchPanel();
         }
         else {
             document.getElementById("showSearchEngineLink").firstElementChild.style.visibility = "hidden";
             document.getElementById("searchTabLink").classList.add("invisible");
+            document.getElementById("searchPluginsMenuItem").classList.add("invisible");
             if (document.getElementById("searchTabLink").classList.contains("selected"))
                 document.getElementById("transfersTabLink").click();
         }

@@ -280,6 +280,15 @@ const initializeWindows = () => {
         });
     });
 
+    addClickEvent("searchPlugins", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        // search.js builds its context menus from the markup in views/search.html, so it comes with
+        // the search panel. The entry is hidden until that panel is available.
+        window.qBittorrent.Search?.manageSearchPlugins();
+    });
+
     addClickEvent("manageCookies", (e) => {
         e.preventDefault();
         e.stopPropagation();
