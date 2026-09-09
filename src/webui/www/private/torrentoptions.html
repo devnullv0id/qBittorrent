@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="${LANG}" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <title>QBT_TR(Torrent Options)QBT_TR[CONTEXT=TorrentOptionsDialog]</title>
+    <link rel="stylesheet" href="css/style.css?v=${CACHEID}" type="text/css">
+    <style>
+        #shareLimitsGrid {
+            display: grid;
+            grid-template-columns: max-content max-content max-content max-content;
+            align-items: center;
+            gap: 6px 8px;
+        }
+
+        #shareLimitsGrid select,
+        #shareLimitsGrid input[type="number"] {
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        #shareLimitsGrid input[type="number"] {
+            min-width: 90px;
+        }
+
+        #shareLimitsGrid>.shareLimitsActionRow {
+            grid-column: 1 / -1;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #shareLimitsGrid .shareLimitsWideSelect {
+            grid-column: 2 / -1;
+        }
+
+        .optionsRow {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .optionsRow label:first-child {
+            min-width: 90px;
+        }
+
+        .optionsRow input[type="text"] {
+            flex-grow: 1;
+            margin-left: 10px;
+        }
+
+        #peerSourcesGrid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5px 10px;
+        }
+
+    </style>
+    <script defer src="scripts/localpreferences.js?v=${CACHEID}"></script>
+    <script defer src="scripts/color-scheme.js?v=${CACHEID}"></script>
+    <script defer src="scripts/misc.js?locale=${LANG}&v=${CACHEID}"></script>
+    <script defer src="scripts/pathAutofill.js?v=${CACHEID}"></script>
+    <script>
+        "use strict";
+
+        const UseDefaultLimit = -2;
+        const NoLimit = -1;
+        const MIXED = "mixed";
+
+        window.addEventListener("DOMContentLoaded", (event) => {
+            window.addEventListener("keydown", (event) => {
+                switch (event.key) {
+                    case "Enter":
+                        event.preventDefault();
+                        document.getElementById("saveButton").click();
+                        break;
+                    case "Escape":
+                        event.preventDefault();
+                        window.parent.qBittorrent.Client.closeFrameWindow(window);
+                        break;
+                }
+            });
+
+            const searchParams = new URLSearchParams(window.location.search);
+            const hashes = searchParams.get("hashes").split("|");
+            const rows = hashes
+                .map((hash) => window.parent.torrentsTable.getRow(hash))
+                .filter((row) => (row !== undefined))
+                .map((row) => row.full_data);
+
+            if (rows.length === 0) {
+                window.parent.qBittorrent.Client.closeFrameWindow(window);
+                return;
+            }
+
+            const shared = (key) => {
+                const first = rows[0][key];
+                return rows.every((row) => (row[key] === first)) ? first : MIXED;
+            };
+
+            const shareLimitFields = [
+                ["ratioLimitMode", "ratioLimit"],
+                ["seedingTimeLimitMode", "seedingTimeLimit"],
+                ["inactiveSeedingTimeLimitMode", "inactiveSeedingTimeLimit"]
+            ];
+
+            const rememberedShareLimit = {
+                ratioLimit: "1.00",
+                seedingTimeLimit: "1440",
+                inactiveSeedingTimeLimit: "1440"
+            };
+
+            const updateShareLimitInput = (modeID, valueID) => {
+                const valueElem = document.getElementById(valueID);
+                const isCustom = (document.getElementById(modeID).value === "custom");
+
+                if (!isCustom && !valueElem.disabled && (valueElem.value !== ""))
+                    rememberedShareLimit[valueID] = valueElem.value;
+
+                valueElem.disabled = !isCustom;
+                valueElem.value = isCustom ? rememberedShareLimit[valueID] : "";
+            };
+
+            const setShareLimit = (modeID, valueID, limit) => {
+                const modeElem = document.getElementById(modeID);
+                if (limit === MIXED) {
+                    modeElem.value = MIXED;
+                }
+                else if (limit === UseDefaultLimit) {
+                    modeElem.value = "default";
+                }
+                else if (limit === NoLimit) {
+                    modeElem.value = "unlimited";
+                }
+                else {
+                    modeElem.value = "custom";
+                    rememberedShareLimit[valueID] = limit;
+                }
+                updateShareLimitInput(modeID, valueID);
+            };
+
+            const getShareLimit = (modeID, valueID) => {
+                switch (document.getElementById(modeID).value) {
+                    case MIXED:
+                        return MIXED;
+                    case "default":
+                        return UseDefaultLimit;
+                    case "unlimited":
+                        return NoLimit;
+                    default:
+                        return document.getElementById(valueID).value;
+                }
+            };
+
+            const setTriState = (id, value) => {
+                const elem = document.getElementById(id);
+                if (value === MIXED)
+                    elem.indeterminate = true;
+                else
+                    elem.checked = value;
+            };
+
+            setTriState("autoTMM", shared("auto_tmm"));
+
+            const savePath = shared("save_path");
+            document.getElementById("savePath").value = (savePath === MIXED) ? "" : savePath;
+            document.getElementById("savePath").placeholder = (savePath === MIXED)
+                ? "QBT_TR(Keep the current paths)QBT_TR[CONTEXT=TorrentOptionsDialog]"
+                : "";
+
+            const downloadPath = shared("download_path");
+            document.getElementById("downloadPath").value = (downloadPath === MIXED) ? "" : downloadPath;
+            setTriState("useDownloadPath", (downloadPath === MIXED)
+                ? MIXED
+                : ((downloadPath !== "") && (downloadPath !== null)));
+
+            const categorySelect = document.getElementById("category");
+            for (const category of window.parent.qBittorrent.Client.categoryMap.keys()) {
+                const option = new Option(category, category);
+                categorySelect.appendChild(option);
+            }
+            // index 0 is the hidden placeholder for a selection that disagrees. Whether it does is
+            // asked directly rather than read off the value, so that a category actually named
+            // "mixed" still selects its own entry.
+            const categoryDiffers = rows.some((row) => (row.category !== rows[0].category));
+            const categoryOption = categoryDiffers
+                ? undefined
+                : [...categorySelect.options].find((option, index) => ((index > 0) && (option.value === rows[0].category)));
+            categorySelect.selectedIndex = (categoryOption !== undefined) ? categoryOption.index : 0;
+
+            const toKiB = (limit) => (((limit === MIXED) || (limit <= 0)) ? "" : Math.round(limit / 1024));
+            document.getElementById("uploadLimit").value = toKiB(shared("up_limit"));
+            document.getElementById("downloadLimit").value = toKiB(shared("dl_limit"));
+
+            setShareLimit("ratioLimitMode", "ratioLimit", shared("ratio_limit"));
+            setShareLimit("seedingTimeLimitMode", "seedingTimeLimit", shared("seeding_time_limit"));
+            setShareLimit("inactiveSeedingTimeLimitMode", "inactiveSeedingTimeLimit", shared("inactive_seeding_time_limit"));
+
+            const shareLimitsMode = shared("share_limits_mode");
+            document.getElementById("shareLimitsMode").value = (shareLimitsMode === MIXED) ? MIXED : shareLimitsMode;
+            const shareLimitAction = shared("share_limit_action");
+            document.getElementById("shareLimitAction").value = (shareLimitAction === MIXED) ? MIXED : shareLimitAction;
+
+            setTriState("disableDHT", shared("dht_disabled"));
+            setTriState("disablePEX", shared("pex_disabled"));
+            setTriState("disableLSD", shared("lsd_disabled"));
+
+            // peer sources do not apply to a private torrent, so they are only offered for the
+            // torrents they can reach, and are shown as unavailable when there are none
+            const publicHashes = rows.filter((row) => !row.private).map((row) => row.hash);
+            if (publicHashes.length === 0) {
+                for (const id of ["disableDHT", "disablePEX", "disableLSD"]) {
+                    const elem = document.getElementById(id);
+                    elem.indeterminate = false;
+                    elem.checked = true;
+                    elem.disabled = true;
+                    elem.title = "QBT_TR(Not applicable to private torrents)QBT_TR[CONTEXT=TorrentOptionsDialog]";
+                }
+            }
+            setTriState("sequentialDownload", shared("seq_dl"));
+            setTriState("firstLastPiecePrio", shared("f_l_piece_prio"));
+
+            const triStateOf = (id) => {
+                const elem = document.getElementById(id);
+                return elem.indeterminate ? MIXED : elem.checked;
+            };
+            const valueOf = (id) => document.getElementById(id).value.trim();
+            // the state the dialog was opened with, so that only what the user actually changed is
+            // sent. Re-sending an untouched control is not free: a speed limit would come back as
+            // whole KiB, and a "mixed" control would write each torrent's own value back to it.
+            const snapshot = () => ({
+                autoTMM: triStateOf("autoTMM"),
+                savePath: valueOf("savePath"),
+                useDownloadPath: triStateOf("useDownloadPath"),
+                downloadPath: valueOf("downloadPath"),
+                category: document.getElementById("category").selectedIndex,
+                uploadLimit: valueOf("uploadLimit"),
+                downloadLimit: valueOf("downloadLimit"),
+                shareLimits: [
+                    ...shareLimitFields.map(([modeID, valueID]) => `${valueOf(modeID)}/${valueOf(valueID)}`),
+                    valueOf("shareLimitsMode"), valueOf("shareLimitAction")
+                ].join("|"),
+                disableDHT: triStateOf("disableDHT"),
+                disablePEX: triStateOf("disablePEX"),
+                disableLSD: triStateOf("disableLSD"),
+                sequentialDownload: triStateOf("sequentialDownload"),
+                firstLastPiecePrio: triStateOf("firstLastPiecePrio")
+            });
+            const initial = snapshot();
+
+            for (const [modeID, valueID] of shareLimitFields) {
+                document.getElementById(modeID).addEventListener("change", () => {
+                    updateShareLimitInput(modeID, valueID);
+                });
+            }
+
+            const useDownloadPathElem = document.getElementById("useDownloadPath");
+            const autoTMMElem = document.getElementById("autoTMM");
+            // the server ignores path changes for torrents under automatic management,
+            // so present them as unavailable instead of silently discarding them
+            const isAutoManaged = () => (autoTMMElem.checked || autoTMMElem.indeterminate);
+            const updatePathControls = () => {
+                const managed = isAutoManaged();
+                document.getElementById("savePath").disabled = managed;
+                useDownloadPathElem.disabled = managed;
+                document.getElementById("downloadPath").disabled = managed || !useDownloadPathElem.checked;
+            };
+            useDownloadPathElem.addEventListener("change", updatePathControls);
+            autoTMMElem.addEventListener("change", updatePathControls);
+            updatePathControls();
+
+            window.qBittorrent.pathAutofill.attachPathAutofill();
+
+            document.getElementById("saveButton").addEventListener("click", async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+
+                // an empty or malformed custom limit reaches the server as "" or as a value it
+                // reads as 0, which is a limit that is met immediately - refuse it rather than
+                // acting on it. The GUI cannot produce either, its fields being spin boxes.
+                // Only the limits the user actually touched are sent, so only those are judged:
+                // a torrent whose stored limit this dialog cannot represent must stay saveable
+                if (snapshot().shareLimits !== initial.shareLimits) {
+                    for (const [, valueID] of shareLimitFields) {
+                        const valueElem = document.getElementById(valueID);
+                        if (!valueElem.disabled && ((valueElem.value.trim() === "") || !valueElem.checkValidity())) {
+                            alert("QBT_TR(Share limit values cannot be empty or invalid.)QBT_TR[CONTEXT=TorrentShareLimitsWidget]");
+                            return;
+                        }
+                    }
+                }
+
+                const willUseDownloadPath = (useDownloadPathElem.checked && !useDownloadPathElem.indeterminate);
+                if (!isAutoManaged() && willUseDownloadPath && (document.getElementById("downloadPath").value.trim() === "")) {
+                    alert("QBT_TR(The path for incomplete torrents cannot be empty.)QBT_TR[CONTEXT=TorrentOptionsDialog]");
+                    return;
+                }
+
+                const allHashes = hashes.join("|");
+                const current = snapshot();
+                const requests = [];
+                const post = (endpoint, body) => {
+                    const request = fetch(`api/v2/torrents/${endpoint}`, {
+                        method: "POST",
+                        body: new URLSearchParams(body)
+                    });
+                    requests.push(request);
+                    return request;
+                };
+
+                document.getElementById("saveButton").disabled = true;
+
+                // must be applied before the save path/category requests: the server silently
+                // ignores those for torrents that still have automatic management enabled
+                const autoManaged = isAutoManaged();
+                if (!autoTMMElem.indeterminate && (current.autoTMM !== initial.autoTMM))
+                    await post("setAutoManagement", { hashes: allHashes, enable: autoTMMElem.checked }).catch(() => {});
+
+                if (!autoManaged) {
+                    if ((current.savePath !== "") && (current.savePath !== initial.savePath))
+                        post("setSavePath", { id: allHashes, path: current.savePath });
+
+                    if (!useDownloadPathElem.indeterminate
+                        && ((current.useDownloadPath !== initial.useDownloadPath) || (current.downloadPath !== initial.downloadPath))) {
+                        post("setDownloadPath", {
+                            id: allHashes,
+                            path: willUseDownloadPath ? current.downloadPath : ""
+                        });
+                    }
+                }
+
+                if ((categorySelect.selectedIndex !== 0) && (current.category !== initial.category))
+                    post("setCategory", { hashes: allHashes, category: categorySelect.value });
+
+                if ((current.uploadLimit !== "") && (current.uploadLimit !== initial.uploadLimit))
+                    post("setUploadLimit", { hashes: allHashes, limit: (Number(current.uploadLimit) * 1024) });
+                if ((current.downloadLimit !== "") && (current.downloadLimit !== initial.downloadLimit))
+                    post("setDownloadLimit", { hashes: allHashes, limit: (Number(current.downloadLimit) * 1024) });
+
+                const ratioLimit = getShareLimit("ratioLimitMode", "ratioLimit");
+                const seedingTimeLimit = getShareLimit("seedingTimeLimitMode", "seedingTimeLimit");
+                const inactiveSeedingTimeLimit = getShareLimit("inactiveSeedingTimeLimitMode", "inactiveSeedingTimeLimit");
+                const shareLimitsModeValue = document.getElementById("shareLimitsMode").value;
+                const shareLimitActionValue = document.getElementById("shareLimitAction").value;
+                // setShareLimits replaces all five values at once, so a control left on "mixed"
+                // has to keep each torrent's own value. Torrents that end up with identical
+                // limits are sent together.
+                const shareLimitGroups = new Map();
+                for (const row of ((current.shareLimits === initial.shareLimits) ? [] : rows)) {
+                    const limits = {
+                        ratioLimit: (ratioLimit === MIXED) ? row.ratio_limit : ratioLimit,
+                        seedingTimeLimit: (seedingTimeLimit === MIXED) ? row.seeding_time_limit : seedingTimeLimit,
+                        inactiveSeedingTimeLimit: (inactiveSeedingTimeLimit === MIXED) ? row.inactive_seeding_time_limit : inactiveSeedingTimeLimit,
+                        shareLimitsMode: (shareLimitsModeValue === MIXED) ? row.share_limits_mode : shareLimitsModeValue,
+                        shareLimitAction: (shareLimitActionValue === MIXED) ? row.share_limit_action : shareLimitActionValue
+                    };
+
+                    const key = JSON.stringify(limits);
+                    const group = shareLimitGroups.get(key);
+                    if (group === undefined)
+                        shareLimitGroups.set(key, { limits: limits, hashes: [row.hash] });
+                    else
+                        group.hashes.push(row.hash);
+                }
+                for (const group of shareLimitGroups.values())
+                    post("setShareLimits", { hashes: group.hashes.join("|"), ...group.limits });
+
+                const peerSources = { hashes: publicHashes.join("|") };
+                for (const id of ["disableDHT", "disablePEX", "disableLSD"]) {
+                    const elem = document.getElementById(id);
+                    if (!elem.indeterminate && (current[id] !== initial[id]))
+                        peerSources[id] = elem.checked;
+                }
+                if ((publicHashes.length > 0) && (Object.keys(peerSources).length > 1))
+                    post("setPeerSources", peerSources);
+
+                // an untouched control must stay untouched: these endpoints toggle rather than set,
+                // so re-sending one would undo a change made elsewhere while the dialog was open
+                const toggleDiffering = (endpoint, id, key) => {
+                    const elem = document.getElementById(id);
+                    if (elem.indeterminate || (current[id] === initial[id]))
+                        return;
+
+                    const differing = rows.filter((row) => (row[key] !== elem.checked)).map((row) => row.hash);
+                    if (differing.length > 0)
+                        post(endpoint, { hashes: differing.join("|") });
+                };
+                toggleDiffering("toggleSequentialDownload", "sequentialDownload", "seq_dl");
+                toggleDiffering("toggleFirstLastPiecePrio", "firstLastPiecePrio", "f_l_piece_prio");
+
+                Promise.all(requests)
+                    .then(async (responses) => {
+                        const failed = responses.find((response) => !response.ok);
+                        if (failed !== undefined) {
+                            alert((await failed.text()) || "QBT_TR(Unable to save torrent options)QBT_TR[CONTEXT=TorrentOptionsDialog]");
+                            document.getElementById("saveButton").disabled = false;
+                            return;
+                        }
+
+                        window.parent.updateMainData();
+                        window.parent.qBittorrent.Client.closeFrameWindow(window);
+                    })
+                    .catch(() => {
+                        alert("QBT_TR(Unable to save torrent options)QBT_TR[CONTEXT=TorrentOptionsDialog]");
+                        document.getElementById("saveButton").disabled = false;
+                    });
+            });
+        });
+    </script>
+</head>
+
+<body>
+    <div style="padding: 10px 10px 0px 10px;">
+        <div class="optionsRow">
+            <input type="checkbox" id="autoTMM">
+            <label for="autoTMM">QBT_TR(Automatic Torrent Management)QBT_TR[CONTEXT=TorrentOptionsDialog]</label>
+        </div>
+
+        <fieldset class="settings" style="text-align: left;">
+            <legend>QBT_TR(Save at)QBT_TR[CONTEXT=TorrentOptionsDialog]</legend>
+            <div class="optionsRow">
+                <label for="savePath">QBT_TR(Save path:)QBT_TR[CONTEXT=TorrentOptionsDialog]</label>
+                <input type="text" id="savePath" class="pathDirectory">
+            </div>
+            <div class="optionsRow">
+                <input type="checkbox" id="useDownloadPath">
+                <label for="useDownloadPath">QBT_TR(Use another path for incomplete torrent)QBT_TR[CONTEXT=TorrentOptionsDialog]</label>
+            </div>
+            <div class="optionsRow">
+                <label for="downloadPath">QBT_TR(Path:)QBT_TR[CONTEXT=TorrentOptionsDialog]</label>
+                <input type="text" id="downloadPath" class="pathDirectory">
+            </div>
+        </fieldset>
+
+        <div class="optionsRow">
+            <label for="category">QBT_TR(Category:)QBT_TR[CONTEXT=TorrentOptionsDialog]</label>
+            <select id="category" style="margin-left: 10px;">
+                <option value="mixed" hidden></option>
+                <option value=""></option>
+            </select>
+        </div>
+
+        <fieldset class="settings" style="text-align: left;">
+            <legend>QBT_TR(Torrent Speed Limits)QBT_TR[CONTEXT=TorrentOptionsDialog]</legend>
+            <div class="optionsRow">
+                <label for="uploadLimit">QBT_TR(Upload:)QBT_TR[CONTEXT=TorrentOptionsDialog]</label>
+                <input type="number" id="uploadLimit" step="1" min="0" style="width: 8em; margin-left: 10px;">
+                <span style="margin-left: 5px;">QBT_TR(KiB/s)QBT_TR[CONTEXT=OptionsDialog]</span>
+            </div>
+            <div class="optionsRow">
+                <label for="downloadLimit">QBT_TR(Download:)QBT_TR[CONTEXT=TorrentOptionsDialog]</label>
+                <input type="number" id="downloadLimit" step="1" min="0" style="width: 8em; margin-left: 10px;">
+                <span style="margin-left: 5px;">QBT_TR(KiB/s)QBT_TR[CONTEXT=OptionsDialog]</span>
+            </div>
+            <div><i>QBT_TR(0 means unlimited)QBT_TR[CONTEXT=OptionsDialog]</i></div>
+            <div>QBT_TR(These will not exceed the global limits)QBT_TR[CONTEXT=TorrentOptionsDialog]</div>
+        </fieldset>
+
+        <fieldset class="settings" style="text-align: left;">
+            <legend>QBT_TR(Torrent Share Limits)QBT_TR[CONTEXT=TorrentOptionsDialog]</legend>
+            <div id="shareLimitsGrid">
+                <label id="ratioLimitLabel" for="ratioLimitMode">QBT_TR(Ratio:)QBT_TR[CONTEXT=TorrentShareLimitsWidget]</label>
+                <select id="ratioLimitMode">
+                    <option value="mixed" hidden></option>
+                    <option value="default">QBT_TR(Default)QBT_TR[CONTEXT=TorrentShareLimitsWidget]</option>
+                    <option value="unlimited">QBT_TR(Unlimited)QBT_TR[CONTEXT=TorrentShareLimitsWidget]</option>
+                    <option value="custom">QBT_TR(Set to)QBT_TR[CONTEXT=TorrentShareLimitsWidget]</option>
+                </select>
+                <input type="number" id="ratioLimit" step="0.01" min="0" disabled aria-labelledby="ratioLimitLabel">
+                <span></span>
+
+                <label id="seedingTimeLimitLabel" for="seedingTimeLimitMode">QBT_TR(Seeding time:)QBT_TR[CONTEXT=TorrentShareLimitsWidget]</label>
+                <select id="seedingTimeLimitMode">
+                    <option value="mixed" hidden></option>
+                    <option value="default">QBT_TR(Default)QBT_TR[CONTEXT=TorrentShareLimitsWidget]</option>
+                    <option value="unlimited">QBT_TR(Unlimited)QBT_TR[CONTEXT=TorrentShareLimitsWidget]</option>
+                    <option value="custom">QBT_TR(Set to)QBT_TR[CONTEXT=TorrentShareLimitsWidget]</option>
+                </select>
+                <input type="number" id="seedingTimeLimit" step="1" min="0" disabled aria-labelledby="seedingTimeLimitLabel">
+                <span>QBT_TR(min)QBT_TR[CONTEXT=TorrentShareLimitsWidget]</span>
+
+                <label id="inactiveSeedingTimeLimitLabel" for="inactiveSeedingTimeLimitMode">QBT_TR(Inactive seeding time:)QBT_TR[CONTEXT=TorrentShareLimitsWidget]</label>
+                <select id="inactiveSeedingTimeLimitMode">
+                    <option value="mixed" hidden></option>
+                    <option value="default">QBT_TR(Default)QBT_TR[CONTEXT=TorrentShareLimitsWidget]</option>
+                    <option value="unlimited">QBT_TR(Unlimited)QBT_TR[CONTEXT=TorrentShareLimitsWidget]</option>
+                    <option value="custom">QBT_TR(Set to)QBT_TR[CONTEXT=TorrentShareLimitsWidget]</option>
+                </select>
+                <input type="number" id="inactiveSeedingTimeLimit" step="1" min="0" disabled aria-labelledby="inactiveSeedingTimeLimitLabel">
+                <span>QBT_TR(min)QBT_TR[CONTEXT=TorrentShareLimitsWidget]</span>
+
+                <label for="shareLimitsMode">QBT_TR(Mode:)QBT_TR[CONTEXT=TorrentShareLimitsWidget]</label>
+                <select id="shareLimitsMode" class="shareLimitsWideSelect">
+                    <option value="mixed" hidden></option>
+                    <option value="Default">QBT_TR(Default)QBT_TR[CONTEXT=TorrentShareLimitsWidget]</option>
+                    <option value="MatchAny">QBT_TR(Match any limit)QBT_TR[CONTEXT=TorrentShareLimitsWidget]</option>
+                    <option value="MatchAll">QBT_TR(Match all the limits)QBT_TR[CONTEXT=TorrentShareLimitsWidget]</option>
+                </select>
+
+                <div class="shareLimitsActionRow">
+                    <label for="shareLimitAction">QBT_TR(Action when the limit is reached:)QBT_TR[CONTEXT=TorrentShareLimitsWidget]</label>
+                    <select id="shareLimitAction">
+                        <option value="mixed" hidden></option>
+                        <option value="Default">QBT_TR(Default)QBT_TR[CONTEXT=TorrentShareLimitsWidget]</option>
+                        <option value="Stop">QBT_TR(Stop torrent)QBT_TR[CONTEXT=TorrentShareLimitsWidget]</option>
+                        <option value="Remove">QBT_TR(Remove torrent)QBT_TR[CONTEXT=TorrentShareLimitsWidget]</option>
+                        <option value="RemoveWithContent">QBT_TR(Remove torrent and its content)QBT_TR[CONTEXT=TorrentShareLimitsWidget]</option>
+                        <option value="EnableSuperSeeding">QBT_TR(Enable super seeding for torrent)QBT_TR[CONTEXT=TorrentShareLimitsWidget]</option>
+                    </select>
+                </div>
+            </div>
+        </fieldset>
+
+        <div id="peerSourcesGrid">
+            <div>
+                <input type="checkbox" id="disableDHT">
+                <label for="disableDHT">QBT_TR(Disable DHT for this torrent)QBT_TR[CONTEXT=TorrentOptionsDialog]</label>
+            </div>
+            <div>
+                <input type="checkbox" id="sequentialDownload">
+                <label for="sequentialDownload">QBT_TR(Download in sequential order)QBT_TR[CONTEXT=TorrentOptionsDialog]</label>
+            </div>
+            <div>
+                <input type="checkbox" id="disablePEX">
+                <label for="disablePEX">QBT_TR(Disable PeX for this torrent)QBT_TR[CONTEXT=TorrentOptionsDialog]</label>
+            </div>
+            <div>
+                <input type="checkbox" id="firstLastPiecePrio">
+                <label for="firstLastPiecePrio">QBT_TR(Download first and last pieces first)QBT_TR[CONTEXT=TorrentOptionsDialog]</label>
+            </div>
+            <div>
+                <input type="checkbox" id="disableLSD">
+                <label for="disableLSD">QBT_TR(Disable LSD for this torrent)QBT_TR[CONTEXT=TorrentOptionsDialog]</label>
+            </div>
+        </div>
+
+        <div style="text-align: center; padding-top: 10px;">
+            <input type="button" value="QBT_TR(Save)QBT_TR[CONTEXT=HttpServer]" id="saveButton">
+        </div>
+    </div>
+</body>
+
+</html>

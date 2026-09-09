@@ -1661,6 +1661,41 @@ void TorrentsController::setSuperSeedingAction()
     setResult(QString());
 }
 
+void TorrentsController::setPeerSourcesAction()
+{
+    requireParams({u"hashes"_s});
+
+    const auto getOptionalBool = [this](const QString &name) -> std::optional<bool>
+    {
+        const std::optional<QString> value = Utils::Dict::get(params(), name);
+        if (!value)
+            return std::nullopt;
+
+        const std::optional<bool> parsed = parseBool(*value);
+        if (!parsed)
+            throw APIError(APIErrorType::BadParams, tr("'%1' parameter has invalid value").arg(name));
+
+        return parsed;
+    };
+
+    const std::optional<bool> disableDHT = getOptionalBool(u"disableDHT"_s);
+    const std::optional<bool> disablePEX = getOptionalBool(u"disablePEX"_s);
+    const std::optional<bool> disableLSD = getOptionalBool(u"disableLSD"_s);
+
+    const QStringList hashes {params()[u"hashes"_s].split(u'|')};
+    applyToTorrents(hashes, [&disableDHT, &disablePEX, &disableLSD](BitTorrent::Torrent *const torrent)
+    {
+        if (disableDHT)
+            torrent->setDHTDisabled(*disableDHT);
+        if (disablePEX)
+            torrent->setPEXDisabled(*disablePEX);
+        if (disableLSD)
+            torrent->setLSDDisabled(*disableLSD);
+    });
+
+    setResult(QString());
+}
+
 void TorrentsController::setForceStartAction()
 {
     requireParams({u"hashes"_s, u"value"_s});

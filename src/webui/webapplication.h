@@ -219,6 +219,7 @@ private:
         {{u"torrents"_s, u"setDownloadPath"_s}, Http::HEADER_REQUEST_METHOD_POST},
         {{u"torrents"_s, u"setForceStart"_s}, Http::HEADER_REQUEST_METHOD_POST},
         {{u"torrents"_s, u"setLocation"_s}, Http::HEADER_REQUEST_METHOD_POST},
+        {{u"torrents"_s, u"setPeerSources"_s}, Http::HEADER_REQUEST_METHOD_POST},
         {{u"torrents"_s, u"setSavePath"_s}, Http::HEADER_REQUEST_METHOD_POST},
         {{u"torrents"_s, u"setShareLimits"_s}, Http::HEADER_REQUEST_METHOD_POST},
         {{u"torrents"_s, u"setSSLParameters"_s}, Http::HEADER_REQUEST_METHOD_POST},
