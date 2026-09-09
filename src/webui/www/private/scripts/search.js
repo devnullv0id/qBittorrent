@@ -268,6 +268,20 @@ window.qBittorrent.Search ??= (() => {
         listItem.addEventListener("click", (e) => {
             setActiveTab(listItem);
         });
+        listItem.addEventListener("mousedown", (e) => {
+            // only suppress autoscroll for the click that is going to close the tab
+            if ((e.button === 1) && window.qBittorrent.Cache.preferences.get().close_search_tab_with_middle_click)
+                e.preventDefault();
+        });
+        listItem.addEventListener("auxclick", (e) => {
+            if (e.button !== 1)
+                return;
+
+            e.preventDefault();
+            e.stopPropagation();
+            if (window.qBittorrent.Cache.preferences.get().close_search_tab_with_middle_click)
+                closeSearchTab(listItem);
+        });
         listItem.appendChild(tabElem);
         document.getElementById("searchTabs").appendChild(listItem);
         searchResultsTabsContextMenu.addTarget(listItem);

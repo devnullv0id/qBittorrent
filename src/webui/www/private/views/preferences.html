@@ -992,6 +992,10 @@ QBT_TR((best choice if supported))QBT_TR[CONTEXT=OptionsDialog] QBT_TR(Default p
             <label for="searchHistoryLength">QBT_TR(History length)QBT_TR[CONTEXT=OptionsDialog]</label>
             <input type="number" id="searchHistoryLength" min="0" max="99" step="1" style="width: 6em; margin-left: 10px;">
         </div>
+        <div class="formRow" style="margin-bottom: 3px;">
+            <input type="checkbox" id="closeSearchTabWithMiddleClick">
+            <label for="closeSearchTabWithMiddleClick">QBT_TR(Allow closing tabs with middle-click)QBT_TR[CONTEXT=OptionsDialog]</label>
+        </div>
     </fieldset>
 
     <fieldset class="settings">
@@ -2594,6 +2598,7 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
                     document.getElementById("storeSearchJobs").checked = pref.store_search_jobs;
                     document.getElementById("storeSearchJobResults").checked = pref.store_search_job_results;
                     document.getElementById("searchHistoryLength").value = pref.search_history_length;
+                    document.getElementById("closeSearchTabWithMiddleClick").checked = pref.close_search_tab_with_middle_click;
                     qBittorrent.Preferences.updateStoreSearchJobsEnabled();
                     document.getElementById("useAltRowColorsInput").checked = useAltRowColors === true;
                     document.getElementById("useTorrentStatesColorsInput").checked = useTorrentStatesColors === true;
@@ -3068,6 +3073,7 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
             settings["store_search_jobs"] = document.getElementById("storeSearchJobs").checked;
             settings["store_search_job_results"] = document.getElementById("storeSearchJobResults").checked;
             settings["search_history_length"] = Number(document.getElementById("searchHistoryLength").value);
+            settings["close_search_tab_with_middle_click"] = document.getElementById("closeSearchTabWithMiddleClick").checked;
             clientData.use_alt_row_colors = document.getElementById("useAltRowColorsInput").checked;
             clientData.use_torrent_states_colors = document.getElementById("useTorrentStatesColorsInput").checked;
             clientData.progress_bar_follows_text_color = document.getElementById("progressBarFollowsTextColorInput").checked;
