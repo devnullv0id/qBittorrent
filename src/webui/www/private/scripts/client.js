@@ -1319,7 +1319,17 @@ window.addEventListener("DOMContentLoaded", async (event) => {
 
         document.title = titlePrefix + window.qBittorrent.Client.mainTitle();
 
-        document.getElementById("freeSpaceOnDisk").textContent = "QBT_TR(Free space: %1)QBT_TR[CONTEXT=HttpServer]".replace("%1", window.qBittorrent.Misc.friendlyUnit(serverState.free_space_on_disk));
+        const freeSpaceElement = document.getElementById("freeSpaceOnDisk");
+        if (window.qBittorrent.Cache.preferences.get().status_bar_free_disk_space) {
+            freeSpaceElement.textContent = "QBT_TR(Free space: %1)QBT_TR[CONTEXT=HttpServer]".replace("%1", window.qBittorrent.Misc.friendlyUnit(serverState.free_space_on_disk));
+            freeSpaceElement.classList.remove("invisible");
+            freeSpaceElement.nextElementSibling.classList.remove("invisible");
+        }
+        else {
+            freeSpaceElement.textContent = "";
+            freeSpaceElement.classList.add("invisible");
+            freeSpaceElement.nextElementSibling.classList.add("invisible");
+        }
 
         const externalIPsElement = document.getElementById("externalIPs");
         if (window.qBittorrent.Cache.preferences.get().status_bar_external_ip) {
@@ -1336,22 +1346,22 @@ window.addEventListener("DOMContentLoaded", async (event) => {
             lastExternalAddressLabel = lastExternalAddressLabel.replace("%1", lastExternalAddressV4).replace("%2", lastExternalAddressV6);
             externalIPsElement.textContent = lastExternalAddressLabel;
             externalIPsElement.classList.remove("invisible");
-            externalIPsElement.previousElementSibling.classList.remove("invisible");
+            externalIPsElement.nextElementSibling.classList.remove("invisible");
         }
         else {
             externalIPsElement.classList.add("invisible");
-            externalIPsElement.previousElementSibling.classList.add("invisible");
+            externalIPsElement.nextElementSibling.classList.add("invisible");
         }
 
         const dhtElement = document.getElementById("DHTNodes");
         if (window.qBittorrent.Cache.preferences.get().dht) {
             dhtElement.textContent = "QBT_TR(DHT: %1 nodes)QBT_TR[CONTEXT=StatusBar]".replace("%1", serverState.dht_nodes);
             dhtElement.classList.remove("invisible");
-            dhtElement.previousElementSibling.classList.remove("invisible");
+            dhtElement.nextElementSibling.classList.remove("invisible");
         }
         else {
             dhtElement.classList.add("invisible");
-            dhtElement.previousElementSibling.classList.add("invisible");
+            dhtElement.nextElementSibling.classList.add("invisible");
         }
 
         // Statistics dialog
