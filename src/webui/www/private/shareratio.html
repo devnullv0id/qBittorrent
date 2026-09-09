@@ -13,9 +13,11 @@
         const UseGlobalLimit = -2;
         const NoLimit = -1;
         let limitReachedActionsEl;
+        let shareLimitsModeEl;
 
         window.addEventListener("DOMContentLoaded", (event) => {
             limitReachedActionsEl = document.getElementById("limitReachedActions");
+            shareLimitsModeEl = document.getElementById("shareLimitsMode");
 
             window.addEventListener("keydown", (event) => {
                 switch (event.key) {
@@ -40,14 +42,24 @@
                 maxRatio: Number(origValues[3]),
                 maxSeedingTime: Number(origValues[4]),
                 maxInactiveSeedingTime: Number(origValues[5]),
-                shareLimitAction: String(origValues[6])
+                shareLimitAction: String(origValues[6]),
+                shareLimitsMode: String(origValues[7])
             };
 
-            // select default when orig values not passed. using double equals to compare string and int
-            if ((origValues[0] === "")
-                || ((values.ratioLimit === UseGlobalLimit)
-                    && (values.seedingTimeLimit === UseGlobalLimit)
-                    && (values.inactiveSeedingTimeLimit === UseGlobalLimit))) {
+            // the mode governs how the limits below are combined, so it has to show the torrent's
+            // own value whichever radio the dialog opens on, not only "Set share limit to"
+            if (origValues[0] !== "")
+                shareLimitsModeEl.value = values.shareLimitsMode;
+
+            // A selection whose torrents disagree passes no orig values. Leaving every radio
+            // unselected keeps Save disabled until a limit is picked, so torrents that merely
+            // differ are not all flattened onto the global limit by one click.
+            if (origValues[0] === "") {
+                document.getElementById("default").checked = false;
+            }
+            else if ((values.ratioLimit === UseGlobalLimit)
+                && (values.seedingTimeLimit === UseGlobalLimit)
+                && (values.inactiveSeedingTimeLimit === UseGlobalLimit)) {
                 // use default option
                 setSelectedRadioValue("shareLimit", "default");
             }
@@ -88,6 +100,9 @@
                 let seedingTimeLimitValue = 0; // eslint-disable-line no-useless-assignment
                 let inactiveSeedingTimeLimitValue = 0; // eslint-disable-line no-useless-assignment
                 let shareLimitActionValue = "Default";
+                // the dialog shows the torrent's own mode whichever radio is picked, so saving has
+                // to send back what it is showing rather than resetting it
+                const shareLimitsModeValue = shareLimitsModeEl.value;
 
                 if (shareLimit === "default") {
                     ratioLimitValue = UseGlobalLimit;
@@ -116,7 +131,8 @@
                             ratioLimit: ratioLimitValue,
                             seedingTimeLimit: seedingTimeLimitValue,
                             inactiveSeedingTimeLimit: inactiveSeedingTimeLimitValue,
-                            shareLimitAction: shareLimitActionValue
+                            shareLimitAction: shareLimitActionValue,
+                            shareLimitsMode: shareLimitsModeValue
                         })
                     })
                     .then((response) => {
@@ -152,6 +168,7 @@
             document.getElementById("setTotalMinutes").disabled = !customShareLimit;
             document.getElementById("setInactiveMinutes").disabled = !customShareLimit;
             limitReachedActionsEl.disabled = !customShareLimit;
+            shareLimitsModeEl.disabled = !customShareLimit;
 
             enableInputBoxes();
 
@@ -167,7 +184,11 @@
         };
 
         const isFormValid = () => {
-            return !((getSelectedRadioValue("shareLimit") === "custom") && !document.getElementById("setRatio").checked
+            const shareLimit = getSelectedRadioValue("shareLimit");
+            if (shareLimit === undefined)
+                return false;
+
+            return !((shareLimit === "custom") && !document.getElementById("setRatio").checked
                 && !document.getElementById("setTotalMinutes").checked && !document.getElementById("setInactiveMinutes").checked);
         };
     </script>
@@ -193,6 +214,14 @@
             <input type="checkbox" id="setInactiveMinutes" class="shareLimitInput" onclick="enableInputBoxes()">
             <label id="inactiveMinutesLabel" for="setInactiveMinutes">QBT_TR(inactive minutes)QBT_TR[CONTEXT=UpDownRatioDialog]</label>
             <input type="number" id="inactiveMinutes" value="0" step="1" min="0" class="shareLimitInput" aria-labelledby="inactiveMinutesLabel">
+        </div>
+        <div style="margin-left: 40px; margin-bottom: 5px;">
+            <label id="shareLimitsModeLabel" for="shareLimitsMode">QBT_TR(Mode:)QBT_TR[CONTEXT=TorrentShareLimitsWidget]</label>
+            <select id="shareLimitsMode" aria-labelledby="shareLimitsModeLabel">
+                <option value="Default">QBT_TR(Default)QBT_TR[CONTEXT=TorrentShareLimitsWidget]</option>
+                <option value="MatchAny">QBT_TR(Match any limit)QBT_TR[CONTEXT=TorrentShareLimitsWidget]</option>
+                <option value="MatchAll">QBT_TR(Match all the limits)QBT_TR[CONTEXT=TorrentShareLimitsWidget]</option>
+            </select>
         </div>
         <div style="margin-left: 40px; margin-bottom: 5px;">
             <label id="actionListLabel" for="limitReachedActions">QBT_TR(Action when the limit is reached)QBT_TR[CONTEXT=UpDownRatioDialog]</label>
