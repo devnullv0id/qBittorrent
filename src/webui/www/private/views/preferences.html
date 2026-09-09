@@ -207,6 +207,10 @@
                 <input type="checkbox" id="mergeTrackersInput">
                 <label for="mergeTrackersInput">QBT_TR(Merge trackers to existing torrent)QBT_TR[CONTEXT=OptionsDialog]</label>
             </div>
+            <div class="formRow">
+                <input type="checkbox" id="confirmMergeTrackers">
+                <label for="confirmMergeTrackers">QBT_TR(Ask to merge trackers for manually added torrent)QBT_TR[CONTEXT=OptionsDialog]</label>
+            </div>
         </fieldset>
         <fieldset class="settings">
             <legend>
@@ -2556,6 +2560,7 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
                     }
                     document.getElementById("stopConditionSelect").getChildren("option")[index].selected = true;
                     document.getElementById("mergeTrackersInput").checked = pref.merge_trackers;
+                    document.getElementById("confirmMergeTrackers").checked = pref.confirm_merge_trackers;
                     document.getElementById("deletetorrentfileafter_checkbox").checked = pref.auto_delete_mode;
 
                     document.getElementById("preallocateall_checkbox").checked = pref.preallocate_all;
@@ -2987,6 +2992,7 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
             settings["add_stopped_enabled"] = document.getElementById("dontstartdownloads_checkbox").checked;
             settings["torrent_stop_condition"] = document.getElementById("stopConditionSelect").getSelected()[0].value;
             settings["merge_trackers"] = document.getElementById("mergeTrackersInput").checked;
+            settings["confirm_merge_trackers"] = document.getElementById("confirmMergeTrackers").checked;
             settings["auto_delete_mode"] = Number(document.getElementById("deletetorrentfileafter_checkbox").checked);
 
             settings["preallocate_all"] = document.getElementById("preallocateall_checkbox").checked;
