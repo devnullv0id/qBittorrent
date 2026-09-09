@@ -417,6 +417,10 @@ void AppController::preferencesAction()
     data[u"confirm_torrent_recheck"_s] = pref->confirmTorrentRecheck();
     // Confirm merging trackers
     data[u"confirm_merge_trackers"_s] = pref->confirmMergeTrackers();
+    // Confirm removing all tags
+    data[u"confirm_remove_all_tags"_s] = pref->confirmRemoveAllTags();
+    // Confirm removing a tracker from all torrents
+    data[u"confirm_remove_tracker_from_all_torrents"_s] = pref->confirmRemoveTrackerFromAllTorrents();
     // Ask about downloading torrents linked inside a torrent
     data[u"recursive_download_enabled"_s] = pref->isRecursiveDownloadEnabled();
 #if defined(Q_OS_WIN)
@@ -1084,6 +1088,12 @@ void AppController::setPreferencesAction()
     // Confirm merging trackers
     if (hasKey(u"confirm_merge_trackers"_s))
         pref->setConfirmMergeTrackers(it.value().toBool());
+    // Confirm removing all tags
+    if (hasKey(u"confirm_remove_all_tags"_s))
+        pref->setConfirmRemoveAllTags(it.value().toBool());
+    // Confirm removing a tracker from all torrents
+    if (hasKey(u"confirm_remove_tracker_from_all_torrents"_s))
+        pref->setConfirmRemoveTrackerFromAllTorrents(it.value().toBool());
     // Ask about downloading torrents linked inside a torrent
     if (hasKey(u"recursive_download_enabled"_s))
         pref->setRecursiveDownloadEnabled(it.value().toBool());
