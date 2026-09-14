@@ -115,9 +115,11 @@
                     inactiveSeedingTimeLimitValue = NoLimit;
                 }
                 else if (shareLimit === "custom") {
-                    ratioLimitValue = document.getElementById("setRatio").checked ? document.getElementById("ratio").value : -1;
-                    seedingTimeLimitValue = document.getElementById("setTotalMinutes").checked ? document.getElementById("totalMinutes").value : -1;
-                    inactiveSeedingTimeLimitValue = document.getElementById("setInactiveMinutes").checked ? document.getElementById("inactiveMinutes").value : -1;
+                    // an unticked box means the limit is not set, which is "unlimited" only for a
+                    // torrent that was not on the global limit: both render the box unticked
+                    ratioLimitValue = document.getElementById("setRatio").checked ? document.getElementById("ratio").value : ((values.ratioLimit === UseGlobalLimit) ? UseGlobalLimit : NoLimit);
+                    seedingTimeLimitValue = document.getElementById("setTotalMinutes").checked ? document.getElementById("totalMinutes").value : ((values.seedingTimeLimit === UseGlobalLimit) ? UseGlobalLimit : NoLimit);
+                    inactiveSeedingTimeLimitValue = document.getElementById("setInactiveMinutes").checked ? document.getElementById("inactiveMinutes").value : ((values.inactiveSeedingTimeLimit === UseGlobalLimit) ? UseGlobalLimit : NoLimit);
                     shareLimitActionValue = limitReachedActionsEl.value;
                 }
                 else {
