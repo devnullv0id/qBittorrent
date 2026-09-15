@@ -2,6 +2,11 @@
 
 ## 2.16.2
 
+* [#NNNNN](https://github.com/qbittorrent/qBittorrent/pull/NNNNN)
+  * Add `torrents/setPeerSources` endpoint for enabling or disabling a torrent's peer sources (accepts `POST` requests only; takes `hashes` and the optional `disableDHT`, `disablePEX` and `disableLSD`, each `true` or `false`)
+  * `torrents/info` and `sync/maindata` include `dht_disabled` (bool) per torrent
+  * `torrents/info` and `sync/maindata` include `pex_disabled` (bool) per torrent
+  * `torrents/info` and `sync/maindata` include `lsd_disabled` (bool) per torrent
 * [#24891](https://github.com/qbittorrent/qBittorrent/pull/24891)
   * `app/preferences` endpoint includes `i2p_inbound_length_variance` (int) option
   * `app/preferences` endpoint includes `i2p_outbound_length_variance` (int) option
