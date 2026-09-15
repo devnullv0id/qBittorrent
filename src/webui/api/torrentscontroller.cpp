@@ -165,6 +165,12 @@ namespace
 
     const QSet<QString> SUPPORTED_WEB_SEED_SCHEMES {u"http"_s, u"https"_s, u"ftp"_s};
 
+    // Parameter names
+    const QString PARAM_HASHES = u"hashes"_s;
+    const QString PARAM_DISABLE_DHT = u"disableDHT"_s;
+    const QString PARAM_DISABLE_PEX = u"disablePEX"_s;
+    const QString PARAM_DISABLE_LSD = u"disableLSD"_s;
+
     template <typename Func>
     void applyToTorrents(const QStringList &idList, Func func)
         requires std::invocable<Func, BitTorrent::Torrent *>
@@ -1613,7 +1619,7 @@ void TorrentsController::setSuperSeedingAction()
 
 void TorrentsController::setPeerSourcesAction()
 {
-    requireParams({u"hashes"_s});
+    requireParams({PARAM_HASHES});
 
     const auto getOptionalBool = [this](const QString &name) -> std::optional<bool>
     {
@@ -1628,11 +1634,11 @@ void TorrentsController::setPeerSourcesAction()
         return parsed;
     };
 
-    const std::optional<bool> disableDHT = getOptionalBool(u"disableDHT"_s);
-    const std::optional<bool> disablePEX = getOptionalBool(u"disablePEX"_s);
-    const std::optional<bool> disableLSD = getOptionalBool(u"disableLSD"_s);
+    const std::optional<bool> disableDHT = getOptionalBool(PARAM_DISABLE_DHT);
+    const std::optional<bool> disablePEX = getOptionalBool(PARAM_DISABLE_PEX);
+    const std::optional<bool> disableLSD = getOptionalBool(PARAM_DISABLE_LSD);
 
-    const QStringList hashes {params()[u"hashes"_s].split(u'|')};
+    const QStringList hashes {params()[PARAM_HASHES].split(u'|')};
     applyToTorrents(hashes, [&disableDHT, &disablePEX, &disableLSD](BitTorrent::Torrent *const torrent)
     {
         if (disableDHT)
