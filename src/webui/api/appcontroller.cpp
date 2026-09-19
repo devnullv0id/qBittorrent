@@ -73,6 +73,8 @@
 
 using namespace std::chrono_literals;
 
+const QString KEY_CONFIRM_REMOVE_ALL_TAGS = u"confirm_remove_all_tags"_s;
+const QString KEY_CONFIRM_REMOVE_TRACKER_FROM_ALL_TORRENTS = u"confirm_remove_tracker_from_all_torrents"_s;
 const QString KEY_COOKIE_NAME = u"name"_s;
 const QString KEY_COOKIE_DOMAIN = u"domain"_s;
 const QString KEY_COOKIE_PATH = u"path"_s;
@@ -84,9 +86,6 @@ const QString KEY_FILE_METADATA_SIZE = u"size"_s;
 const QString KEY_FILE_METADATA_CREATION_DATE = u"creation_date"_s;
 const QString KEY_FILE_METADATA_LAST_ACCESS_DATE = u"last_access_date"_s;
 const QString KEY_FILE_METADATA_LAST_MODIFICATION_DATE = u"last_modification_date"_s;
-
-const QString KEY_CONFIRM_REMOVE_ALL_TAGS = u"confirm_remove_all_tags"_s;
-const QString KEY_CONFIRM_REMOVE_TRACKER_FROM_ALL_TORRENTS = u"confirm_remove_tracker_from_all_torrents"_s;
 
 void AppController::webapiVersionAction()
 {
@@ -417,10 +416,6 @@ void AppController::preferencesAction()
     data[u"torrent_file_size_limit"_s] = pref->getTorrentFileSizeLimit();
     // Confirm torrent recheck
     data[u"confirm_torrent_recheck"_s] = pref->confirmTorrentRecheck();
-    // Confirm removing all tags
-    data[KEY_CONFIRM_REMOVE_ALL_TAGS] = pref->confirmRemoveAllTags();
-    // Confirm removing a tracker from all torrents
-    data[KEY_CONFIRM_REMOVE_TRACKER_FROM_ALL_TORRENTS] = pref->confirmRemoveTrackerFromAllTorrents();
     // Recheck completed torrents
     data[u"recheck_completed_torrents"_s] = pref->recheckTorrentsOnCompletion();
     // Customize application instance name
@@ -431,6 +426,10 @@ void AppController::preferencesAction()
     data[u"resolve_peer_host_names"_s] = pref->resolvePeerHostNames();
     // Resolve peer countries
     data[u"resolve_peer_countries"_s] = pref->resolvePeerCountries();
+    // Confirm removing all tags
+    data[KEY_CONFIRM_REMOVE_ALL_TAGS] = pref->confirmRemoveAllTags();
+    // Confirm removing a tracker from all torrents
+    data[KEY_CONFIRM_REMOVE_TRACKER_FROM_ALL_TORRENTS] = pref->confirmRemoveTrackerFromAllTorrents();
     // Reannounce to all trackers when ip/port changed
     data[u"reannounce_when_address_changed"_s] = session->isReannounceWhenAddressChangedEnabled();
     // Embedded tracker
@@ -1077,12 +1076,6 @@ void AppController::setPreferencesAction()
     // Confirm torrent recheck
     if (hasKey(u"confirm_torrent_recheck"_s))
         pref->setConfirmTorrentRecheck(it.value().toBool());
-    // Confirm removing all tags
-    if (hasKey(KEY_CONFIRM_REMOVE_ALL_TAGS))
-        pref->setConfirmRemoveAllTags(it.value().toBool());
-    // Confirm removing a tracker from all torrents
-    if (hasKey(KEY_CONFIRM_REMOVE_TRACKER_FROM_ALL_TORRENTS))
-        pref->setConfirmRemoveTrackerFromAllTorrents(it.value().toBool());
     // Recheck completed torrents
     if (hasKey(u"recheck_completed_torrents"_s))
         pref->recheckTorrentsOnCompletion(it.value().toBool());
@@ -1098,6 +1091,12 @@ void AppController::setPreferencesAction()
     // Resolve peer countries
     if (hasKey(u"resolve_peer_countries"_s))
         pref->resolvePeerCountries(it.value().toBool());
+    // Confirm removing all tags
+    if (hasKey(KEY_CONFIRM_REMOVE_ALL_TAGS))
+        pref->setConfirmRemoveAllTags(it.value().toBool());
+    // Confirm removing a tracker from all torrents
+    if (hasKey(KEY_CONFIRM_REMOVE_TRACKER_FROM_ALL_TORRENTS))
+        pref->setConfirmRemoveTrackerFromAllTorrents(it.value().toBool());
     // Reannounce to all trackers when ip/port changed
     if (hasKey(u"reannounce_when_address_changed"_s))
         session->setReannounceWhenAddressChangedEnabled(it.value().toBool());
