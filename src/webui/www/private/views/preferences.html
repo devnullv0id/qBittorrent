@@ -3571,7 +3571,7 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
                 updateInterfaceAddresses(this.value, "");
             });
 
-            document.getElementById("deleteTorrentFileAfterCheckbox").addEventListener("change", updateDeleteCancelledTorrentEnabled);
+            document.getElementById("deleteTorrentFileAfterCheckbox").addEventListener("change", (e) => { updateDeleteCancelledTorrentEnabled(); });
 
             loadPreferences();
 
