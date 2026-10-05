@@ -47,6 +47,16 @@ window.qBittorrent.ColorScheme ??= (() => {
         root.classList.toggle("dark", ((!validScheme && isDark) || (colorScheme === "dark")));
     };
 
+    // responsive.css follows the page's own stylesheets; this script runs in the main window and in every dialog frame
+    const responsiveStylesheet = document.createElement("link");
+    responsiveStylesheet.id = "responsiveStylesheet";
+    responsiveStylesheet.rel = "stylesheet";
+    responsiveStylesheet.type = "text/css";
+    const href = new URL("css/responsive.css", window.location);
+    href.search = new URLSearchParams({ v: "${CACHEID}" });
+    responsiveStylesheet.href = href;
+    document.head.append(responsiveStylesheet);
+
     colorSchemeQuery.addEventListener("change", (_event) => update());
     // Apply immediately: framed windows already have parent's ClientData loaded;
     // main window falls back to system preference until client.js calls update() after fetch

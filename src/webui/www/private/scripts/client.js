@@ -611,6 +611,8 @@ window.addEventListener("DOMContentLoaded", async (event) => {
     // After Show Top Toolbar
     MochaUI.Desktop.setDesktopSize();
 
+    window.qBittorrent.Responsive.init();
+
     let syncMainDataLastResponseId = 0;
     const serverState = {};
 
