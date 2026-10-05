@@ -704,6 +704,12 @@
         min-height: 32px;
     }
 
+    /* editable selects as tall as the fields, inside their border */
+    .select-watched-folder-editable {
+        box-sizing: content-box;
+        height: 32px;
+    }
+
     :is(input[type="checkbox"], input[type="radio"]) {
         height: 20px;
         width: 20px;
