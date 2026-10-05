@@ -257,6 +257,24 @@
     }
 }
 
+/* fields in dialog iframes stay within the page */
+body:not(:has(#desktop)) {
+    & input[type="text"],
+    & input[type="number"],
+    & input[type="password"],
+    & input:not([type]),
+    & select,
+    & textarea {
+        box-sizing: border-box;
+        max-width: 100%;
+    }
+}
+
+/* Download from URLs on phones */
+:root.responsivePhone body:has(> #download_frame) {
+    padding-inline: 10px;
+}
+
 /* window buttons stay in view while the page scrolls */
 :is(
     .dialogFooter,
