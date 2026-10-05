@@ -100,6 +100,13 @@ window.qBittorrent.ContextMenu ??= (() => {
                 xPosMenu = 0;
             if (yPosMenu < 0)
                 yPosMenu = 0;
+            // some views' menus are positioned in a panel
+            const parent = this.menu.offsetParent;
+            if ((parent !== null) && (parent !== document.body)) {
+                const parentRect = parent.getBoundingClientRect();
+                xPosMenu -= parentRect.left + parent.clientLeft - parent.scrollLeft;
+                yPosMenu -= parentRect.top + parent.clientTop - parent.scrollTop;
+            }
             this.menu.style.left = `${xPosMenu}px`;
             this.menu.style.top = `${yPosMenu}px`;
             this.menu.style.position = "absolute";
