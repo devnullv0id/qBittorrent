@@ -2174,8 +2174,15 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
             document.getElementById("smtp_server_txt").disabled = !isMailNotificationEnabled;
             document.getElementById("mailNotificationEncryptionCombobox").disabled = !isMailNotificationEnabled;
             document.getElementById("mail_auth_checkbox").disabled = !isMailNotificationEnabled;
-            document.getElementById("mail_test_button").disabled = !isMailNotificationEnabled;
+            updateMailTestButton();
             updateMailAuthSettings();
+        };
+
+        const updateMailTestButton = () => {
+            const isMailNotificationEnabled = document.getElementById("mail_notification_checkbox").checked;
+            const hasAddresses = ["src_email_txt", "dest_email_txt", "smtp_server_txt"]
+                .every((id) => document.getElementById(id).value.trim() !== "");
+            document.getElementById("mail_test_button").disabled = !isMailNotificationEnabled || !hasAddresses;
         };
 
         const updateMailAuthSettings = () => {
@@ -3590,6 +3597,9 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
             });
 
             document.getElementById("deleteTorrentFileAfterCheckbox").addEventListener("change", (e) => { updateDeleteCancelledTorrentEnabled(); });
+
+            for (const id of ["src_email_txt", "dest_email_txt", "smtp_server_txt"])
+                document.getElementById(id).addEventListener("input", (_event) => updateMailTestButton());
 
             loadPreferences();
 
