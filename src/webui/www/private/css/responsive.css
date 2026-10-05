@@ -393,6 +393,15 @@
     min-width: 0;
 }
 
+/* New Category: the share limit fields fit the window */
+:root.responsiveRelayout #shareLimitsGrid {
+    grid-template-columns: max-content max-content minmax(0, 1fr) auto;
+}
+
+:root.responsiveRelayout #useDownloadPath {
+    flex: none;
+}
+
 /* Torrent Creator: the task list takes the height left */
 :root.responsiveRelayout .mocha #torrentCreatorContainer {
     display: flex;
@@ -591,6 +600,29 @@
         flex: 1 1 100%;
         margin: 0;
         width: auto !important; /* override the inline widths */
+    }
+}
+
+/* New Category on phones */
+:root.responsivePhone #shareLimitsGrid {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr) auto;
+
+    & :is(select, input) {
+        min-width: 0;
+    }
+
+    & > label,
+    & > .shareLimitsWideSelect,
+    & > .shareLimitsActionRow {
+        grid-column: 1 / -1;
+    }
+
+    & > .shareLimitsActionRow {
+        flex-wrap: wrap;
+
+        & > select {
+            flex: 1 1 100%;
+        }
     }
 }
 
