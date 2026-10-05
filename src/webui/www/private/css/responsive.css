@@ -332,6 +332,11 @@ body:not(:has(#desktop)) {
     }
 }
 
+/* no maximize button on phones */
+:root.responsivePhone .mochaMaximizeButton {
+    display: none;
+}
+
 /* full-screen windows on phones */
 .mocha.responsiveFullScreen {
     border-radius: 0;
