@@ -159,6 +159,11 @@ window.qBittorrent.Responsive ??= (() => {
         return true;
     };
 
+    // rows are touch-sized while the pointer is coarse (dynamicTable.js), which can change
+    const initRowHeights = () => {
+        window.matchMedia("(pointer: coarse)").addEventListener("change", (event) => window.torrentsTable.rerender());
+    };
+
     // Mocha lays the page out only on window resize, not when the header or the filters column change size
     const initLayout = () => {
         const relayout = window.qBittorrent.Misc.createDebounceHandler(50, () => {
@@ -397,6 +402,7 @@ window.qBittorrent.Responsive ??= (() => {
     // called by client.js once the main window is built
     const init = () => {
         initLayout();
+        initRowHeights();
         initFiltersDrawer();
         initWindows();
         initMenus();

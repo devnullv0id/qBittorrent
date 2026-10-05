@@ -522,6 +522,11 @@
         width: var(--touch-target);
     }
 
+    /* also set in dynamicTable.js */
+    .dynamicTable tbody tr {
+        height: 30px;
+    }
+
     .horizontalHandle {
         height: 12px;
     }
