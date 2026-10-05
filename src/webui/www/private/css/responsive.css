@@ -323,3 +323,145 @@
         width: 100%;
     }
 }
+
+/* Touch sizes */
+@media (pointer: coarse) {
+    :root {
+        --touch-target: 36px;
+        --window-title-height: 36px; /* also read by responsive.js */
+    }
+
+    #desktopNavbar > ul > li > a {
+        padding-bottom: 9px;
+        padding-top: 9px;
+    }
+
+    #desktopNavbar li ul {
+        max-height: calc(100dvh - var(--touch-target) - 4px);
+    }
+
+    #desktopNavbar li ul li :is(a, div.anchor) {
+        align-items: center;
+        box-sizing: border-box;
+        display: flex;
+        min-height: var(--touch-target);
+    }
+
+    #desktopNavbar .MyMenuIcon {
+        margin-bottom: 0;
+        margin-top: 0;
+    }
+
+    .contextMenu li a {
+        box-sizing: border-box;
+        min-height: var(--touch-target);
+    }
+
+    #mochaToolbar .mochaToolButton {
+        box-sizing: border-box;
+        height: var(--touch-target);
+        margin-right: 0;
+        padding: 6px;
+        width: var(--touch-target);
+    }
+
+    #mochaToolbar .divider {
+        background-position: 3px center;
+        padding-top: 0;
+    }
+
+    .tab-menu li a {
+        box-sizing: border-box;
+        min-height: var(--touch-target);
+    }
+
+    #propertiesPanel_header {
+        height: auto;
+    }
+
+    ul.filterList span.link {
+        box-sizing: border-box;
+        min-height: var(--touch-target);
+    }
+
+    #filtersButton,
+    #torrentsFilterInput,
+    #torrentsFilterSelect {
+        box-sizing: border-box;
+        height: var(--touch-target);
+    }
+
+    /* the icon once, at its size */
+    #RssDownloader .imageButton {
+        background-repeat: no-repeat;
+        background-size: 18px;
+    }
+
+    /* as tall as the field and level with it */
+    #torrentsFilterRegexBox + label,
+    #torrentsFilterRegexBox:checked + label {
+        box-sizing: border-box;
+        height: var(--touch-target);
+        margin-bottom: 0;
+        vertical-align: top;
+        width: var(--touch-target);
+    }
+
+    button,
+    input[type="button"],
+    input[type="submit"] {
+        min-height: var(--touch-target);
+        min-width: var(--touch-target);
+    }
+
+    input[type="text"],
+    input[type="search"],
+    input[type="number"],
+    input[type="password"],
+    input:not([type]),
+    select {
+        min-height: 32px;
+    }
+
+    :is(input[type="checkbox"], input[type="radio"]) {
+        height: 20px;
+        width: 20px;
+    }
+
+    /* window title bars */
+    .mochaTitlebar h3 {
+        background-position: 8px center !important; /* override Mocha's inline position */
+        line-height: calc(var(--window-title-height) - 9px);
+        /* a long title ends before the close button */
+        padding-right: calc(var(--touch-target) + 4px);
+    }
+
+    .mochaControls {
+        height: var(--window-title-height);
+        right: 0;
+        top: 0;
+        width: auto;
+    }
+
+    .mochaCloseButton {
+        height: var(--window-title-height);
+        margin: 0;
+        width: var(--touch-target);
+    }
+
+    .horizontalHandle {
+        height: 12px;
+    }
+
+    .columnHandle {
+        width: 12px;
+    }
+}
+
+/* touch phones: no space between the toolbar groups */
+@media (pointer: coarse) and (width < 760px) {
+    #mochaToolbar .divider {
+        background: none;
+        padding-left: 0;
+    }
+}

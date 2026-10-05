@@ -244,12 +244,26 @@ window.qBittorrent.Responsive ??= (() => {
         instance.responsiveFittedSize = { width: width, height: height };
     };
 
+    // taller title bars from the stylesheet, as Mocha's default for new windows
+    const applyWindowTitleHeight = () => {
+        const height = Number.parseInt(getComputedStyle(root).getPropertyValue("--window-title-height"), 10);
+        if (!(height > 0))
+            return;
+
+        MochaUI.Window.prototype.options.headerHeight = height;
+        MochaUI.Modal.prototype.options.headerHeight = height;
+    };
+
     const fitWindows = () => {
         for (const instance of Object.values(MochaUI.Windows.instances))
             fitWindow(instance);
     };
 
     const initWindows = () => {
+        // responsive.css loads after the page
+        applyWindowTitleHeight();
+        document.getElementById("responsiveStylesheet").addEventListener("load", (_event) => applyWindowTitleHeight());
+
         // content that changes size fits its window again
         const contentObserver = new ResizeObserver(window.qBittorrent.Misc.createDebounceHandler(50, fitWindows));
         const watch = (node) => {
