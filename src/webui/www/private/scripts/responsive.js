@@ -195,6 +195,10 @@ window.qBittorrent.Responsive ??= (() => {
         observer.observe(document.getElementById("filtersColumn"));
         // after Mocha's own resize handling
         window.addEventListener("resize", (_event) => relayout());
+
+        // view tabs showing only their icons are named on hover
+        for (const img of document.querySelectorAll("#mainWindowTabsList img"))
+            img.parentElement.title = img.alt;
     };
 
     /* Filters drawer */
