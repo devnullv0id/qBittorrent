@@ -52,6 +52,24 @@ window.qBittorrent.Responsive ??= (() => {
         return scrim;
     };
 
+    // client.js builds the transfer list after this script starts
+    const whenElement = (id) => new Promise((resolve) => {
+        const found = document.getElementById(id);
+        if (found !== null) {
+            resolve(found);
+            return;
+        }
+        const observer = new MutationObserver(() => {
+            const element = document.getElementById(id);
+            if (element === null)
+                return;
+
+            observer.disconnect();
+            resolve(element);
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
+    });
+
     /* Focus */
 
     // the focus stays in an open drawer
@@ -242,6 +260,57 @@ window.qBittorrent.Responsive ??= (() => {
         placeButton();
     };
 
+    /* Header that slides away */
+
+    // the header hides once the first torrent has scrolled out of view, unless a field has focus
+    const initHeaderAutoHide = async () => {
+        const header = document.getElementById("desktopHeader");
+        const list = await whenElement("torrentsTableDiv");
+        let lockedUntil = 0;
+        let unpinTimer = null;
+        const setHidden = (hidden) => {
+            if (root.classList.contains("headerHidden") === hidden)
+                return;
+
+            // slide between fixed heights, as auto can't be animated
+            clearTimeout(unpinTimer);
+            header.classList.add("sliding");
+            header.style.height = `${header.offsetHeight}px`;
+            void header.offsetHeight;
+            root.classList.toggle("headerHidden", hidden);
+            if (!hidden)
+                header.style.height = `${header.scrollHeight}px`;
+            unpinTimer = setTimeout(() => {
+                header.classList.remove("sliding");
+                header.style.removeProperty("height");
+            }, 250);
+            // ignore the scroll the relayout causes
+            lockedUntil = performance.now() + 250;
+        };
+
+        const busy = () => header.contains(document.activeElement) && document.activeElement.matches("input, select");
+
+        list.addEventListener("scroll", (event) => {
+            if (!smallQuery.matches) {
+                setHidden(false);
+                return;
+            }
+            if (performance.now() < lockedUntil)
+                return;
+
+            const rowHeight = list.querySelector("tbody tr")?.offsetHeight || 26;
+            if (list.scrollTop <= rowHeight)
+                setHidden(false);
+            else if (!root.classList.contains("headerHidden") && !busy() && ((list.scrollHeight - list.clientHeight) > (header.offsetHeight + 24)))
+                setHidden(true);
+        }, { passive: true });
+        smallQuery.addEventListener("change", (event) => {
+            if (!smallQuery.matches)
+                setHidden(false);
+        });
+        header.addEventListener("focusin", (event) => setHidden(false));
+    };
+
     /* Windows */
 
     // distance from the screen's edges
@@ -406,6 +475,7 @@ window.qBittorrent.Responsive ??= (() => {
         initFiltersDrawer();
         initWindows();
         initMenus();
+        initHeaderAutoHide();
         initKeyboardItems();
     };
 
