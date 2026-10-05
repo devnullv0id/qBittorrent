@@ -192,3 +192,37 @@
         display: none;
     }
 }
+
+/* Options: the settings rows wrap in a narrow window */
+#preferencesPage .mochaContentWrapper {
+    container: options / inline-size;
+}
+
+@container options (width < 600px) {
+    .PrefTab {
+        & fieldset {
+            min-width: 0;
+        }
+
+        & :is(table, tbody) {
+            display: block;
+        }
+
+        & tr {
+            align-items: center;
+            column-gap: 4px;
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        & td {
+            display: block;
+            min-width: 0;
+        }
+
+        & :is(input:not([type="checkbox"], [type="radio"]), select, textarea) {
+            box-sizing: border-box;
+            max-width: 100%;
+        }
+    }
+}
