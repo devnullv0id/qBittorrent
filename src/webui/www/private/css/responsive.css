@@ -312,3 +312,14 @@
         }
     }
 }
+
+/* Global Speed Limits on phones */
+:root.responsivePhone .speedGrid {
+    grid-template-columns: 24px auto minmax(0, 1fr) minmax(0, 80px) auto;
+
+    & :is(input, select) {
+        box-sizing: border-box;
+        min-width: 0;
+        width: 100%;
+    }
+}
