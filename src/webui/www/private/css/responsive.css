@@ -388,6 +388,11 @@
     }
 }
 
+/* Add Torrent: the Files section fits its column */
+#filesColumn > fieldset {
+    min-width: 0;
+}
+
 /* Torrent Creator: the task list takes the height left */
 :root.responsiveRelayout .mocha #torrentCreatorContainer {
     display: flex;
