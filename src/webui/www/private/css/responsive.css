@@ -443,6 +443,23 @@
     }
 }
 
+#torrentCreatorContentView {
+    position: relative;
+}
+
+#torrentCreatorEmpty {
+    left: 0;
+    margin: 0;
+    position: absolute;
+    right: 0;
+    text-align: center;
+    top: 50%;
+}
+
+#torrentCreatorContentView:has(tbody > tr) > #torrentCreatorEmpty {
+    display: none;
+}
+
 /* RSS: the button bar grows */
 :root.responsiveRelayout #rssView #rssButtonBar {
     height: auto;
