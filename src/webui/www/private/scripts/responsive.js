@@ -390,21 +390,21 @@ window.qBittorrent.Responsive ??= (() => {
 
     // a page's own height at the given width, 0 if it fills whatever height it is given, or null while it loads
     const pageHeight = (instance, width, tallHeight) => {
-        // the bottom padding of a page that runs past its content box
-        const bottomPadding = () => {
-            const content = instance.iframeEl ? null : instance.contentEl;
-            if ((content === null) || (content.scrollHeight <= content.clientHeight))
-                return 0;
-
-            return Number.parseFloat(getComputedStyle(content).paddingBottom) || 0;
-        };
-
-        const short = measurePage(instance, width, 1, (page) => ({ height: page.scrollHeight + bottomPadding(), heights: contentHeights(page) }));
+        const short = measurePage(instance, width, 1, (page) => ({ height: page.scrollHeight + pageBottomPadding(instance), heights: contentHeights(page) }));
         if (short === null)
             return null;
 
         const tall = measurePage(instance, width, tallHeight, contentHeights);
         return tall.some((height, i) => Math.abs(height - short.heights[i]) > 1) ? 0 : short.height;
+    };
+
+    // the bottom padding of a content box the page runs past
+    const pageBottomPadding = (instance) => {
+        const content = instance.iframeEl ? null : instance.contentEl;
+        if ((content === null) || (content.scrollHeight <= content.clientHeight))
+            return 0;
+
+        return Number.parseFloat(getComputedStyle(content).paddingBottom) || 0;
     };
 
     // the size a page needs not to scroll, 0 where it fits
@@ -420,6 +420,45 @@ window.qBittorrent.Responsive ??= (() => {
         page.style.overflowY = "scroll";
         return (page.scrollWidth > page.clientWidth) ? (fullWidth - page.clientWidth) : 0;
     }) ?? 0;
+
+    // the smallest size a page fits in at the given width
+    const pageMinSize = (instance, width) => ({
+        width: Math.max(MIN_WINDOW_WIDTH, pageOverflow(instance, MIN_WINDOW_WIDTH, instance.contentWrapperEl.offsetHeight).width),
+        height: measurePage(instance, width, 1, (page) => page.scrollHeight + pageBottomPadding(instance)) ?? 0
+    });
+
+    // a window can't be resized smaller than its page needs
+    const limitResize = (instance) => {
+        if (!root.classList.contains("responsiveRelayout"))
+            return;
+
+        const wrapper = instance.contentWrapperEl;
+        const min = pageMinSize(instance, wrapper.offsetWidth);
+        const frameWidth = instance.windowEl.offsetWidth - wrapper.offsetWidth;
+        const frameHeight = instance.windowEl.offsetHeight - wrapper.offsetHeight;
+        const { x, y } = instance.options.resizeLimit;
+        instance.options.resizeLimit = { x: [min.width + frameWidth, x[1]], y: [min.height + frameHeight, y[1]] };
+        for (const drag of [instance.resizable2, instance.resizable3, instance.resizable4]) {
+            if (drag?.options.limit.x)
+                drag.options.limit.x[0] = min.width;
+            if (drag?.options.limit.y)
+                drag.options.limit.y[0] = min.height;
+        }
+    };
+
+    // a narrower page needs more height
+    const keepPageHeight = (instance) => {
+        if (!root.classList.contains("responsiveRelayout"))
+            return;
+
+        const wrapper = instance.contentWrapperEl;
+        const minHeight = pageMinSize(instance, wrapper.offsetWidth).height;
+        if (wrapper.offsetHeight >= minHeight)
+            return;
+
+        wrapper.style.height = `${minHeight}px`;
+        instance.drawWindow();
+    };
 
     // sizes a window to its page and keeps it on the screen
     const fitWindow = (instance) => {
@@ -566,7 +605,11 @@ window.qBittorrent.Responsive ??= (() => {
                 drag?.addEvent("start", () => {
                     instance.responsiveUserMoved = true;
                 });
+                drag?.addEvent("beforeStart", () => limitResize(instance));
             }
+            // the edges that change the width
+            for (const drag of [instance.resizable2, instance.resizable3, instance.resizable5])
+                drag?.addEvent("drag", () => keepPageHeight(instance));
             instance.windowDrag?.addEvent("complete", () => {
                 instance.responsiveUserMoved = true;
             });
