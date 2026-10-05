@@ -72,11 +72,23 @@
     }
 }
 
-/* phones: the view tabs in a row of their own */
+/* View tabs and filter bar on phones */
 @media (width < 760px) {
     #mainWindowTabs {
-        float: none;
-        margin: 4px 0 0;
+        margin: 0;
+
+        & .tab-menu {
+            display: inline-flex;
+            margin: 0;
+        }
+
+        & .tab-menu li a {
+            font-size: 0;
+            gap: 0;
+            justify-content: center;
+            margin-left: 4px;
+            min-width: 32px;
+        }
     }
 
     #torrentsFilterToolbar {
