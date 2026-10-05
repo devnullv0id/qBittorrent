@@ -290,6 +290,18 @@ body:not(:has(#desktop)) {
     z-index: 1;
 }
 
+/* a line above them */
+:is(
+    .dialogFooter,
+    #submitbutton,
+    #preferencesPage
+        .mochaContent
+        > div:not(.PrefTab):has(> input[type="button"])
+) {
+    border-top: 1px solid var(--color-border-default);
+    padding-top: 6px !important; /* override the inline paddings */
+}
+
 /* Add Torrent: Download takes its place in the row */
 #submitbutton > div:has(> button[type="submit"]) {
     margin: 0 auto;
