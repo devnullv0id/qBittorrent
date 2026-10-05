@@ -178,3 +178,17 @@
         white-space: nowrap;
     }
 }
+
+/* full-screen windows on phones */
+.mocha.responsiveFullScreen {
+    border-radius: 0;
+    box-shadow: none;
+
+    & .mochaOverlay {
+        border-radius: 0;
+    }
+
+    & .handle {
+        display: none;
+    }
+}

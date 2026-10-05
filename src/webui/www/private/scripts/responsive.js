@@ -39,6 +39,7 @@ window.qBittorrent.Responsive ??= (() => {
 
     // keep in sync with responsive.css
     const drawerQuery = window.matchMedia("(width < 1100px)");
+    const phoneQuery = window.matchMedia("(width < 760px)");
     const smallQuery = window.matchMedia("(width < 760px), (height < 620px)");
 
     const root = document.documentElement;
@@ -156,10 +157,133 @@ window.qBittorrent.Responsive ??= (() => {
         placeButton();
     };
 
+    /* Windows */
+
+    // distance from the screen's edges
+    const WINDOW_MARGIN = 8;
+
+    // resizes like a drag of the edge, without storing the size as the user's
+    const setContentSize = (instance, width, height) => {
+        const wrapper = instance.contentWrapperEl;
+        if ((wrapper.style.width === width) && (wrapper.style.height === height))
+            return;
+
+        wrapper.style.width = width;
+        wrapper.style.height = height;
+        instance.drawWindow();
+        // only resizable windows have handles
+        if (instance.options.resizable)
+            instance.adjustHandles();
+        MochaUI.rWidth(wrapper);
+        for (const column of wrapper.querySelectorAll(":scope > .column"))
+            MochaUI.panelHeight(column);
+    };
+
+    // the size a window asks for; an empty width or height fits its content
+    const wantedSize = (instance) => {
+        const { width, height } = instance.contentWrapperEl.style;
+        const fitted = instance.responsiveFittedSize;
+        if ((fitted === undefined) || (width !== fitted.width) || (height !== fitted.height))
+            instance.responsiveWantedSize = { width: width, height: height };
+        return instance.responsiveWantedSize;
+    };
+
+    // sizes a window and keeps it on the screen; on phones it fills the screen
+    const fitWindow = (instance) => {
+        const windowEl = instance.windowEl;
+        if (!windowEl.isConnected || (windowEl.style.display === "none") || instance.isMaximized)
+            return;
+
+        const phone = phoneQuery.matches;
+        fitWindowSize(instance, phone);
+
+        // phones: no dragging a window that fills the screen
+        if (phone)
+            instance.windowDrag?.detach();
+        else
+            instance.windowDrag?.attach();
+
+        const margin = phone ? 0 : WINDOW_MARGIN;
+        const wasPhone = windowEl.classList.contains("responsiveFullScreen");
+        windowEl.classList.toggle("responsiveFullScreen", phone);
+        const maxLeft = window.innerWidth - windowEl.offsetWidth - margin;
+        const maxTop = window.innerHeight - windowEl.offsetHeight - margin;
+        if (phone) {
+            windowEl.style.left = "0px";
+            windowEl.style.top = "0px";
+        }
+        else if (wasPhone) {
+            windowEl.style.left = `${Math.max(margin, Math.round((maxLeft + margin) / 2))}px`;
+            windowEl.style.top = `${Math.max(margin, Math.round((maxTop + margin) / 2))}px`;
+        }
+        else {
+            windowEl.style.left = `${Math.max(margin, Math.min(windowEl.offsetLeft, maxLeft))}px`;
+            windowEl.style.top = `${Math.max(margin, Math.min(windowEl.offsetTop, maxTop))}px`;
+        }
+    };
+
+    const fitWindowSize = (instance, phone) => {
+        const windowEl = instance.windowEl;
+        const wrapper = instance.contentWrapperEl;
+        const wanted = wantedSize(instance);
+        // title bar and borders
+        const frameWidth = windowEl.offsetWidth - wrapper.offsetWidth;
+        const frameHeight = windowEl.offsetHeight - wrapper.offsetHeight;
+        // measure the wanted size
+        wrapper.style.width = wanted.width;
+        wrapper.style.height = wanted.height;
+        const margin = phone ? 0 : WINDOW_MARGIN;
+        const maxWidth = window.innerWidth - (2 * margin) - frameWidth;
+        const maxHeight = window.innerHeight - (2 * margin) - frameHeight;
+        const width = (phone || (wrapper.offsetWidth > maxWidth)) ? `${maxWidth}px` : wanted.width;
+        const height = (phone || (wrapper.offsetHeight > maxHeight)) ? `${maxHeight}px` : wanted.height;
+        // restore, so the window is only redrawn on a change
+        wrapper.style.width = instance.responsiveFittedSize?.width ?? wanted.width;
+        wrapper.style.height = instance.responsiveFittedSize?.height ?? wanted.height;
+        setContentSize(instance, width, height);
+        instance.responsiveFittedSize = { width: width, height: height };
+    };
+
+    const fitWindows = () => {
+        for (const instance of Object.values(MochaUI.Windows.instances))
+            fitWindow(instance);
+    };
+
+    const initWindows = () => {
+        // content that changes size fits its window again
+        const contentObserver = new ResizeObserver(window.qBittorrent.Misc.createDebounceHandler(50, fitWindows));
+        const watch = (node) => {
+            if (!node.classList?.contains("mocha"))
+                return;
+
+            const instance = MochaUI.Windows.instances[node.id];
+            if (instance === undefined)
+                return;
+
+            fitWindow(instance);
+            contentObserver.observe(instance.contentEl);
+        };
+
+        const windowObserver = new MutationObserver((mutations) => {
+            for (const mutation of mutations) {
+                for (const node of mutation.addedNodes)
+                    watch(node);
+            }
+        });
+        for (const container of new Set([document.getElementById("desktop"), document.body]))
+            windowObserver.observe(container, { childList: true });
+        for (const node of document.querySelectorAll(".mocha"))
+            watch(node);
+
+        // after Mocha's own resize handling
+        window.addEventListener("resize", window.qBittorrent.Misc.createDebounceHandler(50, fitWindows));
+    };
+
     // called by client.js once the main window is built
     const init = () => {
         initLayout();
         initFiltersDrawer();
+        initWindows();
     };
 
     return exports();
