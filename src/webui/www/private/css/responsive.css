@@ -131,3 +131,9 @@
         width: 1px;
     }
 }
+
+/* menubar menus scroll on short screens */
+#desktopNavbar li ul {
+    max-height: calc(100dvh - 30px);
+    overflow-y: auto;
+}
