@@ -447,6 +447,47 @@
     }
 }
 
+/* dialog buttons stack on phones, the main action first */
+:root.responsivePhone .dialogFooter {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    & > :is(button, input) {
+        margin: 0;
+        width: 100%;
+    }
+
+    & > .primary {
+        order: -1;
+    }
+}
+
+:root.responsivePhone .modalDialog .mochaContent.pad > .dialogFooter {
+    align-self: stretch;
+}
+
+:root.responsivePhone
+    #preferencesPage
+    .mochaContent
+    > div:not(.PrefTab):has(> input[type="button"])
+    > input {
+    width: 100%;
+}
+
+/* Search Plugins' buttons, a row of their own, stack as well */
+:root.responsivePhone .mocha #searchPluginsContainer > div:last-child {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+
+    & > button {
+        flex: 1 1 100%;
+        margin: 0;
+        width: auto !important; /* override the inline widths */
+    }
+}
+
 /* Global Speed Limits on phones */
 :root.responsivePhone .speedGrid {
     grid-template-columns: 24px auto minmax(0, 1fr) minmax(0, 80px) auto;

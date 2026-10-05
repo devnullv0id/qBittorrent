@@ -37,9 +37,10 @@ window.qBittorrent.ColorScheme ??= (() => {
     };
 
     const colorSchemeQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    const phoneQuery = window.matchMedia("(width < 760px)");
+    // the main window's screen, also from a dialog's frame
+    const phoneQuery = window.parent.matchMedia("(width < 760px)");
     // touch screens and narrower screens, where the desktop layout doesn't hold
-    const relayoutQuery = window.matchMedia("(pointer: coarse), (width < 1100px)");
+    const relayoutQuery = window.parent.matchMedia("(pointer: coarse), (width < 1100px)");
     const clientData = window.parent.qBittorrent.ClientData;
 
     const update = () => {
@@ -64,8 +65,15 @@ window.qBittorrent.ColorScheme ??= (() => {
     document.head.append(responsiveStylesheet);
 
     colorSchemeQuery.addEventListener("change", (_event) => update());
-    phoneQuery.addEventListener("change", (_event) => update());
-    relayoutQuery.addEventListener("change", (_event) => update());
+    // the main window's queries outlive a dialog page, so its listeners go with it
+    const followScreen = (query) => {
+        const listening = new AbortController();
+        query.addEventListener("change", ((_event) => update()), { signal: listening.signal });
+        if (window.parent !== window)
+            window.addEventListener("pagehide", (_event) => listening.abort());
+    };
+    followScreen(phoneQuery);
+    followScreen(relayoutQuery);
     // Apply immediately: framed windows already have parent's ClientData loaded;
     // main window falls back to system preference until client.js calls update() after fetch
     update();
