@@ -226,3 +226,89 @@
         }
     }
 }
+
+/* RSS on phones: feeds, articles and details stack */
+@media (width < 760px) {
+    #rssView {
+        padding: 10px 10px 0;
+
+        /* buttons two by two, the filter below them */
+        & #rssButtonBar {
+            box-sizing: border-box;
+            display: grid;
+            gap: 6px;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            height: auto;
+            width: 100%;
+
+            & button {
+                box-sizing: border-box;
+                margin: 0;
+                width: 100%;
+            }
+        }
+
+        & #rssFilterToolbar {
+            display: contents;
+        }
+
+        & #rssFilterInput {
+            box-sizing: border-box;
+            grid-column: 1 / -1;
+            min-width: 0;
+            order: 1;
+            width: 100%;
+        }
+
+        & :is(#leftRssColumn, #centerRssColumn, #rightRssColumn) {
+            float: none;
+            height: auto;
+            margin: 0 0 10px;
+            width: 100%;
+        }
+
+        & #rssFeedTableDiv {
+            height: 30dvh;
+        }
+
+        & #rssArticleTableDiv {
+            height: 40dvh;
+        }
+    }
+}
+
+/* RSS Downloader in narrow windows: the columns stack */
+#rssdownloaderpage .mochaContentWrapper {
+    container: rss-downloader / inline-size;
+}
+
+@container rss-downloader (width < 700px) {
+    #RssDownloader {
+        height: auto;
+
+        & #leftRssDownloaderColumn,
+        & #centerRssDownloaderColumn,
+        & #rightRssDownloaderColumn {
+            float: none;
+            height: auto !important;
+            margin-bottom: 10px;
+            width: 100%;
+        }
+
+        & #rulesTable {
+            height: 180px !important;
+        }
+
+        & #rssDownloaderFeeds {
+            height: auto !important;
+        }
+
+        & #rssDownloaderFeedsTable {
+            height: 160px !important;
+        }
+
+        & #rssDownloaderArticlesTable {
+            height: 240px !important;
+        }
+    }
+}
