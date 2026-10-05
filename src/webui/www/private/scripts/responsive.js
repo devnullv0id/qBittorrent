@@ -445,7 +445,7 @@ window.qBittorrent.Responsive ??= (() => {
             windowEl.style.left = "0px";
             windowEl.style.top = "0px";
         }
-        else if (phone || wasFullScreen) {
+        else if (phone || wasFullScreen || (!instance.responsiveUserMoved && root.classList.contains("responsiveRelayout"))) {
             windowEl.style.left = `${Math.max(margin, Math.round((maxLeft + margin) / 2))}px`;
             windowEl.style.top = `${Math.max(margin, Math.round((maxTop + margin) / 2))}px`;
         }
@@ -558,9 +558,17 @@ window.qBittorrent.Responsive ??= (() => {
             contentChangeObserver.observe(instance.contentEl, { childList: true, subtree: true, attributes: true, attributeFilter: ["class", "hidden"] });
             if (instance.toolbarWrapperEl)
                 contentObserver.observe(instance.toolbarWrapperEl);
-            // a size the user drags a window to is kept, even if its page needs more
+            // a size or place the user chose is kept, from the start of the drag
             instance.addEvent("resize", () => {
                 instance.responsiveUserResized = true;
+            });
+            for (const drag of [instance.resizable1, instance.resizable2, instance.resizable3, instance.resizable4, instance.resizable5]) {
+                drag?.addEvent("start", () => {
+                    instance.responsiveUserMoved = true;
+                });
+            }
+            instance.windowDrag?.addEvent("complete", () => {
+                instance.responsiveUserMoved = true;
             });
             // dialog pages
             const iframe = instance.iframeEl;
