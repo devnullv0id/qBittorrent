@@ -317,8 +317,13 @@ window.qBittorrent.Responsive ??= (() => {
 
     /* Windows */
 
-    // distance from the screen's edges
+    // distance from the screen's edges, and the least width
     const WINDOW_MARGIN = 8;
+    const PHONE_WINDOW_MARGIN = 12;
+    const MIN_WINDOW_WIDTH = 300;
+    // the largest a window grows to fit its page
+    const MAX_WINDOW_WIDTH = 1200;
+    const MAX_WINDOW_HEIGHT = 800;
 
     // resizes like a drag of the edge, without storing the size as the user's
     const setContentSize = (instance, width, height) => {
@@ -346,31 +351,101 @@ window.qBittorrent.Responsive ??= (() => {
         return instance.responsiveWantedSize;
     };
 
-    // sizes a window and keeps it on the screen; on phones it fills the screen
+    // measure(page) at the given size, or null while the page loads
+    const measurePage = (instance, width, height, measure) => {
+        const iframe = instance.iframeEl;
+        const box = iframe ?? instance.contentWrapperEl;
+        const page = iframe ? iframe.contentDocument?.documentElement : box;
+        const loading = iframe
+            ? ((iframe.contentDocument?.readyState !== "complete") || (iframe.contentWindow.location.href === "about:blank"))
+            : (instance.contentEl.childElementCount === 0);
+        if (!page || loading)
+            return null;
+
+        const { width: oldWidth, height: oldHeight } = box.style;
+        const oldOverflow = page.style.overflow;
+        box.style.width = `${width}px`;
+        box.style.height = `${height}px`;
+        // a scrollbar would narrow the page
+        page.style.overflow = "hidden";
+        const result = measure(page);
+        page.style.overflow = oldOverflow;
+        box.style.width = oldWidth;
+        box.style.height = oldHeight;
+        return result;
+    };
+
+    // heights of the scrolling boxes and leaf elements
+    const contentHeights = (page) => {
+        const view = page.ownerDocument.defaultView;
+        const heights = [];
+        for (const el of page.querySelectorAll("*")) {
+            if ((el === page.ownerDocument.body) || ((el.firstElementChild !== null) && !/auto|scroll/.test(view.getComputedStyle(el).overflowY)))
+                continue;
+
+            heights.push(el.getBoundingClientRect().height);
+        }
+        return heights;
+    };
+
+    // a page's own height at the given width, 0 if it fills whatever height it is given, or null while it loads
+    const pageHeight = (instance, width, tallHeight) => {
+        // the bottom padding of a page that runs past its content box
+        const bottomPadding = () => {
+            const content = instance.iframeEl ? null : instance.contentEl;
+            if ((content === null) || (content.scrollHeight <= content.clientHeight))
+                return 0;
+
+            return Number.parseFloat(getComputedStyle(content).paddingBottom) || 0;
+        };
+
+        const short = measurePage(instance, width, 1, (page) => ({ height: page.scrollHeight + bottomPadding(), heights: contentHeights(page) }));
+        if (short === null)
+            return null;
+
+        const tall = measurePage(instance, width, tallHeight, contentHeights);
+        return tall.some((height, i) => Math.abs(height - short.heights[i]) > 1) ? 0 : short.height;
+    };
+
+    // the size a page needs not to scroll, 0 where it fits
+    const pageOverflow = (instance, width, height) => measurePage(instance, width, height, (page) => ({
+        width: (page.scrollWidth > page.clientWidth) ? page.scrollWidth : 0,
+        height: (page.scrollHeight > page.clientHeight) ? page.scrollHeight : 0
+    })) ?? { width: 0, height: 0 };
+
+    // the width a vertical scrollbar takes where it would make the page scroll sideways, else 0 (also where scrollbars
+    // are drawn over the page)
+    const sidewaysScrollbarWidth = (instance, width, height) => measurePage(instance, width, height, (page) => {
+        const fullWidth = page.clientWidth;
+        page.style.overflowY = "scroll";
+        return (page.scrollWidth > page.clientWidth) ? (fullWidth - page.clientWidth) : 0;
+    }) ?? 0;
+
+    // sizes a window to its page and keeps it on the screen
     const fitWindow = (instance) => {
         const windowEl = instance.windowEl;
         if (!windowEl.isConnected || (windowEl.style.display === "none") || instance.isMaximized)
             return;
 
         const phone = phoneQuery.matches;
-        fitWindowSize(instance, phone);
+        const fullScreen = fitWindowSize(instance, phone);
 
-        // phones: no dragging a window that fills the screen
+        // no dragging on phones
         if (phone)
             instance.windowDrag?.detach();
         else
             instance.windowDrag?.attach();
 
-        const margin = phone ? 0 : WINDOW_MARGIN;
-        const wasPhone = windowEl.classList.contains("responsiveFullScreen");
-        windowEl.classList.toggle("responsiveFullScreen", phone);
+        const margin = fullScreen ? 0 : (phone ? PHONE_WINDOW_MARGIN : WINDOW_MARGIN);
+        const wasFullScreen = windowEl.classList.contains("responsiveFullScreen");
+        windowEl.classList.toggle("responsiveFullScreen", fullScreen);
         const maxLeft = window.innerWidth - windowEl.offsetWidth - margin;
         const maxTop = window.innerHeight - windowEl.offsetHeight - margin;
-        if (phone) {
+        if (fullScreen) {
             windowEl.style.left = "0px";
             windowEl.style.top = "0px";
         }
-        else if (wasPhone) {
+        else if (phone || wasFullScreen) {
             windowEl.style.left = `${Math.max(margin, Math.round((maxLeft + margin) / 2))}px`;
             windowEl.style.top = `${Math.max(margin, Math.round((maxTop + margin) / 2))}px`;
         }
@@ -380,6 +455,7 @@ window.qBittorrent.Responsive ??= (() => {
         }
     };
 
+    // the size a window asks for, larger where its page needs it (responsiveRelayout), within the screen; returns whether it fills the screen
     const fitWindowSize = (instance, phone) => {
         const windowEl = instance.windowEl;
         const wrapper = instance.contentWrapperEl;
@@ -390,16 +466,38 @@ window.qBittorrent.Responsive ??= (() => {
         // measure the wanted size
         wrapper.style.width = wanted.width;
         wrapper.style.height = wanted.height;
-        const margin = phone ? 0 : WINDOW_MARGIN;
+        const wantedWidth = wrapper.offsetWidth;
+        const wantedHeight = wrapper.offsetHeight;
+        const margin = phone ? PHONE_WINDOW_MARGIN : WINDOW_MARGIN;
         const maxWidth = window.innerWidth - (2 * margin) - frameWidth;
         const maxHeight = window.innerHeight - (2 * margin) - frameHeight;
-        const width = (phone || (wrapper.offsetWidth > maxWidth)) ? `${maxWidth}px` : wanted.width;
-        const height = (phone || (wrapper.offsetHeight > maxHeight)) ? `${maxHeight}px` : wanted.height;
+
+        let width = phone ? maxWidth : Math.min(maxWidth, wantedWidth);
+        let height = Math.min(maxHeight, wantedHeight);
+        // null while unknown: a window the user sized, or a page still loading, isn't taken full screen
+        let ownHeight = null;
+        if (!instance.responsiveUserResized && root.classList.contains("responsiveRelayout")) {
+            const fitWidth = Math.min(maxWidth, MAX_WINDOW_WIDTH);
+            const fitHeight = Math.min(maxHeight, MAX_WINDOW_HEIGHT);
+            width = phone ? maxWidth : Math.min(fitWidth, Math.max(width, MIN_WINDOW_WIDTH, pageOverflow(instance, width, wantedHeight).width));
+            ownHeight = pageHeight(instance, width, maxHeight);
+            height = Math.min(fitHeight, (ownHeight > 0) ? ownHeight : Math.max(wantedHeight, pageOverflow(instance, width, wantedHeight).height));
+            // a page that scrolls keeps its width beside the scrollbar
+            if (pageOverflow(instance, width, height).height > 0)
+                width = Math.min(fitWidth, width + sidewaysScrollbarWidth(instance, width, height));
+        }
+        const fullScreen = phone && (ownHeight !== null) && ((ownHeight === 0) || (ownHeight > maxHeight));
+        if (fullScreen) {
+            width = window.innerWidth - frameWidth;
+            height = window.innerHeight - frameHeight;
+        }
+
         // restore, so the window is only redrawn on a change
         wrapper.style.width = instance.responsiveFittedSize?.width ?? wanted.width;
         wrapper.style.height = instance.responsiveFittedSize?.height ?? wanted.height;
-        setContentSize(instance, width, height);
-        instance.responsiveFittedSize = { width: width, height: height };
+        setContentSize(instance, `${width}px`, `${height}px`);
+        instance.responsiveFittedSize = { width: `${width}px`, height: `${height}px` };
+        return fullScreen;
     };
 
     // taller title bars from the stylesheet, as Mocha's default for new windows
@@ -422,8 +520,23 @@ window.qBittorrent.Responsive ??= (() => {
         applyWindowTitleHeight();
         document.getElementById("responsiveStylesheet").addEventListener("load", (_event) => applyWindowTitleHeight());
 
-        // content that changes size fits its window again
-        const contentObserver = new ResizeObserver(window.qBittorrent.Misc.createDebounceHandler(50, fitWindows));
+        // content that changes size fits its window again, and only that window
+        const changed = new Set();
+        const fitChanged = window.qBittorrent.Misc.createDebounceHandler(50, () => {
+            for (const instance of changed)
+                fitWindow(instance);
+            changed.clear();
+        });
+        const fitSoon = (records) => {
+            for (const { target } of records) {
+                const instance = MochaUI.Windows.instances[target.closest(".mocha")?.id];
+                if (instance !== undefined)
+                    changed.add(instance);
+            }
+            fitChanged();
+        };
+        const contentObserver = new ResizeObserver(fitSoon);
+        const contentChangeObserver = new MutationObserver(fitSoon);
         const watch = (node) => {
             if (!node.classList?.contains("mocha"))
                 return;
@@ -436,6 +549,18 @@ window.qBittorrent.Responsive ??= (() => {
             closeFiltersDrawer();
             fitWindow(instance);
             contentObserver.observe(instance.contentEl);
+            contentChangeObserver.observe(instance.contentEl, { childList: true, subtree: true, attributes: true, attributeFilter: ["class", "hidden"] });
+            // a size the user drags a window to is kept, even if its page needs more
+            instance.addEvent("resize", () => {
+                instance.responsiveUserResized = true;
+            });
+            // dialog pages
+            const iframe = instance.iframeEl;
+            iframe?.addEventListener("load", (event) => {
+                fitWindow(instance);
+                const pageObserver = new iframe.contentWindow.ResizeObserver(window.qBittorrent.Misc.createDebounceHandler(50, () => fitWindow(instance)));
+                pageObserver.observe(iframe.contentDocument.body);
+            });
         };
 
         const windowObserver = new MutationObserver((mutations) => {
