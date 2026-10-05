@@ -459,8 +459,14 @@ window.qBittorrent.Responsive ??= (() => {
     const fitWindowSize = (instance, phone) => {
         const windowEl = instance.windowEl;
         const wrapper = instance.contentWrapperEl;
+        // Mocha draws the window around the toolbar's inline height
+        const toolbar = instance.toolbarWrapperEl;
+        if (toolbar && (toolbar.style.height !== `${toolbar.offsetHeight}px`)) {
+            toolbar.style.height = `${toolbar.offsetHeight}px`;
+            instance.drawWindow();
+        }
         const wanted = wantedSize(instance);
-        // title bar and borders
+        // title bar, toolbar and borders
         const frameWidth = windowEl.offsetWidth - wrapper.offsetWidth;
         const frameHeight = windowEl.offsetHeight - wrapper.offsetHeight;
         // measure the wanted size
@@ -550,6 +556,8 @@ window.qBittorrent.Responsive ??= (() => {
             fitWindow(instance);
             contentObserver.observe(instance.contentEl);
             contentChangeObserver.observe(instance.contentEl, { childList: true, subtree: true, attributes: true, attributeFilter: ["class", "hidden"] });
+            if (instance.toolbarWrapperEl)
+                contentObserver.observe(instance.toolbarWrapperEl);
             // a size the user drags a window to is kept, even if its page needs more
             instance.addEvent("resize", () => {
                 instance.responsiveUserResized = true;

@@ -266,6 +266,12 @@
     }
 }
 
+/* window tabs wrap on phones */
+:root.responsivePhone .mocha .tab-menu {
+    flex-wrap: wrap;
+    row-gap: 4px;
+}
+
 /* Options: the settings rows wrap in a narrow window */
 #preferencesPage .mochaContentWrapper {
     container: options / inline-size;
