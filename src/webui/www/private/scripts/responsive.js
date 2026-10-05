@@ -605,6 +605,18 @@ window.qBittorrent.Responsive ??= (() => {
             document.addEventListener(type, (_event) => scheduleSync(), true);
     };
 
+    /* Options */
+
+    // a page opens at its top, as the pages share the window's scrolling
+    const initOptionsPages = () => {
+        document.addEventListener("click", (event) => {
+            if (event.target.closest("#preferencesTabs a") === null)
+                return;
+
+            document.getElementById("preferencesPage_contentWrapper").scrollTop = 0;
+        });
+    };
+
     // called by client.js once the main window is built
     const init = () => {
         initLayout();
@@ -614,6 +626,7 @@ window.qBittorrent.Responsive ??= (() => {
         initMenus();
         initHeaderAutoHide();
         initKeyboardItems();
+        initOptionsPages();
     };
 
     return exports();
