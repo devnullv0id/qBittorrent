@@ -361,6 +361,51 @@
     }
 }
 
+/* Search plugins: the list takes the height left, the buttons wrap */
+:root.responsiveRelayout .mocha #searchPluginsContainer {
+    display: flex;
+    flex-direction: column;
+
+    & > * {
+        flex: none;
+    }
+
+    & > #searchPluginsTable {
+        flex: 1 1 auto;
+        height: auto;
+        min-height: 120px;
+    }
+
+    & > div:last-child {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+
+        & > button {
+            flex: 1 1 auto;
+            width: auto !important;
+        }
+    }
+}
+
+/* Torrent Creator: the task list takes the height left */
+:root.responsiveRelayout .mocha #torrentCreatorContainer {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+
+    & > * {
+        flex: none;
+    }
+
+    & > #torrentCreatorContentView {
+        box-sizing: border-box;
+        flex: 1 1 auto;
+        height: auto;
+        min-height: 0;
+    }
+}
+
 /* RSS on phones: feeds, articles and details stack */
 @media (width < 760px) {
     #rssView {
@@ -411,6 +456,61 @@
     }
 }
 
+/* RSS Downloader: a grid of its three columns */
+#RssDownloader {
+    display: grid;
+    grid-template-columns: 25% 50% 25%;
+    grid-template-rows: auto minmax(0, 1fr);
+
+    & > #rssDownloaderDisabled {
+        grid-column: 1 / -1;
+    }
+
+    & > #leftRssDownloaderColumn,
+    & > #centerRssDownloaderColumn,
+    & > #rightRssDownloaderColumn {
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        float: none;
+        grid-row: 2;
+        height: auto !important;
+        min-height: 0;
+        width: auto;
+
+        & > * {
+            flex: none;
+        }
+    }
+
+    & #topMenuBar {
+        display: flow-root;
+        height: auto;
+    }
+
+    & #rulesTable,
+    & #rssDownloaderFeeds,
+    & #rssDownloaderArticlesTable {
+        flex: 1 1 auto;
+        height: auto !important;
+        min-height: 0;
+    }
+
+    /* the list scrolls, not the fieldset, keeping the legend */
+    & #rssDownloaderFeeds {
+        display: flex;
+        flex-direction: column;
+        min-height: 140px;
+        overflow: visible;
+    }
+
+    & #rssDownloaderFeedsTable {
+        flex: 1 1 auto;
+        height: auto !important;
+        min-height: 60px;
+    }
+}
+
 /* RSS Downloader in narrow windows: the columns stack */
 #rssdownloaderpage .mochaContentWrapper {
     container: rss-downloader / inline-size;
@@ -418,6 +518,7 @@
 
 @container rss-downloader (width < 700px) {
     #RssDownloader {
+        display: block;
         height: auto;
 
         & #leftRssDownloaderColumn,
