@@ -274,6 +274,8 @@ window.qBittorrent.Responsive ??= (() => {
             if (instance === undefined)
                 return;
 
+            // a window opened from the drawer would open behind it
+            closeFiltersDrawer();
             fitWindow(instance);
             contentObserver.observe(instance.contentEl);
         };
