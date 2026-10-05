@@ -367,6 +367,18 @@
     }
 }
 
+/* Execution Log: the filter bar wraps */
+:root.responsiveRelayout #logView #logFilterBar {
+    height: auto;
+
+    & #filterTextInput {
+        box-sizing: border-box;
+        flex: 1 1 160px;
+        min-width: 0;
+        width: auto;
+    }
+}
+
 /* Search plugins: the list takes the height left, the buttons wrap */
 :root.responsiveRelayout .mocha #searchPluginsContainer {
     display: flex;
