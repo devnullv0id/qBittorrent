@@ -505,6 +505,13 @@ body:not(:has(#desktop)) {
     flex: none;
 }
 
+/* About keeps one size across its tabs */
+:root.responsiveRelayout #aboutpage .aboutTabContent {
+    box-sizing: border-box;
+    height: 100%;
+    overflow: auto;
+}
+
 /* Torrent Creator: the task list takes the height left */
 :root.responsiveRelayout .mocha #torrentCreatorContainer {
     display: flex;
