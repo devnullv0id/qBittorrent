@@ -88,9 +88,10 @@ window.qBittorrent.ContextMenu ??= (() => {
             this.menu.style.left = "-999em";
             this.menu.style.top = "-999em";
 
-            // position the menu
-            let xPosMenu = e.pageX + this.options.offsets.x;
-            let yPosMenu = e.pageY + this.options.offsets.y;
+            // position the menu (at the finger for a long press)
+            const point = e.changedTouches?.[0] ?? e;
+            let xPosMenu = point.pageX + this.options.offsets.x;
+            let yPosMenu = point.pageY + this.options.offsets.y;
             if ((xPosMenu + this.menu.offsetWidth) > document.documentElement.clientWidth)
                 xPosMenu -= this.menu.offsetWidth;
             if ((yPosMenu + this.menu.offsetHeight) > document.documentElement.clientHeight)
@@ -148,10 +149,16 @@ window.qBittorrent.ContextMenu ??= (() => {
                 this.touchStartAt = null;
                 this.touchStartEvent = null;
 
+                if (!touchStartEvent)
+                    return;
+
                 const isTargetUnchanged = (Math.abs(e.changedTouches[0].pageX - touchStartEvent.changedTouches[0].pageX) <= 10) && (Math.abs(e.changedTouches[0].pageY - touchStartEvent.changedTouches[0].pageY) <= 10);
-                if (((now - touchStartAt) >= this.options.touchTimer) && isTargetUnchanged)
+                if (((now - touchStartAt) >= this.options.touchTimer) && isTargetUnchanged) {
+                    // the click that follows the touch would close the menu again
+                    e.preventDefault();
                     this.triggerMenu(touchStartEvent, elem);
-            }, { passive: true });
+                }
+            });
         }
 
         addTarget(t) {
