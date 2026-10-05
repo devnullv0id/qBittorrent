@@ -438,6 +438,12 @@
     }
 }
 
+/* RSS: the button bar grows */
+:root.responsiveRelayout #rssView #rssButtonBar {
+    height: auto;
+    overflow: visible;
+}
+
 /* RSS on phones: feeds, articles and details stack */
 @media (width < 760px) {
     #rssView {
