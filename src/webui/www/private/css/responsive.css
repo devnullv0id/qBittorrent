@@ -211,6 +211,11 @@
     }
 }
 
+/* Mocha sizes the page as a content box */
+#pageWrapper {
+    box-sizing: content-box;
+}
+
 /* Status bar that wraps */
 #desktopFooterWrapper {
     height: auto;
