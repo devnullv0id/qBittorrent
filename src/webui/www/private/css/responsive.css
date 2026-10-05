@@ -137,3 +137,44 @@
     max-height: calc(100dvh - 30px);
     overflow-y: auto;
 }
+
+/* Status bar that wraps */
+#desktopFooterWrapper {
+    height: auto;
+}
+
+#desktopFooter {
+    box-sizing: border-box;
+    height: auto;
+    min-height: 28px;
+    overflow: visible !important; /* override the inline scrolling */
+
+    & > table,
+    & > table > tbody {
+        display: block;
+        width: auto !important;
+    }
+
+    /* spaced like the table's cells */
+    & > table > tbody > tr {
+        align-items: center;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2px;
+        justify-content: flex-end;
+        min-height: 24px;
+        padding: 0 2px;
+    }
+
+    & td.statusBarSeparator {
+        align-self: stretch;
+    }
+}
+
+@media (width < 760px) {
+    /* the fixed width would cost phones a row */
+    #desktopFooter td.speedLabel {
+        min-width: 0;
+        white-space: nowrap;
+    }
+}
