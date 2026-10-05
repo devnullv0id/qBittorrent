@@ -138,6 +138,46 @@
     overflow-y: auto;
 }
 
+/* tall context menus scroll, their submenus open inline */
+.contextMenu.responsiveScrollingMenu {
+    max-height: 100dvh;
+    overflow-y: auto;
+
+    & li ul {
+        border-width: 1px 0 0;
+        display: none;
+        margin: 0 !important; /* override the inline margins */
+        padding-left: 16px;
+        position: static;
+        width: auto;
+    }
+
+    & li:not(.disabled):hover > ul {
+        display: block;
+    }
+}
+
+/* a hidden menu takes no room past the screen: a long translation can make it wider than a phone */
+.contextMenu:not(.visible) {
+    max-width: 100vw;
+    overflow: clip;
+}
+
+/* on phones a long item wraps: no menu is wider than the screen */
+:root.responsivePhone .contextMenu {
+    box-sizing: border-box;
+    max-width: 100vw;
+
+    & li a {
+        white-space: normal;
+    }
+
+    & li ul {
+        box-sizing: border-box;
+        max-width: 100vw;
+    }
+}
+
 /* Status bar that wraps */
 #desktopFooterWrapper {
     height: auto;

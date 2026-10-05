@@ -293,11 +293,31 @@ window.qBittorrent.Responsive ??= (() => {
         window.addEventListener("resize", window.qBittorrent.Misc.createDebounceHandler(50, fitWindows));
     };
 
+    /* Context menus */
+
+    // menus taller than the screen scroll; fitted after each input
+    const syncMenus = () => {
+        for (const menu of document.querySelectorAll(".contextMenu")) {
+            const visible = menu.classList.contains("visible");
+            const scrolling = visible && (menu.scrollHeight > window.innerHeight);
+            if (scrolling !== menu.classList.contains("responsiveScrollingMenu"))
+                menu.classList.toggle("responsiveScrollingMenu", scrolling);
+        }
+    };
+
+    const initMenus = () => {
+        // after the handlers of the input, before the next paint
+        const scheduleSync = () => requestAnimationFrame(syncMenus);
+        for (const type of ["contextmenu", "click", "touchend", "keydown"])
+            document.addEventListener(type, (_event) => scheduleSync(), true);
+    };
+
     // called by client.js once the main window is built
     const init = () => {
         initLayout();
         initFiltersDrawer();
         initWindows();
+        initMenus();
     };
 
     return exports();
