@@ -52,6 +52,81 @@ window.qBittorrent.Responsive ??= (() => {
         return scrim;
     };
 
+    /* Focus */
+
+    // the focus stays in an open drawer
+    const focusableSelector = "a[href], button:not([disabled]), input:not([disabled], [type='hidden']), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex='-1'])";
+    const trapFocus = (container) => {
+        const returnTo = document.activeElement;
+        const focusable = () => [...container.querySelectorAll(focusableSelector)].filter((element) => element.getClientRects().length > 0);
+        const first = focusable()[0];
+        if (first !== undefined) {
+            first.focus();
+        }
+        else {
+            container.tabIndex = -1;
+            container.focus();
+        }
+        const onKeyDown = (event) => {
+            if (event.key !== "Tab")
+                return;
+
+            const items = focusable();
+            if (items.length === 0) {
+                event.preventDefault();
+                return;
+            }
+            const index = items.indexOf(document.activeElement);
+            if (event.shiftKey && (index <= 0)) {
+                event.preventDefault();
+                items.at(-1).focus();
+            }
+            else if (!event.shiftKey && ((index === -1) || (index === (items.length - 1)))) {
+                event.preventDefault();
+                items[0].focus();
+            }
+        };
+
+        const listening = new AbortController();
+        document.addEventListener("keydown", ((event) => onKeyDown(event)), { capture: true, signal: listening.signal });
+        return () => {
+            listening.abort();
+            if (returnTo?.isConnected)
+                returnTo.focus();
+        };
+    };
+
+    // filters reachable and activated from the keyboard
+    const keyboardItems = "ul.filterList span.link";
+
+    const initKeyboardItems = () => {
+        const mark = (container) => {
+            for (const item of container.querySelectorAll(keyboardItems)) {
+                if (!item.hasAttribute("tabindex"))
+                    item.tabIndex = 0;
+            }
+        };
+
+        mark(document);
+        // the filter lists are filled in later
+        new MutationObserver((mutations) => {
+            for (const target of new Set(mutations.map((mutation) => mutation.target)))
+                mark(target);
+        }).observe(document.getElementById("Filters"), { childList: true, subtree: true });
+        document.addEventListener("keydown", (event) => {
+            switch (event.key) {
+                case "Enter":
+                case " ":
+                    if (!event.target.matches?.(keyboardItems))
+                        break;
+
+                    event.preventDefault();
+                    event.target.click();
+                    break;
+            }
+        });
+    };
+
     /* Main window layout */
 
     // on phones and short screens the properties panel gives way until the list has this share of the page
@@ -103,6 +178,8 @@ window.qBittorrent.Responsive ??= (() => {
 
     let filtersScrim = null;
 
+    let releaseFiltersFocus = null;
+
     const openFiltersDrawer = () => {
         if (!drawerQuery.matches)
             return;
@@ -110,6 +187,7 @@ window.qBittorrent.Responsive ??= (() => {
         root.classList.add("filtersDrawerOpen");
         filtersScrim ??= addScrim(closeFiltersDrawer);
         document.getElementById("filtersButton").setAttribute("aria-expanded", "true");
+        releaseFiltersFocus ??= trapFocus(document.getElementById("Filters"));
     };
 
     const closeFiltersDrawer = () => {
@@ -120,6 +198,8 @@ window.qBittorrent.Responsive ??= (() => {
         filtersScrim?.remove();
         filtersScrim = null;
         document.getElementById("filtersButton").setAttribute("aria-expanded", "false");
+        releaseFiltersFocus?.();
+        releaseFiltersFocus = null;
     };
 
     const initFiltersDrawer = () => {
@@ -320,6 +400,7 @@ window.qBittorrent.Responsive ??= (() => {
         initFiltersDrawer();
         initWindows();
         initMenus();
+        initKeyboardItems();
     };
 
     return exports();
