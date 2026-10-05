@@ -38,6 +38,8 @@ window.qBittorrent.ColorScheme ??= (() => {
 
     const colorSchemeQuery = window.matchMedia("(prefers-color-scheme: dark)");
     const phoneQuery = window.matchMedia("(width < 760px)");
+    // touch screens and narrower screens, where the desktop layout doesn't hold
+    const relayoutQuery = window.matchMedia("(pointer: coarse), (width < 1100px)");
     const clientData = window.parent.qBittorrent.ClientData;
 
     const update = () => {
@@ -47,6 +49,8 @@ window.qBittorrent.ColorScheme ??= (() => {
         const isDark = colorSchemeQuery.matches;
         root.classList.toggle("dark", ((!validScheme && isDark) || (colorScheme === "dark")));
         root.classList.toggle("responsivePhone", phoneQuery.matches);
+        // pages laid out anew only there
+        root.classList.toggle("responsiveRelayout", relayoutQuery.matches);
     };
 
     // responsive.css follows the page's own stylesheets; this script runs in the main window and in every dialog frame
@@ -61,6 +65,7 @@ window.qBittorrent.ColorScheme ??= (() => {
 
     colorSchemeQuery.addEventListener("change", (_event) => update());
     phoneQuery.addEventListener("change", (_event) => update());
+    relayoutQuery.addEventListener("change", (_event) => update());
     // Apply immediately: framed windows already have parent's ClientData loaded;
     // main window falls back to system preference until client.js calls update() after fetch
     update();

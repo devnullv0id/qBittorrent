@@ -267,6 +267,39 @@
     }
 }
 
+/* Pages laid out anew on touch and narrow screens */
+
+/* Search: the bars take their height, the results the rest */
+:root.responsiveRelayout #searchResults {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+
+    & > * {
+        flex: none;
+    }
+
+    & > #searchResultsHeader,
+    & > #searchResultsFilters,
+    & #searchResultsHeaderContainer {
+        height: auto;
+    }
+
+    /* the plugins button's row, its height set inline */
+    & > :last-child {
+        display: flow-root;
+        height: auto !important;
+    }
+
+    & > #searchResultsTableContainer,
+    & > #searchResultsNoPlugins,
+    & > #searchResultsNoSearches {
+        flex: 1 1 0;
+        height: auto;
+        min-height: 0;
+    }
+}
+
 /* RSS on phones: feeds, articles and details stack */
 @media (width < 760px) {
     #rssView {
