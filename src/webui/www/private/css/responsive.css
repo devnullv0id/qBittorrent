@@ -807,3 +807,43 @@
         padding-left: 0;
     }
 }
+
+/* Renaming: the buttons follow the settings */
+:root.responsiveRelayout #multiRenamePage_content #operation_btns {
+    clear: left;
+    margin-bottom: 12px !important;
+    position: static !important;
+}
+
+/* Renaming on phones and short screens: everything stacks and the window scrolls */
+@media (width < 760px), (height < 620px) {
+    #multiRenamePage .mochaContentWrapper {
+        overflow-y: auto !important;
+    }
+
+    #multiRenamePage_content > div {
+        display: flex;
+        flex-direction: column;
+
+        & > div:has(> .formRow > #multirename_rememberprefs_checkbox) {
+            float: none !important;
+            height: auto !important;
+            width: auto !important;
+        }
+
+        & > #torrentFiles {
+            height: 50vh !important;
+            margin: 10px 0 !important;
+            order: 1;
+            position: static !important;
+        }
+
+        & > #operation_btns {
+            display: flow-root;
+            margin: 0 0 12px !important;
+            order: 2;
+            position: static !important;
+            width: auto !important;
+        }
+    }
+}
