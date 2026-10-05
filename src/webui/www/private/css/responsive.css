@@ -300,6 +300,34 @@
     }
 }
 
+/* phones: the General tab one label and value per row */
+@media (width < 760px) {
+    #propGeneral {
+        & table,
+        & tbody {
+            display: block;
+            width: 100% !important;
+        }
+
+        & tbody {
+            column-gap: 8px;
+            display: grid;
+            grid-template-columns: max-content minmax(0, 1fr);
+        }
+
+        & tr {
+            display: contents;
+        }
+
+        & td {
+            display: block;
+            min-width: 0;
+            overflow-wrap: anywhere;
+            width: auto; /* override style.css's 1px */
+        }
+    }
+}
+
 /* Pages laid out anew on touch and narrow screens */
 
 /* Search: the bars take their height, the results the rest */
