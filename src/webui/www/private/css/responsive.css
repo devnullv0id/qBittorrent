@@ -257,6 +257,51 @@
     }
 }
 
+/* window buttons stay in view while the page scrolls */
+:is(
+    .dialogFooter,
+    #submitbutton,
+    #RssDownloader #saveButton,
+    #preferencesPage
+        .mochaContent
+        > div:not(.PrefTab):has(> input[type="button"])
+) {
+    background-color: var(--color-background-popup);
+    bottom: 0;
+    position: sticky !important; /* override the inline positions */
+    z-index: 1;
+}
+
+/* Add Torrent: Download takes its place in the row */
+#submitbutton > div:has(> button[type="submit"]) {
+    margin: 0 auto;
+    position: static !important;
+    transform: none !important;
+}
+
+/* Add Torrent's buttons share the row on phones */
+:root.responsivePhone {
+    & #submitbutton {
+        flex-wrap: wrap;
+        gap: 8px;
+
+        & > div:has(> button[type="submit"]),
+        & > #saveTorrent:not(.invisible) {
+            flex: 1 1 auto;
+            margin: 0;
+        }
+
+        & > div > button {
+            width: 100%;
+        }
+
+        /* spacer */
+        & > span:not([id]) {
+            display: none;
+        }
+    }
+}
+
 /* full-screen windows on phones */
 .mocha.responsiveFullScreen {
     border-radius: 0;
@@ -867,11 +912,15 @@
         }
 
         & > #operation_btns {
+            background-color: var(--color-background-popup);
+            bottom: 0;
             display: flow-root;
-            margin: 0 0 12px !important;
+            margin: 0 !important;
             order: 2;
-            position: static !important;
+            padding-bottom: 12px;
+            position: sticky !important;
             width: auto !important;
+            z-index: 1;
         }
     }
 }
