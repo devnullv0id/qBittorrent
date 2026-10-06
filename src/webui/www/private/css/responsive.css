@@ -653,9 +653,9 @@ body:not(:has(#desktop)) {
     }
 }
 
-/* phones: the General tab one label and value per row */
+/* General tab: one label and value per row on phones */
 @media (width < 760px) {
-    #propGeneral {
+    :root:not(.modern) #propGeneral {
         & table,
         & tbody {
             display: block;

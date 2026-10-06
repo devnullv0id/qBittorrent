@@ -197,7 +197,8 @@
         .mochaCloseButton,
         .mochaMinimizeButton,
         .mochaMaximizeButton,
-        .categoryToggle
+        .categoryToggle,
+        .modernSheetBack
     ) {
     align-items: center;
     background-color: var(--color-background-default);
@@ -3434,6 +3435,395 @@
 
         &::before {
             background-color: var(--color-background-blue);
+        }
+    }
+}
+
+/* Torrent cards and the properties sheet */
+
+@keyframes modern-sheet {
+    from {
+        opacity: 0;
+        transform: translateY(24px);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@media (width < 760px) {
+    :root.modern #propertiesPanel_wrapper:not(.modernSheet),
+    :root.modern #transferList_handle {
+        display: none;
+    }
+
+    :root.modern #transferList {
+        height: 100% !important;
+    }
+
+    :root.modern #transferList_wrapper {
+        height: 100%;
+    }
+
+    /* General tab on phones */
+    :root.modern #propGeneral {
+        padding: 8px 14px 16px;
+
+        & fieldset {
+            margin-top: 34px;
+            padding: 0 14px;
+        }
+
+        & table,
+        & tbody {
+            display: block;
+            width: 100% !important;
+        }
+
+        & tbody {
+            column-gap: 0; /* a gap would break the divider */
+            display: grid;
+            grid-template-columns: minmax(7.5em, auto) minmax(0, 1fr);
+        }
+
+        & tr {
+            display: contents;
+        }
+
+        & td {
+            border-bottom: 1px solid var(--color-border-divider);
+            display: block;
+            line-height: 18px;
+            min-width: 0;
+            overflow-wrap: anywhere;
+            padding: 10px 0 !important;
+        }
+
+        & td:not(.generalLabel) {
+            font-variant-numeric: tabular-nums;
+            padding-left: 16px !important;
+            text-align: right;
+        }
+
+        & tbody > tr:last-child > td {
+            border-bottom: 0;
+        }
+
+        & td.generalLabel {
+            padding-right: 0 !important;
+            text-align: left;
+            white-space: nowrap;
+            width: auto !important; /* override style.css's 1px */
+        }
+    }
+}
+
+@media (540px <= width < 760px) {
+    :root.modern #propGeneral tbody {
+        grid-template-columns: repeat(2, minmax(7.5em, auto) minmax(0, 1fr));
+    }
+
+    /* hashes, save path, comment: full row */
+    :root.modern #propGeneral td[colspan] {
+        grid-column: 2 / -1;
+    }
+}
+
+@media (width < 760px) {
+    /* properties sheet header */
+    :root.modern #propertiesPanel_wrapper.modernSheet #propertiesPanel_header {
+        align-items: stretch;
+        cursor: default;
+        display: flex !important;
+        flex: none;
+        flex-direction: column;
+        height: auto !important;
+        padding: env(safe-area-inset-top) 0 0;
+
+        & #propertiesPanel_headerCollapseBox {
+            display: none;
+        }
+
+        & .modernSheetBar {
+            align-items: center;
+            display: flex;
+            gap: 4px;
+            min-height: 52px;
+            padding: 0 12px 0 4px;
+        }
+
+        & .modernSheetBack {
+            background: var(--modern-chevron-down) center / 22px no-repeat
+                transparent;
+            border: 0;
+            border-radius: var(--modern-radius-pill);
+            flex: none;
+            height: 44px;
+            min-height: 44px;
+            padding: 0;
+            transform: rotate(90deg);
+            width: 44px;
+        }
+
+        & .modernSheetTitle {
+            flex: 1 1 auto;
+            font-size: 15px;
+            font-weight: 600;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        & .panel-headerContent {
+            border-top: 1px solid var(--color-border-divider);
+            width: 100%;
+        }
+
+        & .tab-menu {
+            gap: 2px;
+            overflow-x: visible;
+            padding: 4px 6px;
+            scroll-padding-inline: 12px;
+            scrollbar-width: none;
+        }
+
+        /* all five tabs fit */
+
+        & .tab-menu li {
+            flex: 1 1 0;
+            min-width: 0;
+        }
+
+        & .tab-menu li a {
+            align-items: center;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            font-size: 11px;
+            gap: 3px;
+            justify-content: center;
+            line-height: 14px;
+            min-height: 48px;
+            overflow: hidden;
+            padding: 4px 2px;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+
+            & img {
+                height: 18px;
+                margin: 0;
+                width: 18px;
+            }
+        }
+
+        & .toolbarTabs {
+            display: flex;
+            flex-direction: column;
+        }
+
+        & #torrentFilesFilterToolbar {
+            float: none;
+            margin: 0;
+            order: 2;
+            padding: 0 12px 8px;
+
+            & input {
+                box-sizing: border-box;
+                width: 100%;
+            }
+        }
+    }
+
+    /* half height */
+    :root.modern #propertiesPanel_wrapper.modernSheet.modernSheetHalf {
+        border-radius: 14px 14px 0 0;
+        /* the second shadow dims the list */
+        box-shadow:
+            0 -8px 28px hsl(0deg 0% 0% / 35%),
+            0 0 0 100vmax var(--color-background-scrim);
+        overflow: hidden;
+        top: var(--modern-sheet-top, 50dvh);
+
+        & #propertiesPanel_header {
+            border-radius: 14px 14px 0 0;
+            cursor: grab !important;
+            touch-action: none;
+        }
+
+        & #propertiesPanel_header::before {
+            align-self: center;
+            background-color: var(--color-text-muted);
+            border-radius: var(--modern-radius-pill);
+            content: "";
+            flex: none;
+            height: 4px;
+            margin-top: 8px;
+            opacity: 0.6;
+            width: 36px;
+        }
+    }
+
+    :root.modern #propertiesPanel_wrapper.modernSheet {
+        animation: modern-sheet 0.18s ease-out;
+        background-color: var(--color-background-default);
+        display: flex;
+        flex-direction: column;
+        inset: 0;
+        padding-bottom: env(safe-area-inset-bottom);
+        position: fixed;
+        transition:
+            top 0.25s ease,
+            border-radius 0.25s ease;
+        z-index: 90; /* below the windows (from 100) */
+
+        & #propertiesPanel {
+            flex: 1 1 auto;
+            height: auto !important;
+        }
+    }
+
+    :root.modern #propertiesPanel_wrapper.modernSheet.modernSheetDragging {
+        transition: none;
+        user-select: none;
+    }
+
+    :root.modern #torrentsTableFixedHeaderDiv {
+        display: none;
+    }
+
+    /* Torrent cards */
+    :root.modern #transferList #torrentsTableDiv {
+        & thead {
+            display: none;
+        }
+
+        & table,
+        & tbody {
+            display: block;
+            width: 100% !important;
+        }
+
+        /* fixed height, also set in dynamicTable.js */
+        & tbody tr {
+            align-content: center;
+            border-bottom: 1px solid var(--color-border-divider);
+            box-sizing: border-box;
+            display: grid;
+            gap: 0 14px;
+            grid-template-areas:
+                "queue name name name"
+                "bar bar bar bar"
+                "status status status eta"
+                "size size dl up";
+            grid-template-columns: auto minmax(0, 1fr) auto auto;
+            height: var(--modern-card-height) !important;
+            left: 0;
+            overflow: hidden;
+            padding: 0 16px;
+            right: 0;
+            width: auto !important;
+        }
+
+        & td {
+            border: 0;
+            color: var(--color-text-muted);
+            display: none;
+            font-size: 12px;
+            font-variant-numeric: tabular-nums;
+            height: auto !important;
+            line-height: 18px;
+            max-width: none !important; /* override the inline widths */
+            min-width: 0;
+            overflow: hidden;
+            padding: 0 0 1px !important;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            width: auto !important;
+        }
+
+        & tr.selected td {
+            color: inherit;
+        }
+
+        & td[data-col="name"] {
+            color: var(--color-text-default);
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            grid-area: name;
+            line-height: 20px;
+        }
+        /* queue position before the name */
+        & td[data-col="priority"] {
+            color: var(--color-text-muted);
+            display: block;
+            font-size: 12px;
+            grid-area: queue;
+            line-height: 20px;
+            margin-right: -6px;
+            min-width: 1.2em;
+        }
+
+        & td[data-col="progress"] {
+            display: block;
+            grid-area: bar;
+            margin: 6px 0 7px;
+        }
+
+        & td[data-col="progress"] progress-bar {
+            --progress-bar-height: 18px;
+
+            font-size: 11px;
+        }
+
+        & td[data-col="status"] {
+            color: var(--color-text-default);
+            display: block;
+            grid-area: status;
+        }
+
+        & td[data-col="eta"] {
+            display: block;
+            grid-area: eta;
+            text-align: right;
+        }
+
+        & td[data-col="size"] {
+            display: block;
+            grid-area: size;
+        }
+
+        & td[data-col="dlspeed"] {
+            display: block;
+            grid-area: dl;
+            text-align: right;
+        }
+
+        & td[data-col="upspeed"] {
+            display: block;
+            grid-area: up;
+            text-align: right;
+        }
+
+        & td[data-col="dlspeed"]::before {
+            content: "↓ ";
+        }
+
+        & td[data-col="upspeed"]::before {
+            content: "↑ ";
+        }
+
+        & td[data-col="eta"]::before {
+            content: attr(data-label) " ";
+            opacity: 0.8;
+        }
+
+        & tr.selected td[data-col="name"],
+        & tr.selected td[data-col="status"] {
+            color: inherit;
         }
     }
 }

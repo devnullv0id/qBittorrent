@@ -43,6 +43,7 @@ window.qBittorrent.Responsive ??= (() => {
     const smallQuery = window.matchMedia("(width < 760px), (height < 620px)");
 
     const root = document.documentElement;
+    const localPreferences = new window.qBittorrent.LocalPreferences.LocalPreferences();
     const isModern = () => root.classList.contains("modern");
 
     const addScrim = (onClick, zIndex) => {
@@ -55,7 +56,7 @@ window.qBittorrent.Responsive ??= (() => {
         return scrim;
     };
 
-    // client.js builds the transfer list after this script starts
+    // for the elements client.js creates later
     const whenElement = (id) => new Promise((resolve) => {
         const found = document.getElementById(id);
         if (found !== null) {
@@ -975,6 +976,269 @@ window.qBittorrent.Responsive ??= (() => {
         });
     };
 
+    /* Modern torrent cards and properties sheet */
+
+    // the properties sheet opens at half height and grows to full screen
+    let sheetWired = false;
+    // a collapsed panel opened for the sheet
+    let collapseAfterSheet = false;
+
+    const openHalfSheet = (wrapper) => {
+        wrapper.style.removeProperty("--modern-sheet-top");
+        wrapper.classList.add("modernSheetHalf");
+        if (sheetWired)
+            return;
+
+        sheetWired = true;
+
+        const isOpen = () => wrapper.classList.contains("modernSheet");
+        const isHalf = () => wrapper.classList.contains("modernSheetHalf");
+        const close = () => wrapper.classList.remove("modernSheet");
+        const toFull = () => wrapper.classList.remove("modernSheetHalf");
+        const toHalf = () => {
+            wrapper.style.removeProperty("--modern-sheet-top");
+            wrapper.classList.add("modernSheetHalf");
+        };
+
+        // closing clears the state; changing classes would trigger this again
+        new MutationObserver(() => {
+            if (isOpen())
+                return;
+
+            for (const cls of ["modernSheetHalf", "modernSheetDragging"]) {
+                if (wrapper.classList.contains(cls))
+                    wrapper.classList.remove(cls);
+            }
+            if (wrapper.style.getPropertyValue("--modern-sheet-top"))
+                wrapper.style.removeProperty("--modern-sheet-top");
+            if (collapseAfterSheet) {
+                collapseAfterSheet = false;
+                document.getElementById("propertiesPanel_collapseToggle").click();
+            }
+        }).observe(wrapper, { attributes: true, attributeFilter: ["class"] });
+
+        // a tap outside it (not on a menu, scrim or window) closes it without selecting a torrent
+        let swallowClick = false;
+        document.addEventListener("pointerdown", (event) => {
+            if (!isOpen() || !isHalf() || wrapper.contains(event.target) || event.target.closest(".contextMenu, .responsiveScrim, .mocha"))
+                return;
+
+            swallowClick = true;
+            setTimeout(() => {
+                swallowClick = false;
+            }, 400);
+            event.preventDefault();
+            event.stopPropagation();
+            close();
+        }, true);
+        document.addEventListener("click", (event) => {
+            if (!swallowClick)
+                return;
+
+            swallowClick = false;
+            event.preventDefault();
+            event.stopPropagation();
+        }, true);
+
+        // dragging the header resizes the sheet
+        const header = document.getElementById("propertiesPanel_header");
+        let drag = null;
+        header.addEventListener("pointerdown", (event) => {
+            if (!isOpen() || event.target.closest("button, input") || (event.button > 0))
+                return;
+
+            drag = { id: event.pointerId, y0: event.clientY, top0: wrapper.getBoundingClientRect().top, moved: false };
+        });
+        header.addEventListener("pointermove", (event) => {
+            if ((drag === null) || (event.pointerId !== drag.id))
+                return;
+
+            const dy = event.clientY - drag.y0;
+            if (!drag.moved) {
+                if (Math.abs(dy) < 6)
+                    return;
+
+                drag.moved = true;
+                header.setPointerCapture(drag.id);
+                wrapper.classList.add("modernSheetHalf", "modernSheetDragging");
+            }
+            const top = Math.min(Math.max(drag.top0 + dy, 0), window.innerHeight - 80);
+            wrapper.style.setProperty("--modern-sheet-top", `${top}px`);
+        });
+        const endDrag = (event) => {
+            if ((drag === null) || (event.pointerId !== drag.id))
+                return;
+
+            const moved = drag.moved;
+            drag = null;
+            if (!moved)
+                return;
+
+            wrapper.classList.remove("modernSheetDragging");
+            const top = wrapper.getBoundingClientRect().top;
+            if (top < (window.innerHeight * 0.12))
+                toFull();
+            else if (top > (window.innerHeight * 0.8))
+                close();
+            // the click ending a mouse drag (a finger's drag and a cancel end without one)
+            if ((event.type === "pointerup") && (event.pointerType !== "touch")) {
+                header.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                }, { capture: true, once: true });
+            }
+        };
+
+        header.addEventListener("pointerup", (event) => endDrag(event));
+        header.addEventListener("pointercancel", (event) => endDrag(event));
+
+        // one step per gesture
+        let lockedUntil = 0;
+        const step = (fn) => {
+            if (performance.now() < lockedUntil)
+                return;
+
+            lockedUntil = performance.now() + 450;
+            fn();
+        };
+
+        const scrollerOf = (target) => target.closest?.(".dynamicTableDiv") ?? document.getElementById("propertiesPanel");
+        const atTop = (target) => (scrollerOf(target)?.scrollTop ?? 0) <= 0;
+        const shrinkOrClose = () => step(() => (isHalf() ? close() : toHalf()));
+
+        wrapper.addEventListener("scroll", (event) => {
+            if (isHalf() && !wrapper.classList.contains("modernSheetDragging") && (event.target.scrollTop > 4))
+                step(toFull);
+        }, true);
+        // only a gesture's first wheel event counts
+        let lastWheel = 0;
+        wrapper.addEventListener("wheel", (event) => {
+            const now = performance.now();
+            const newGesture = (now - lastWheel) > 250;
+            lastWheel = now;
+            if (!newGesture)
+                return;
+
+            if ((event.deltaY > 0) && isHalf())
+                step(toFull);
+            else if ((event.deltaY < 0) && atTop(event.target))
+                shrinkOrClose();
+        }, { passive: true });
+        let startY = null;
+        let startAtTop = false;
+        wrapper.addEventListener("touchstart", (event) => {
+            startY = header.contains(event.target) ? null : event.touches[0].clientY;
+            startAtTop = atTop(event.target);
+        }, { passive: true });
+        wrapper.addEventListener("touchmove", (event) => {
+            if (startY === null)
+                return;
+
+            const dy = event.touches[0].clientY - startY;
+            if ((dy < -12) && isHalf()) {
+                step(toFull);
+                startY = null;
+            }
+            else if ((dy > 60) && startAtTop) {
+                shrinkOrClose();
+                startY = null;
+            }
+        }, { passive: true });
+        wrapper.addEventListener("touchend", (event) => {
+            startY = null;
+        });
+    };
+
+    // show a collapsed panel in the sheet, keeping the stored state
+    const expandPanelForSheet = () => {
+        const toggle = document.getElementById("propertiesPanel_collapseToggle");
+        if (!toggle?.classList.contains("panel-expand"))
+            return;
+
+        const saved = localPreferences.get("properties_panel_collapsed");
+        toggle.click();
+        collapseAfterSheet = true;
+        if (saved !== null)
+            localPreferences.set("properties_panel_collapsed", saved);
+    };
+
+    const addSheetBar = (wrapper) => {
+        const header = wrapper.querySelector(".panel-header");
+        if (header.querySelector(".modernSheetBar"))
+            return;
+
+        const bar = document.createElement("div");
+        bar.className = "modernSheetBar";
+        const back = document.createElement("button");
+        back.type = "button";
+        back.className = "modernSheetBack";
+        back.title = "QBT_TR(Back)QBT_TR[CONTEXT=MainWindow]";
+        back.setAttribute("aria-label", back.title);
+        back.addEventListener("click", (event) => wrapper.classList.remove("modernSheet"));
+        const title = document.createElement("span");
+        title.className = "modernSheetTitle";
+        bar.append(back, title);
+        header.prepend(bar);
+    };
+
+    const initTorrentCards = async () => {
+        // also used in modern.css
+        root.style.setProperty("--modern-card-height", `${window.qBittorrent.DynamicTable.TorrentsTable.MODERN_CARD_HEIGHT}px`);
+        const tableDiv = await whenElement("torrentsTableDiv");
+        // the cells tell the card layout which column they are
+        const tag = () => {
+            if (!phoneQuery.matches)
+                return;
+
+            const headers = [...document.querySelectorAll("#torrentsTableFixedHeaderDiv th")];
+            const names = headers.map((th) => (th.className.match(/column_(\S+)/) ?? [])[1] ?? "");
+            const labels = headers.map((th) => th.textContent.trim());
+            for (const tr of tableDiv.querySelectorAll("tbody tr")) {
+                for (const [i, td] of [...tr.children].entries()) {
+                    if (td.dataset.col !== names[i])
+                        td.dataset.col = names[i];
+                    if (td.dataset.label !== labels[i])
+                        td.dataset.label = labels[i];
+                }
+            }
+        };
+
+        new MutationObserver(tag).observe(tableDiv, { childList: true, subtree: true });
+        // rows and cards differ in height
+        phoneQuery.addEventListener("change", (event) => {
+            window.torrentsTable.rerender();
+            tag();
+        });
+        tag();
+
+        // tapping a card opens its properties as a sheet
+        const wrapper = await whenElement("propertiesPanel_wrapper");
+        tableDiv.addEventListener("click", (event) => {
+            const tr = event.target.closest("tbody tr");
+            if (!phoneQuery.matches || (tr === null))
+                return;
+
+            addSheetBar(wrapper);
+            if (!wrapper.classList.contains("modernSheet"))
+                openHalfSheet(wrapper);
+            wrapper.classList.add("modernSheet");
+            wrapper.querySelector(".modernSheetTitle").textContent = tr.querySelector("td[data-col='name']")?.textContent.trim() ?? "";
+            expandPanelForSheet();
+        });
+        // tapping the selected tab mustn't collapse the panel
+        document.addEventListener("click", (event) => {
+            if (wrapper.classList.contains("modernSheet") && event.target.closest("#propertiesTabs li.selected"))
+                event.stopPropagation();
+        }, true);
+        document.addEventListener("keydown", (event) => {
+            switch (event.key) {
+                case "Escape":
+                    wrapper.classList.remove("modernSheet");
+                    break;
+            }
+        });
+    };
+
     /* Context menus */
 
     // menus taller than the screen scroll; fitted after each input
@@ -1025,6 +1289,7 @@ window.qBittorrent.Responsive ??= (() => {
 
         initNavbar();
         initPhoneToolbar();
+        initTorrentCards();
     };
 
     return exports();
