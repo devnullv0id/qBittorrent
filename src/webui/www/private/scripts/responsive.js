@@ -51,7 +51,8 @@ window.qBittorrent.Responsive ??= (() => {
         scrim.className = "responsiveScrim";
         if (zIndex !== undefined)
             scrim.style.zIndex = zIndex;
-        scrim.addEventListener("click", (_event) => onClick());
+        if (onClick !== null)
+            scrim.addEventListener("click", (_event) => onClick());
         document.body.append(scrim);
         return scrim;
     };
@@ -1241,11 +1242,28 @@ window.qBittorrent.Responsive ??= (() => {
 
     /* Context menus */
 
-    // menus taller than the screen scroll; fitted after each input
+    // menus taller than the screen scroll; in Modern, menus open as sheets on touch, phone and short screens
+    const sheetQuery = window.matchMedia("(pointer: coarse), (width < 760px), (height < 620px)");
+    const menuScrims = new Map();
+
     const syncMenus = () => {
         for (const menu of document.querySelectorAll(".contextMenu")) {
             const visible = menu.classList.contains("visible");
-            const scrolling = visible && (menu.scrollHeight > window.innerHeight);
+            const sheet = visible && isModern() && sheetQuery.matches;
+            if (sheet !== menu.classList.contains("modernSheet")) {
+                menu.classList.toggle("modernSheet", sheet);
+                menuScrims.get(menu)?.remove();
+                menuScrims.delete(menu);
+                if (sheet) {
+                    // a tap on the scrim closes the menu
+                    menuScrims.set(menu, addScrim(null, 9790));
+                }
+                else {
+                    for (const li of menu.querySelectorAll("li.modernExpanded"))
+                        li.classList.remove("modernExpanded");
+                }
+            }
+            const scrolling = visible && !sheet && (menu.scrollHeight > window.innerHeight);
             if (scrolling !== menu.classList.contains("responsiveScrollingMenu"))
                 menu.classList.toggle("responsiveScrollingMenu", scrolling);
         }
@@ -1256,6 +1274,17 @@ window.qBittorrent.Responsive ??= (() => {
         const scheduleSync = () => requestAnimationFrame(syncMenus);
         for (const type of ["contextmenu", "click", "touchend", "keydown"])
             document.addEventListener(type, (_event) => scheduleSync(), true);
+
+        // submenus open inline in sheets
+        document.addEventListener("click", (event) => {
+            const arrow = event.target.closest(".contextMenu.modernSheet a.arrow-right");
+            if (arrow === null)
+                return;
+
+            event.preventDefault();
+            event.stopPropagation();
+            arrow.parentElement.classList.toggle("modernExpanded");
+        }, true);
     };
 
     /* Options */

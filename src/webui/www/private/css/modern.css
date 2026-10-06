@@ -3053,12 +3053,9 @@
     }
 }
 
+/* always a sheet */
 :root.modern #toolbarOverflowMenu.visible {
     display: block;
-    position: absolute;
-    right: 8px;
-    top: 100%;
-    z-index: 9790;
 
     & a {
         align-items: center;
@@ -3825,5 +3822,41 @@
         & tr.selected td[data-col="status"] {
             color: inherit;
         }
+    }
+}
+
+/* Context menus as sheets */
+:root.modern .contextMenu.modernSheet {
+    animation: modern-sheet 0.18s ease-out;
+    border-radius: 14px 14px 0 0;
+    bottom: 0;
+    left: 0 !important;
+    max-height: 82dvh;
+    overflow-y: auto;
+    padding-bottom: calc(8px + env(safe-area-inset-bottom));
+    position: fixed !important; /* override the inline position */
+    right: 0;
+    top: auto !important;
+    width: auto;
+    z-index: 9800 !important;
+
+    /* a long label wraps: the sheet is as wide as the screen */
+    & li a {
+        min-height: 46px;
+        white-space: normal;
+    }
+
+    & li ul {
+        border: 0;
+        box-shadow: none;
+        margin: 0 !important; /* override the inline margins */
+        max-height: none !important;
+        padding-left: 24px;
+        position: static;
+        width: auto;
+    }
+
+    & li:not(.modernExpanded) > ul {
+        display: none;
     }
 }
