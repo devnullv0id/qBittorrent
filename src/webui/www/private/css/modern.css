@@ -3316,14 +3316,9 @@
         width: 100%;
     }
 
+    /* "Filter by" moves into the Sort sheet */
     :root.modern #torrentsFilterSelect {
-        border-left-color: var(--color-border-divider);
-        border-radius: 0 var(--modern-radius-pill) var(--modern-radius-pill) 0;
-        flex: 0 1 108px;
-        height: 36px;
-        margin: 0;
-        min-width: 84px;
-        width: auto;
+        display: none;
     }
 
     :root.modern #torrentsFilterInput {
@@ -3401,13 +3396,12 @@
         width: var(--modern-phone-filter-height);
     }
 
-    /* the regex toggle inside the joined field */
+    /* the regex toggle ends the joined field */
     :root.modern #torrentsFilterToolbar label[for="torrentsFilterRegexBox"] {
         background-color: var(--color-background-primary);
         border: 1px solid var(--color-border-default);
         border-left-color: var(--color-border-divider);
-        border-radius: 0 !important;
-        border-right: 0;
+        border-radius: 0 var(--modern-radius-pill) var(--modern-radius-pill) 0;
         box-sizing: border-box;
         flex: none;
         height: var(--modern-phone-filter-height);

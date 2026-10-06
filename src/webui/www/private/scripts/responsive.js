@@ -1613,9 +1613,23 @@ window.qBittorrent.Responsive ??= (() => {
                 return li;
             });
 
+            // "Filter by", which has no room on phones
+            const filterSelect = document.getElementById("torrentsFilterSelect");
+            const filterItems = [...filterSelect.options].map((option) => {
+                const li = createMenuItem("menuitemradio", option.textContent, () => {
+                    filterSelect.value = option.value;
+                    // filter again, as typing in the field does
+                    document.getElementById("torrentsFilterInput").dispatchEvent(new CustomEvent("input"));
+                    render();
+                });
+                li.firstElementChild.setAttribute("aria-checked", option.selected.toString());
+                return li;
+            });
+            const filterHeading = document.querySelector("label[for='torrentsFilterSelect']").textContent.replace(/[:\uFF1A]\s*$/, "");
+
             // the item chosen from the keyboard keeps the focus, in its new copy
             const focused = [...menu.querySelectorAll("a")].indexOf(document.activeElement);
-            menu.replaceChildren(createHeading("QBT_TR(Sort by)QBT_TR[CONTEXT=MainWindow]"), ...sortItems, fold, ...toggles);
+            menu.replaceChildren(createHeading("QBT_TR(Sort by)QBT_TR[CONTEXT=MainWindow]"), ...sortItems, createHeading(filterHeading), ...filterItems, fold, ...toggles);
             if (focused >= 0)
                 menu.querySelectorAll("a")[focused]?.focus();
         };
