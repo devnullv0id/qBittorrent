@@ -182,6 +182,11 @@ body:not(:has(#desktop)) {
     display: none;
 }
 
+/* Modern only */
+:root:not(.modern) .modernOnly {
+    display: none !important;
+}
+
 /* Typography */
 
 h2,

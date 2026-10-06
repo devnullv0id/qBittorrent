@@ -19,7 +19,7 @@
     <div>
         <input type="text" id="newPluginPath" placeholder="QBT_TR(URL or local directory)QBT_TR[CONTEXT=PluginSourceDlg]" autocorrect="off" autocapitalize="none">
         <div class="dialogFooter" style="margin-top: 10px; text-align: center;">
-            <button type="button" id="newPluginCancel" onclick="window.qBittorrent.Client.closeWindow(document.getElementById('installSearchPlugin'));">QBT_TR(Cancel)QBT_TR[CONTEXT=PluginSourceDlg]</button>
+            <button type="button" id="newPluginCancel" class="dialogCancel" onclick="window.qBittorrent.Client.closeWindow(document.getElementById('installSearchPlugin'));">QBT_TR(Cancel)QBT_TR[CONTEXT=PluginSourceDlg]</button>
             <button type="button" id="newPluginOk" class="primary" onclick="qBittorrent.InstallSearchPlugin.newPluginOk();">QBT_TR(Ok)QBT_TR[CONTEXT=PluginSourceDlg]</button>
         </div>
     </div>
