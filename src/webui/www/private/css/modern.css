@@ -3253,7 +3253,10 @@
 
     &:has(> td:first-child > input[type="checkbox"]:not(:checked))
         > td:last-child {
-        display: none;
+        height: 0;
+        opacity: 0;
+        padding-block: 0;
+        visibility: hidden;
     }
 }
 
@@ -3350,11 +3353,14 @@
         }
     }
 
+    /* the field slides with its switch (responsive.js) */
     & tr > td:last-child:not(:first-child) {
         border-top: 0;
         box-sizing: border-box;
         display: flex;
         flex: 1 1 100%;
+        overflow: clip;
+        overflow-clip-margin: 4px;
         padding-top: 0;
         width: auto !important;
 
@@ -3367,7 +3373,10 @@
     &
         tr:has(> td:first-child > input[type="checkbox"]:not(:checked))
         > td:last-child:not(:first-child) {
-        display: none;
+        height: 0;
+        opacity: 0;
+        padding-block: 0;
+        visibility: hidden;
     }
 }
 

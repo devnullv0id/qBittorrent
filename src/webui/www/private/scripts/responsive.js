@@ -1934,6 +1934,34 @@ window.qBittorrent.Responsive ??= (() => {
         split();
     };
 
+    // what a switch shows or hides in its table slides open and shut; the sizes before and after are measured, as
+    // not every browser animates a height to auto
+    const slideWithSwitches = (page) => {
+        const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+        const measure = (element) => {
+            const style = getComputedStyle(element);
+            return { height: style.height, opacity: style.opacity, paddingBottom: style.paddingBottom, paddingTop: style.paddingTop, visibility: style.visibility };
+        };
+
+        page.addEventListener("change", (event) => {
+            const box = event.target;
+            const table = box.closest("table");
+            if (!box.matches("input[type='checkbox']") || (table === null) || reducedMotion.matches)
+                return;
+
+            const elements = [...table.querySelectorAll("tr, td")];
+            // before: the switch turned back for a moment
+            box.checked = !box.checked;
+            const before = elements.map(measure);
+            box.checked = !box.checked;
+            for (const [i, element] of elements.entries()) {
+                const after = measure(element);
+                if ((after.visibility !== before[i].visibility) && (after.height !== before[i].height))
+                    element.animate([before[i], after], { duration: 200, easing: "ease" });
+            }
+        });
+    };
+
     const initPreferences = () => {
         // the Options window is built on each opening, its pages loaded after
         new MutationObserver((mutations) => {
@@ -1952,6 +1980,7 @@ window.qBittorrent.Responsive ??= (() => {
                         setupPrefsMore(tabs);
                         labelWatchedFolders(watchedFolders);
                         splitWideSettings(node);
+                        slideWithSwitches(node);
                     });
                     tabsObserver.observe(node, { childList: true, subtree: true });
                 }
