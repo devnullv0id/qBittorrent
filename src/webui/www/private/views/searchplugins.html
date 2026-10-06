@@ -36,6 +36,12 @@
 <div id="searchPluginsContainer">
     <h2>QBT_TR(Installed search plugins:)QBT_TR[CONTEXT=PluginSelectDlg]</h2>
 
+    <div id="searchPluginsActions" class="modernOnly">
+        <button type="button" id="searchPluginsEnableButton" disabled>QBT_TR(Enable)QBT_TR[CONTEXT=PluginSelectDlg]</button>
+        <button type="button" id="searchPluginsDisableButton" disabled>QBT_TR(Disable)QBT_TR[CONTEXT=PluginSelectDlg]</button>
+        <button type="button" id="searchPluginsUninstallButton" disabled>QBT_TR(Uninstall)QBT_TR[CONTEXT=PluginSelectDlg]</button>
+    </div>
+
     <div id="searchPluginsTable">
         <div id="searchPluginsTableDiv" class="dynamicTableDiv">
             <div id="searchPluginsTableFixedHeaderDiv" class="dynamicTableFixedHeaderDiv">
@@ -95,6 +101,11 @@
             searchPluginsTable.setup("searchPluginsTableDiv", "searchPluginsTableFixedHeaderDiv", searchPluginsTableContextMenu);
 
             searchPluginsTable.dynamicTableDiv.addEventListener("dblclick", (e) => { enablePlugin(); });
+            // Modern: the menu's actions as buttons for the selected plugins
+            searchPluginsTable.onSelectedRowChanged = updateActions;
+            document.getElementById("searchPluginsEnableButton").addEventListener("click", (event) => setPluginsEnabled(true));
+            document.getElementById("searchPluginsDisableButton").addEventListener("click", (event) => setPluginsEnabled(false));
+            document.getElementById("searchPluginsUninstallButton").addEventListener("click", (_event) => uninstallPlugin());
 
             updateTable();
         };
@@ -140,6 +151,28 @@
             });
         };
 
+        const setPluginsEnabled = (enable) => {
+            fetch("api/v2/search/enablePlugin", {
+                method: "POST",
+                body: new URLSearchParams({
+                    names: searchPluginsTable.selectedRowsIds().join("|"),
+                    enable: enable
+                })
+            });
+        };
+
+        // each button only where it changes something
+        const updateActions = () => {
+            // search.js updates the table after the window closed as well
+            if (document.getElementById("searchPluginsEnableButton") === null)
+                return;
+
+            const plugins = searchPluginsTable.selectedRowsIds().map((name) => window.qBittorrent.Search.getPlugin(name)).filter(Boolean);
+            document.getElementById("searchPluginsEnableButton").disabled = !plugins.some((plugin) => !plugin.enabled);
+            document.getElementById("searchPluginsDisableButton").disabled = !plugins.some((plugin) => plugin.enabled);
+            document.getElementById("searchPluginsUninstallButton").disabled = (plugins.length === 0);
+        };
+
         const checkForUpdates = () => {
             fetch("api/v2/search/updatePlugins", {
                 method: "POST"
@@ -160,6 +193,7 @@
             }
 
             searchPluginsTable.updateTable();
+            updateActions();
         };
 
         return exports();

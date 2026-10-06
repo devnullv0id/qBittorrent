@@ -2208,6 +2208,119 @@
     }
 }
 
+/* Search plugins */
+:root.modern .mocha #searchPluginsContainer {
+    /* the list scrolls, the window doesn't grow */
+    overflow: visible;
+
+    & > h2 {
+        color: var(--color-text-muted);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        margin: 2px 0 8px;
+        text-transform: uppercase;
+    }
+
+    & > #searchPluginsActions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 8px;
+
+        & > button {
+            padding: 3px 14px;
+        }
+    }
+
+    & > #searchPluginsTable {
+        border: 1px solid var(--color-border-default);
+        border-radius: var(--modern-radius-card);
+        box-sizing: border-box;
+        overflow: hidden;
+    }
+
+    & > span:first-of-type {
+        background-color: color-mix(
+            in srgb,
+            var(--color-text-orange) 10%,
+            transparent
+        );
+        border: 1px solid
+            color-mix(in srgb, var(--color-text-orange) 40%, transparent);
+        border-radius: var(--modern-radius-card);
+        margin-top: 12px;
+        padding: 8px 12px;
+    }
+
+    & > span:nth-of-type(2) {
+        color: var(--color-text-muted);
+        font-style: normal !important;
+        margin-top: 8px;
+    }
+
+    & > div:last-child {
+        border-top: 1px solid var(--color-border-divider);
+        margin-top: 12px !important;
+        padding-top: 12px;
+
+        & > button {
+            flex: none;
+            min-width: 96px;
+            padding: 3px 14px;
+        }
+
+        & > button:first-child {
+            background-color: var(--color-background-blue);
+            border-color: var(--color-background-blue);
+            color: var(--color-text-white);
+            font-weight: 600;
+        }
+
+        & > button:last-child {
+            margin-left: auto;
+        }
+    }
+}
+
+@media (width >= 760px) {
+    :root.modern .mocha #searchPluginsContainer {
+        height: auto;
+
+        & > #searchPluginsTable {
+            flex: none;
+            height: 200px;
+        }
+    }
+}
+
+/* a screen too short for the page (a landscape phone): it scrolls in its window rather than being cut off */
+:root.modern .mocha #searchPlugins_contentWrapper {
+    overflow-y: auto !important; /* override Mocha's inline overflow */
+}
+
+/* phones: one button per row */
+@media (width < 760px) {
+    :root.modern .mocha #searchPluginsContainer > div:last-child > button {
+        flex: 1 1 100%;
+        margin-left: 0;
+    }
+}
+
+/* Install plugin */
+:root.modern .mocha #installSearchPluginContainer {
+    margin: 14px 16px;
+
+    & > label {
+        display: block;
+        margin-bottom: 6px;
+    }
+
+    & #newPluginPath {
+        box-sizing: border-box;
+    }
+}
+
 :root.modern #searchResultsNoPlugins,
 :root.modern #searchResultsNoSearches,
 :root.modern #torrentCreatorEmpty {
