@@ -663,7 +663,8 @@ window.qBittorrent.Responsive ??= (() => {
             return;
 
         const phone = phoneQuery.matches;
-        const fullScreen = fitWindowSize(instance, phone);
+        // a content box placed by the stylesheet sizes its window
+        const fullScreen = (getComputedStyle(instance.contentBorderEl).position !== "absolute") ? fitWindowSize(instance, phone) : phone;
 
         // no dragging on phones
         if (phone)
