@@ -2695,18 +2695,56 @@
     bottom: 0;
     box-shadow: 0 -12px 0 var(--color-background-popup); /* room above the divider */
     display: flex;
-    justify-content: center;
+    gap: 8px;
+    justify-content: flex-end;
     margin: auto 0 0 !important;
     padding: 10px 18px;
     position: sticky;
     z-index: 2;
 
-    & input[type="button"] {
+    & > button {
+        min-width: 96px;
+    }
+
+    & > #preferencesCancel {
+        margin-right: auto;
+    }
+
+    & > #preferencesSave {
+        display: none;
+    }
+
+    & > #preferencesOk {
         background-color: var(--color-background-blue);
         border-color: var(--color-background-blue);
         color: var(--color-text-white);
         font-weight: 600;
-        min-width: 96px;
+
+        &:hover {
+            background-color: var(--color-accent-blue);
+            border-color: var(--color-accent-blue);
+        }
+    }
+}
+
+/* phones: OK first, Cancel last */
+:root.modern.responsivePhone
+    #preferencesPage
+    .mochaContent
+    > div:not(.PrefTab):has(> input[type="button"]) {
+    flex-direction: column;
+
+    & > button {
+        width: 100%;
+    }
+
+    & > #preferencesOk {
+        order: -1;
+    }
+
+    & > #preferencesCancel {
+        margin-right: 0;
+        order: 1;
     }
 }
 
@@ -5262,9 +5300,14 @@
         > div:not(.PrefTab):has(> input[type="button"]) {
         padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
 
-        & > input[type="button"] {
+        & > button {
+            flex: 1 1 0;
             min-height: 44px;
-            width: 100%;
+            min-width: 0;
+        }
+
+        & > #preferencesCancel {
+            margin-right: 0;
         }
     }
 

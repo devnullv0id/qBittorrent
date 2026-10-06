@@ -72,7 +72,8 @@ window.qBittorrent.DynamicTable ??= (() => {
     const localPreferences = new window.qBittorrent.LocalPreferences.LocalPreferences();
     const clientData = window.qBittorrent.ClientData ?? window.parent.qBittorrent.ClientData;
 
-    const isModern = () => clientData.get("display_mode") === "modern";
+    // the display mode the page shows, which Modern's Apply leaves until the page reloads
+    const isModern = () => document.documentElement.classList.contains("modern");
     const coarseQuery = window.matchMedia("(pointer: coarse)");
     const cardQuery = window.matchMedia("(width < 760px)");
     const phoneQuery = window.matchMedia("(width < 760px)");
@@ -80,10 +81,9 @@ window.qBittorrent.DynamicTable ??= (() => {
     // row heights, also in responsive.css and modern.css
     const getRowHeight = (compactHeight, defaultHeight) => {
         const isCompact = clientData.get("display_density") === "compact";
-        const displayMode = clientData.get("display_mode");
         if (coarseQuery.matches)
-            return (displayMode === "modern") ? 44 : 30;
-        if (displayMode === "modern")
+            return isModern() ? 44 : 30;
+        if (isModern())
             return isCompact ? 26 : 30;
         return isCompact ? compactHeight : defaultHeight;
     };

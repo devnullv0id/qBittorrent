@@ -57,6 +57,13 @@ window.qBittorrent.ColorScheme ??= (() => {
         }
     };
 
+    // the main window, once client.js has built it, keeps its display mode until it reloads; dialogs take its mode
+    let built = false;
+    const builtDisplayMode = () => {
+        const mainRoot = window.parent.document.documentElement;
+        return mainRoot.classList.contains("modern") ? "modern" : null;
+    };
+
     const update = (look = null) => {
         const setting = (key) => ((look !== null) ? look[key] : clientData.get(key));
         const root = document.documentElement;
@@ -65,7 +72,8 @@ window.qBittorrent.ColorScheme ??= (() => {
         const isDark = colorSchemeQuery.matches;
         root.classList.toggle("dark", ((!validScheme && isDark) || (colorScheme === "dark")));
 
-        const isModern = (setting("display_mode") === "modern");
+        const displayMode = ((look === null) && (built || !isMainWindow)) ? builtDisplayMode() : setting("display_mode");
+        const isModern = (displayMode === "modern");
         root.classList.toggle("modern", isModern);
         root.classList.toggle("responsivePhone", phoneQuery.matches);
         // pages laid out anew: always in Modern, in Classic where the desktop layout doesn't hold
@@ -79,6 +87,7 @@ window.qBittorrent.ColorScheme ??= (() => {
 
     // called by client.js once it has the client data
     const storeLook = () => {
+        built = true;
         localPreferences.set("display_look", JSON.stringify(Object.fromEntries(lookSettings.map((key) => [key, clientData.get(key) ?? null]))));
     };
 

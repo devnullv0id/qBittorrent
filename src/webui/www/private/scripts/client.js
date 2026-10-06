@@ -353,6 +353,7 @@ const localPreferences = new window.qBittorrent.LocalPreferences.LocalPreference
 this.torrentsTable = new window.qBittorrent.DynamicTable.TorrentsTable();
 
 let updatePropertiesPanel = () => {};
+let applyDisplaySettings = () => {};
 
 this.updateMainData = () => {};
 let alternativeSpeedLimits = false;
@@ -725,6 +726,27 @@ window.addEventListener("DOMContentLoaded", async (event) => {
         updateFilter("errored", "QBT_TR(Errored (%1))QBT_TR[CONTEXT=StatusFilterWidget]");
         if (useAutoHideZeroStatusFilters && document.getElementById(`${selectedStatus}_filter`).classList.contains("invisible"))
             window.qBittorrent.Filters.clearStatusFilter();
+    };
+
+    // Modern's Apply in Options: the look and the lists follow at once, the display mode on reload
+    applyDisplaySettings = () => {
+        const displayMode = document.documentElement.classList.contains("modern") ? "modern" : null;
+        window.qBittorrent.ColorScheme.update({
+            color_scheme: clientData.get("color_scheme"),
+            display_density: clientData.get("display_density"),
+            display_mode: displayMode
+        });
+
+        useAutoHideZeroStatusFilters = clientData.get("hide_zero_status_filters") === true;
+        displayFullURLTrackerColumn = clientData.get("full_url_tracker_column") === true;
+        if (!useAutoHideZeroStatusFilters) {
+            for (const filter of document.querySelectorAll("#statusFilterList > li.invisible"))
+                filter.classList.remove("invisible");
+        }
+        updateFiltersList();
+
+        torrentsTable.updateTable(true);
+        updatePropertiesPanel();
     };
 
     const updateCategoryList = () => {

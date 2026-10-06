@@ -1981,7 +1981,12 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
     </fieldset>
 </div>
 
-<div style="text-align: center; margin-top: 1em;"><input type="button" value="QBT_TR(Save)QBT_TR[CONTEXT=HttpServer]" onclick="qBittorrent.Preferences.applyPreferences();"></div>
+<div style="text-align: center; margin-top: 1em;">
+    <button type="button" id="preferencesCancel" class="modernOnly" onclick="qBittorrent.Preferences.cancelPreferences();">QBT_TR(Cancel)QBT_TR[CONTEXT=MainWindow]</button>
+    <button type="button" id="preferencesApply" class="modernOnly" disabled onclick="qBittorrent.Preferences.applyPreferences(false);">QBT_TR(Apply)QBT_TR[CONTEXT=HttpServer]</button>
+    <input type="button" id="preferencesSave" value="QBT_TR(Save)QBT_TR[CONTEXT=HttpServer]" onclick="qBittorrent.Preferences.applyPreferences();">
+    <button type="button" id="preferencesOk" class="modernOnly" onclick="qBittorrent.Preferences.applyPreferences();">QBT_TR(OK)QBT_TR[CONTEXT=HttpServer]</button>
+</div>
 
 <script>
     "use strict";
@@ -2033,7 +2038,8 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
                 registerDynDns: registerDynDns,
                 rotateAPIKey: rotateAPIKey,
                 deleteAPIKey: deleteAPIKey,
-                applyPreferences: applyPreferences
+                applyPreferences: applyPreferences,
+                cancelPreferences: cancelPreferences
             };
         };
 
@@ -2984,7 +2990,13 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
                 });
         };
 
-        const applyPreferences = () => {
+        // Modern's Apply keeps Options open; the page reloads once it closes
+        let reloadOnClose = false;
+        const cancelPreferences = () => {
+            window.parent.qBittorrent.Client.closeWindow(document.getElementById("preferencesPage"));
+        };
+
+        const applyPreferences = (close = true) => {
             const settings = {};
             const clientData = {};
             // Validate form data
@@ -3547,6 +3559,15 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
                 window.parent.qBittorrent.Cache.preferences.set(settings)
             ]).then((results) => {
                 if (results.every((result) => result.status === "fulfilled")) {
+                    if (!close) {
+                        document.getElementById("preferencesApply").disabled = true;
+                        applyDisplaySettings();
+                        if (!reloadOnClose) {
+                            reloadOnClose = true;
+                            MochaUI.Windows.instances["preferencesPage"].addEvent("closeComplete", () => window.parent.location.reload());
+                        }
+                        return;
+                    }
                     window.parent.location.reload();
                     window.parent.qBittorrent.Client.closeWindow(document.getElementById("preferencesPage"));
                 }
@@ -3621,6 +3642,13 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
             }
 
             loadPreferences();
+
+            // Apply only with unsaved changes
+            for (const type of ["input", "change"]) {
+                document.getElementById("preferencesPage").addEventListener(type, (_event) => {
+                    document.getElementById("preferencesApply").disabled = false;
+                });
+            }
 
             window.qBittorrent.pathAutofill.attachPathAutofill();
         };
