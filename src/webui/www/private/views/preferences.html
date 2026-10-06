@@ -3742,6 +3742,48 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
             render();
         };
 
+        // Modern gives the KiB/s fields a unit, writing the value back to the original field
+        const speedUnits = [
+            ["QBT_TR(KiB)QBT_TR[CONTEXT=misc]QBT_TR(/s)QBT_TR[CONTEXT=misc]", 1],
+            ["QBT_TR(MiB)QBT_TR[CONTEXT=misc]QBT_TR(/s)QBT_TR[CONTEXT=misc]", 1024],
+            ["QBT_TR(GiB)QBT_TR[CONTEXT=misc]QBT_TR(/s)QBT_TR[CONTEXT=misc]", 1024 * 1024]
+        ];
+        const attachSpeedUnitPicker = (fieldId) => {
+            const field = document.getElementById(fieldId);
+            const value = document.createElement("input");
+            value.type = "number";
+            value.min = "0";
+            value.step = "any";
+            value.className = "speedUnitValue";
+            value.setAttribute("aria-label", field.labels?.[0]?.textContent ?? field.getAttribute("aria-label") ?? "");
+            const select = document.createElement("select");
+            select.className = "speedUnitSelect";
+            select.setAttribute("aria-label", "QBT_TR(Unit)QBT_TR[CONTEXT=OptionsDialog]");
+            for (const [unit, factor] of speedUnits)
+                select.add(new Option(unit, factor.toString()));
+            field.classList.add("hasSpeedUnitPicker");
+            field.parentElement.classList.add("withSpeedUnitPicker");
+            field.after(value, select);
+            const write = () => {
+                field.value = (value.value === "") ? "" : Math.round(Number(value.value) * Number(select.value)).toString();
+            };
+            value.addEventListener("input", (_event) => write());
+            select.addEventListener("change", (_event) => write());
+            // the field is switched on and off with its setting
+            const followField = () => {
+                value.disabled = select.disabled = field.disabled;
+            };
+            new MutationObserver(followField).observe(field, { attributes: true, attributeFilter: ["disabled"] });
+            followField();
+            // show the value in the largest unit that holds it exactly
+            modernEditors.push(() => {
+                const kib = Number(field.value);
+                const [, factor] = [...speedUnits].reverse().find(([, f]) => (kib >= f) && ((kib % f) === 0)) ?? speedUnits[0];
+                select.value = factor.toString();
+                value.value = (field.value === "") ? "" : (kib / factor).toString();
+            });
+        };
+
         // Modern's Enable proxy server switch: off is the type (None), on the type used last
         const attachProxySwitch = () => {
             const select = document.getElementById("peer_proxy_type_select");
@@ -3792,6 +3834,8 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
             attachListEditor("bypass_auth_subnet_whitelist_textarea", { joiner: "\n", splitter: /[\n,]/, placeholder: "QBT_TR(IP subnet, e.g. 172.17.32.0/24)QBT_TR[CONTEXT=OptionsDialog]" });
             attachListEditor("webuiDomainTextarea", { joiner: ";", splitter: /[;\n]/, placeholder: "QBT_TR(Domain, e.g. *.example.com)QBT_TR[CONTEXT=OptionsDialog]" });
             attachListEditor("webUIReverseProxiesListTextarea", { joiner: ";", splitter: /[;\n]/, placeholder: "QBT_TR(Proxy IP or subnet)QBT_TR[CONTEXT=OptionsDialog]" });
+            for (const id of ["upLimitValue", "dlLimitValue", "altUpLimitValue", "altDlLimitValue", "dlRateThresholdValue", "ulRateThresholdValue"])
+                attachSpeedUnitPicker(id);
         };
 
         // Modern lines fields and their units up with the dropdowns

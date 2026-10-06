@@ -2200,7 +2200,10 @@
                 .listEditor
             )
         ):not(
-            :has(> input:not([type="checkbox"]) ~ input:not([type="checkbox"])),
+            :has(
+                > input:not([type="checkbox"])
+                    ~ input:not([type="checkbox"], .speedUnitValue)
+            ),
             :has(> label)
         ) {
         box-sizing: border-box;
@@ -4464,7 +4467,7 @@
         }
 
         /* value and unit: the value grows */
-        & td:has(> #filelog_age_type_select) {
+        & td:is(.withSpeedUnitPicker, :has(> #filelog_age_type_select)) {
             align-items: center;
             display: flex !important;
             gap: 8px;
@@ -5012,7 +5015,31 @@
     }
 }
 
-/* List editors */
+/* List editors and speed units */
+
+/* speed unit pickers: the field they write to stays hidden */
+:root.modern .hasSpeedUnitPicker,
+:root.modern .withSpeedUnitPicker > .prefUnit {
+    display: none !important;
+}
+
+:root.modern #preferencesPage .PrefTab td.withSpeedUnitPicker {
+    text-align: left;
+    white-space: nowrap;
+    width: var(--modern-select-width);
+
+    & > .speedUnitValue {
+        box-sizing: border-box;
+        margin-right: 6px;
+        vertical-align: middle;
+        width: calc(var(--modern-select-width) - 6.5em - 6px) !important;
+    }
+
+    & > .speedUnitSelect {
+        vertical-align: middle;
+        width: 6.5em !important;
+    }
+}
 
 /* list editors: the field they write to stays hidden */
 :root.modern .hasListEditor {
