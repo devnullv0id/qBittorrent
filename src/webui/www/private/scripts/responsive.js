@@ -28,7 +28,7 @@
 
 "use strict";
 
-// Behavior of the responsive layout that CSS can't provide
+// Behavior of the responsive layout, and of Modern on top of it, that CSS can't provide
 window.qBittorrent ??= {};
 window.qBittorrent.Responsive ??= (() => {
     const exports = () => {
@@ -43,6 +43,7 @@ window.qBittorrent.Responsive ??= (() => {
     const smallQuery = window.matchMedia("(width < 760px), (height < 620px)");
 
     const root = document.documentElement;
+    const isModern = () => root.classList.contains("modern");
 
     const addScrim = (onClick) => {
         const scrim = document.createElement("div");
@@ -250,12 +251,12 @@ window.qBittorrent.Responsive ??= (() => {
             }
         });
 
-        // while View > Top Toolbar hides the toolbar, the button waits at the menubar's end
+        // while View > Top Toolbar hides the toolbar, the button waits at the menubar's end (Modern keeps its toolbar)
         const toolbar = document.getElementById("mochaToolbar");
         const home = button.parentElement;
         const homeNext = button.nextSibling;
         const placeButton = () => {
-            if (toolbar.classList.contains("invisible"))
+            if (toolbar.classList.contains("invisible") && !isModern())
                 document.getElementById("desktopNavbar").append(button);
             else if (button.parentElement !== home)
                 home.insertBefore(button, homeNext);
@@ -330,7 +331,7 @@ window.qBittorrent.Responsive ??= (() => {
 
     /* Header that slides away */
 
-    // the header hides once the first torrent has scrolled out of view, unless a field has focus
+    // the header hides once the first torrent has scrolled out of view, unless a menu is open or a field has focus
     const initHeaderAutoHide = async () => {
         const header = document.getElementById("desktopHeader");
         const list = await whenElement("torrentsTableDiv");
@@ -356,7 +357,8 @@ window.qBittorrent.Responsive ??= (() => {
             lockedUntil = performance.now() + 250;
         };
 
-        const busy = () => header.contains(document.activeElement) && document.activeElement.matches("input, select");
+        const busy = () => (document.querySelector("#desktopNavbar li.open") !== null)
+            || (header.contains(document.activeElement) && document.activeElement.matches("input, select"));
 
         list.addEventListener("scroll", (event) => {
             if (!smallQuery.matches) {
@@ -412,7 +414,7 @@ window.qBittorrent.Responsive ??= (() => {
 
         // the ⋯ at a card's top right opens the torrent's menu, as a long press does
         document.addEventListener("click", (event) => {
-            const tr = phoneQuery.matches ? event.target.closest?.("#torrentsTableDiv tbody tr") : null;
+            const tr = (phoneQuery.matches && !isModern()) ? event.target.closest?.("#torrentsTableDiv tbody tr") : null;
             if (!tr)
                 return;
 
@@ -433,7 +435,7 @@ window.qBittorrent.Responsive ??= (() => {
         const table = window.torrentsTable;
         // the checkbox zone: the card's left side
         const hitCheckbox = (event) => {
-            const tr = phoneQuery.matches ? event.target.closest("tbody tr") : null;
+            const tr = (phoneQuery.matches && !isModern()) ? event.target.closest("tbody tr") : null;
             if (tr === null)
                 return false;
 
@@ -735,7 +737,7 @@ window.qBittorrent.Responsive ??= (() => {
         return fullScreen;
     };
 
-    // taller title bars from the stylesheet, as Mocha's default for new windows
+    // taller title bars from the stylesheets, as Mocha's default for new windows
     const applyWindowTitleHeight = () => {
         const height = Number.parseInt(getComputedStyle(root).getPropertyValue("--window-title-height"), 10);
         if (!(height > 0))
@@ -751,9 +753,10 @@ window.qBittorrent.Responsive ??= (() => {
     };
 
     const initWindows = () => {
-        // responsive.css loads after the page
+        // the display mode stylesheets load after the page
         applyWindowTitleHeight();
-        document.getElementById("responsiveStylesheet").addEventListener("load", (_event) => applyWindowTitleHeight());
+        for (const link of document.querySelectorAll("link[id$='Stylesheet']"))
+            link.addEventListener("load", (_event) => applyWindowTitleHeight());
 
         // content that changes size fits its window again, and only that window
         const changed = new Set();
@@ -827,6 +830,53 @@ window.qBittorrent.Responsive ??= (() => {
         window.addEventListener("resize", window.qBittorrent.Misc.createDebounceHandler(50, fitWindows));
     };
 
+    /* Modern menubar */
+
+    // menus open on click; with one open, hovering another switches to it (with a mouse only: a tap hovers too)
+    const initNavbar = () => {
+        const navbar = document.getElementById("desktopNavbar");
+        const topItems = [...navbar.querySelectorAll(":scope > ul > li")];
+        const closeAll = () => {
+            for (const li of topItems)
+                li.classList.remove("open");
+        };
+
+        for (const li of topItems) {
+            li.firstElementChild.addEventListener("click", (event) => {
+                event.preventDefault();
+                const wasOpen = li.classList.contains("open");
+                closeAll();
+                if (!wasOpen)
+                    li.classList.add("open");
+            });
+            li.addEventListener("pointerenter", (event) => {
+                if (event.pointerType !== "mouse")
+                    return;
+
+                if (!li.classList.contains("open") && topItems.some((item) => item.classList.contains("open"))) {
+                    closeAll();
+                    li.classList.add("open");
+                }
+            });
+        }
+        document.addEventListener("pointerdown", (event) => {
+            if (!navbar.contains(event.target))
+                closeAll();
+        });
+        // capturing, as the items' handlers stop the click
+        navbar.addEventListener("click", (event) => {
+            if (event.target.closest("li li"))
+                closeAll();
+        }, true);
+        document.addEventListener("keydown", (event) => {
+            switch (event.key) {
+                case "Escape":
+                    closeAll();
+                    break;
+            }
+        });
+    };
+
     /* Context menus */
 
     // menus taller than the screen scroll; fitted after each input
@@ -871,6 +921,11 @@ window.qBittorrent.Responsive ??= (() => {
         initCardCheckboxes();
         initKeyboardItems();
         initOptionsPages();
+
+        if (!isModern())
+            return;
+
+        initNavbar();
     };
 
     return exports();

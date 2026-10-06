@@ -1,3 +1,5 @@
+/* breakpoints, also in responsive.js: 1100px filters drawer, 760px phones, 620px short screens */
+
 /* override Layout.css's 400px */
 #desktop {
     min-width: 0;
@@ -80,12 +82,12 @@
 
 @media (width < 760px) {
     /* the menubar gives way to the button in the toolbar */
-    #desktopNavbar {
+    :root:not(.modern) #desktopNavbar {
         display: none;
     }
 
     /* the menubar stays while the toolbar, and the button with it, is off */
-    :root:has(#mochaToolbar.invisible) #desktopNavbar {
+    :root:not(.modern):has(#mochaToolbar.invisible) #desktopNavbar {
         display: block;
     }
 
@@ -258,7 +260,7 @@
 }
 
 /* on phones a long item wraps: no menu is wider than the screen */
-:root.responsivePhone .contextMenu {
+:root.responsivePhone:not(.modern) .contextMenu {
     box-sizing: border-box;
     max-width: 100vw;
 
@@ -299,12 +301,12 @@
 }
 
 @media (width < 760px) {
-    #torrentsTableFixedHeaderDiv {
+    :root:not(.modern) #torrentsTableFixedHeaderDiv {
         display: none;
     }
 
     /* in the column header's place, it counts the selected cards (responsive.js) */
-    #torrentsSelectionBar {
+    :root:not(.modern) #torrentsSelectionBar {
         align-items: center;
         border-bottom: 1px solid var(--color-border-default);
         display: flex;
@@ -321,7 +323,7 @@
         white-space: nowrap;
     }
 
-    #transferList #torrentsTableDiv {
+    :root:not(.modern) #transferList #torrentsTableDiv {
         & thead {
             display: none;
         }
@@ -822,6 +824,7 @@ body:not(:has(#desktop)) {
         & #rssButtonBar {
             box-sizing: border-box;
             display: grid;
+            flex: 1 1 100%;
             gap: 6px;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             height: auto;

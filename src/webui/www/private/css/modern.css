@@ -1,0 +1,1536 @@
+/* Tokens */
+
+:root.modern {
+    --modern-radius-pill: 999px;
+    --modern-radius-card: 8px;
+    --modern-radius-menu: 10px;
+    --modern-radius-item: 6px;
+    --modern-radius-button: 6px;
+    --modern-control-height: 28px;
+    --modern-row-height: 30px;
+    --modern-switch-width: 36px;
+    --modern-switch-height: 20px;
+    --modern-knob: 14px;
+    --modern-title-height: 34px;
+    --window-title-height: var(
+        --modern-title-height
+    ); /* also read by responsive.js */
+
+    --color-text-muted: hsl(0deg 0% 45%);
+    --color-background-card: hsl(0deg 0% 98%);
+    --color-background-row-hover: hsl(0deg 0% 92%);
+    --color-border-divider: hsl(0deg 0% 90%);
+    --modern-shadow:
+        0 8px 28px hsl(0deg 0% 0% / 18%), 0 1px 3px hsl(0deg 0% 0% / 12%);
+    --color-background-scrim: hsl(0deg 0% 0% / 45%);
+
+    /* one chevron everywhere */
+    --modern-chevron-down: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M4.34 6.79 10 12.45 15.66 6.79' fill='none' stroke='%23545454' stroke-width='2'/%3E%3C/svg%3E");
+    --modern-chevron-up: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M4.34 13.21 10 7.55 15.66 13.21' fill='none' stroke='%23545454' stroke-width='2'/%3E%3C/svg%3E");
+
+    /* the accent */
+    --color-background-blue: hsl(210deg 65% 42%);
+    --color-accent-blue: hsl(210deg 65% 45%);
+    --color-background-hover: var(--color-background-blue);
+    --color-background-default: hsl(0deg 0% 95%);
+    --color-border-default: hsl(0deg 0% 84%);
+    --modern-tool-height: 38px;
+    --modern-tool-width: 42px;
+    --modern-tool-icon: 24px;
+    --modern-toolbar-padding: 6px 12px 12px;
+    --modern-menu-item-padding: 5px 12px;
+    --modern-tab-padding: 6px 16px;
+    --modern-filter-item-padding: 7px 12px;
+    --modern-cell-padding: 7px 10px;
+    --modern-th-padding: 10px 10px;
+    --modern-footer-height: 38px;
+    --color-background-surface: var(--color-background-primary);
+    --color-background-fill: color-mix(
+        in srgb,
+        var(--color-text-default) 7%,
+        var(--color-background-primary)
+    );
+    --color-background-zebra: color-mix(
+        in srgb,
+        var(--color-text-default) 3%,
+        var(--color-background-primary)
+    );
+    --color-background-track: color-mix(
+        in srgb,
+        var(--color-accent-blue) 22%,
+        var(--color-background-primary)
+    );
+
+    &.dark {
+        --modern-chevron-down: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M4.34 6.79 10 12.45 15.66 6.79' fill='none' stroke='%23e6e6e6' stroke-width='2'/%3E%3C/svg%3E");
+        --modern-chevron-up: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M4.34 13.21 10 7.55 15.66 13.21' fill='none' stroke='%23e6e6e6' stroke-width='2'/%3E%3C/svg%3E");
+        --color-text-muted: hsl(0deg 0% 64%);
+        --color-background-card: hsl(0deg 0% 16%);
+        --color-background-row-hover: hsl(0deg 0% 22%);
+        --color-border-divider: hsl(0deg 0% 24%);
+        --modern-shadow:
+            0 10px 32px hsl(0deg 0% 0% / 55%), 0 1px 3px hsl(0deg 0% 0% / 40%);
+        --color-background-blue: hsl(210deg 42% 42%);
+        --color-accent-blue: hsl(210deg 45% 50%);
+        --color-background-primary: hsl(0deg 0% 9%);
+        --color-background-default: hsl(0deg 0% 13%);
+        --color-background-popup: hsl(0deg 0% 12%);
+        --color-border-default: hsl(0deg 0% 26%);
+        --color-background-track: color-mix(
+            in srgb,
+            var(--color-accent-blue) 32%,
+            var(--color-background-primary)
+        );
+    }
+}
+
+@media (pointer: coarse) {
+    :root.modern {
+        --modern-control-height: 44px;
+        --modern-row-height: 44px;
+        --modern-switch-width: 48px;
+        --modern-switch-height: 26px;
+        --modern-knob: 20px;
+        --modern-title-height: 48px;
+        --touch-target: 44px; /* like the controls */
+    }
+}
+
+/* Base */
+
+:root.modern body {
+    font-family:
+        system-ui,
+        -apple-system,
+        "Segoe UI",
+        Ubuntu,
+        Cantarell,
+        "Noto Sans",
+        sans-serif;
+    font-size: 13px;
+}
+
+:root.modern a:not(.contextMenu a, #desktopNavbar a, .tab-menu a) {
+    color: var(--color-accent-blue);
+}
+
+:root.modern.dark a:not(.contextMenu a, #desktopNavbar a, .tab-menu a) {
+    color: var(--color-text-blue);
+}
+
+:root.modern hr {
+    background-color: var(--color-border-divider);
+}
+
+/* Controls */
+
+:root.modern
+    :is(
+        input[type="text"],
+        input[type="search"],
+        input[type="number"],
+        input[type="password"],
+        input[type="url"],
+        input[type="email"],
+        input:not([type]),
+        select
+    ) {
+    background-color: var(--color-background-primary);
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--modern-radius-pill);
+    color: var(--color-text-default);
+    min-height: var(--modern-control-height);
+    padding: 2px 12px;
+    transition: border-color 0.12s;
+    vertical-align: middle;
+
+    &:hover:not(:disabled) {
+        border-color: var(--color-text-muted);
+    }
+
+    &:disabled {
+        opacity: 0.55;
+    }
+}
+
+:root.modern select {
+    appearance: none;
+    background: var(--color-background-primary) var(--modern-chevron-down) right
+        8px center / 16px no-repeat;
+    cursor: pointer;
+    text-overflow: ellipsis;
+}
+
+/* room for the arrow */
+:root.modern select:not([multiple]) {
+    padding-right: 30px;
+}
+
+/* the current option, tinted like the selected Options page */
+:root.modern option:checked {
+    background-color: color-mix(
+        in srgb,
+        var(--color-accent-blue) 22%,
+        var(--color-background-default)
+    );
+    color: var(--color-text-default);
+}
+
+:root.modern textarea {
+    background-color: var(--color-background-primary);
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--modern-radius-card);
+    padding: 8px 10px;
+}
+
+:root.modern
+    :is(
+        input[type="button"],
+        input[type="submit"],
+        input[type="reset"],
+        button
+    ):not(
+        .mochaCloseButton,
+        .mochaMinimizeButton,
+        .mochaMaximizeButton,
+        .categoryToggle
+    ) {
+    align-items: center;
+    background-color: var(--color-background-default);
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--modern-radius-button);
+    color: var(--color-text-default);
+    display: inline-flex;
+    gap: 6px;
+    justify-content: center;
+    min-height: var(--modern-control-height);
+    padding: 3px 14px;
+    transition:
+        background-color 0.12s,
+        border-color 0.12s;
+    vertical-align: middle;
+
+    &:hover:not(:disabled) {
+        background-color: var(--color-background-row-hover);
+        border-color: var(--color-text-muted);
+    }
+
+    &:disabled {
+        opacity: 0.5;
+    }
+
+    & img {
+        margin: 0 !important;
+    }
+}
+
+:root.modern :is(input, select, textarea, button):focus-visible,
+:root.modern :focus-visible {
+    outline: 2px solid var(--color-accent-blue);
+    outline-offset: 1px;
+}
+
+/* Switches */
+:root.modern
+    input[type="checkbox"]:not(
+        .dynamicTable input,
+        .contextMenu input,
+        #torrentsFilterRegexBox,
+        #tristateCb
+    ) {
+    appearance: none;
+    background-color: var(--color-background-row-hover);
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--modern-radius-pill);
+    cursor: pointer;
+    flex: none;
+    height: var(--modern-switch-height);
+    margin: 2px 8px 2px 2px;
+    position: relative;
+    transition:
+        background-color 0.15s,
+        border-color 0.15s;
+    vertical-align: middle;
+    width: var(--modern-switch-width);
+
+    &::before {
+        background-color: var(--color-text-white);
+        border-radius: 50%;
+        box-shadow: 0 1px 2px hsl(0deg 0% 0% / 35%);
+        content: "";
+        height: var(--modern-knob);
+        left: 2px;
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        transition: left 0.15s;
+        width: var(--modern-knob);
+    }
+
+    &:checked {
+        background-color: var(--color-accent-blue);
+        border-color: var(--color-accent-blue);
+    }
+
+    &:checked::before {
+        left: calc(100% - var(--modern-knob) - 2px);
+    }
+
+    &:disabled {
+        cursor: default;
+        opacity: 0.45;
+    }
+}
+
+:root.modern :is(.dynamicTable, .contextMenu) input[type="checkbox"],
+:root.modern input[type="radio"] {
+    height: 15px;
+    width: 15px;
+}
+
+/* Menubar */
+
+:root.modern #desktopNavbar {
+    background-color: var(--color-background-surface);
+    border-bottom: 0;
+    overflow: visible;
+    padding: 6px 8px 2px;
+
+    & > ul {
+        display: flex;
+        gap: 2px;
+    }
+
+    & > ul > li {
+        float: none;
+        position: relative;
+    }
+
+    /* bridges the gap to the dropdown, so it stays open */
+    & > ul > li:hover::after {
+        content: "";
+        height: 4px;
+        left: 0;
+        position: absolute;
+        right: 0;
+        top: 100%;
+        z-index: 8000;
+    }
+
+    & > ul > li > a {
+        border-radius: var(--modern-radius-pill);
+        font-size: 13px;
+        font-weight: 500;
+        padding: var(--modern-menu-item-padding);
+    }
+
+    & > ul > li > a:hover,
+    & > ul > li.open > a {
+        background-color: var(--color-background-fill);
+        color: var(--color-text-default);
+    }
+
+    & li ul {
+        background-color: var(--color-background-popup);
+        border-radius: var(--modern-radius-menu);
+        box-shadow: var(--modern-shadow);
+        margin-top: 4px;
+        min-width: 220px;
+        padding: 4px;
+    }
+
+    & li ul li a,
+    & li ul li div.anchor {
+        align-items: center;
+        border-radius: var(--modern-radius-item);
+        display: flex;
+        font-size: 13px;
+        gap: 10px;
+        padding: 5px 12px 5px 10px;
+    }
+
+    & li ul li div.anchor label {
+        align-items: center;
+        display: flex;
+        gap: 10px;
+    }
+
+    & .MyMenuIcon {
+        margin: 0;
+    }
+
+    & li ul li.divider {
+        border-top: 1px solid var(--color-border-divider);
+        margin-top: 4px;
+        padding-top: 4px;
+    }
+
+    & li.open > ul {
+        left: 0;
+    }
+}
+
+/* Toolbar, view tabs, filter bar */
+
+/* always shown, so View > Top Toolbar has nothing to switch */
+:root.modern #desktopNavbar li:has(> #showTopToolbarLink) {
+    display: none;
+}
+
+/* Modern keeps the menubar: Classic's menu drawer is left out */
+:root.modern #menuDrawerButton {
+    display: none;
+}
+
+:root.modern #mochaToolbar {
+    align-items: center;
+    background-color: var(--color-background-surface);
+    border-bottom: 1px solid var(--color-border-default);
+    display: flex;
+    flex-wrap: wrap;
+    font-size: 0; /* hides the &nbsp; text nodes */
+    gap: 6px 4px;
+    margin-top: 0;
+    padding: var(--modern-toolbar-padding);
+
+    & > * {
+        font-size: 13px;
+    }
+
+    & > a,
+    & > #uploadButton,
+    & #queueingButtons > a {
+        align-items: center;
+        border: 1px solid transparent;
+        border-radius: var(--modern-radius-pill);
+        display: inline-flex !important;
+        height: var(--modern-tool-height);
+        justify-content: center;
+        position: relative;
+        width: var(--modern-tool-width);
+    }
+
+    & #uploadButton label {
+        display: inline-flex;
+    }
+
+    & #queueingButtons {
+        display: inline-flex;
+        gap: 2px;
+
+        &.invisible {
+            display: none;
+        }
+    }
+
+    & .mochaToolButton {
+        height: var(--modern-tool-icon);
+        margin: 0;
+        padding: 0;
+        width: var(--modern-tool-icon);
+    }
+
+    & > a:hover,
+    & #queueingButtons > a:hover,
+    & > #uploadButton:hover {
+        background-color: var(--color-background-surface);
+        border-color: var(--color-border-default);
+    }
+
+    & .divider {
+        background: none;
+        margin-left: 17px;
+        padding: 0;
+    }
+
+    & .divider::before {
+        background-color: var(--color-border-default);
+        content: "";
+        height: 18px;
+        left: -10px;
+        position: absolute;
+        top: calc(50% - 9px);
+        width: 1px;
+    }
+
+    & > a:active,
+    & #queueingButtons > a:active {
+        background-color: var(--color-background-fill);
+    }
+}
+
+:root.modern #mainWindowTabs {
+    float: none;
+    margin: 0 0 0 auto;
+}
+
+:root.modern #torrentsFilterToolbar {
+    align-items: center;
+    display: flex;
+    flex: 1 1 100%;
+    gap: 8px;
+    margin: 2px 0 0;
+    order: 10;
+
+    &.invisible {
+        display: none;
+    }
+
+    & label[for="torrentsFilterSelect"] {
+        color: var(--color-text-muted);
+        white-space: nowrap;
+    }
+}
+
+:root.modern #torrentsFilterInput,
+:root.modern #torrentFilesFilterInput,
+:root.modern #searchPattern,
+:root.modern #rssFilterInput,
+:root.modern #filterTextInput,
+:root.modern #searchInNameFilter {
+    background: var(--color-background-primary) url("../images/edit-find.svg")
+        10px center / 14px no-repeat;
+    padding-left: 32px;
+}
+
+:root.modern #torrentsFilterInput {
+    background: var(--color-background-surface) url("../images/edit-find.svg")
+        11px center / 14px no-repeat;
+    flex: 1 1 200px;
+    min-width: 0;
+}
+
+:root.modern #torrentsFilterRegexBox + label {
+    background-color: var(--color-background-primary);
+    background-size: 16px;
+    border-radius: var(--modern-radius-pill);
+    height: var(--modern-control-height);
+    margin: 0;
+    width: calc(var(--modern-control-height) + 6px);
+}
+
+:root.modern #torrentsFilterRegexBox:checked + label {
+    background-color: var(--color-background-blue);
+    background-size: 16px;
+    border-color: var(--color-background-blue);
+    height: var(--modern-control-height);
+    margin: 0;
+    width: calc(var(--modern-control-height) + 6px);
+}
+
+:root.modern #torrentsFilterSelect {
+    background: var(--color-background-surface) var(--modern-chevron-down) right
+        8px center / 16px no-repeat;
+    width: 150px;
+}
+
+:root.modern #filtersButton {
+    align-items: center;
+    border-radius: var(--modern-radius-pill);
+    gap: 6px;
+}
+
+/* Tabs */
+:root.modern .tab-menu {
+    align-items: center;
+    display: flex;
+    font-size: 13px;
+    gap: 4px;
+    padding: 2px 0;
+    scrollbar-width: none;
+
+    & li a {
+        background-color: transparent;
+        border: 1px solid transparent;
+        border-radius: var(--modern-radius-pill);
+        font-weight: 500;
+        margin: 0;
+        padding: var(--modern-tab-padding);
+        white-space: nowrap;
+    }
+
+    & li:first-child a {
+        margin: 0;
+    }
+
+    & li:not(.selected):hover a {
+        background-color: var(--color-background-fill);
+        color: var(--color-text-default);
+    }
+
+    & li:not(.selected):hover img {
+        filter: none;
+    }
+
+    & li.selected a {
+        background-color: var(--color-background-blue);
+        color: var(--color-text-white);
+    }
+}
+
+/* Panels and handles */
+
+:root.modern #pageWrapper {
+    border-bottom: 0;
+    border-top: 0;
+}
+
+/* the scrollbar keeps off the handle */
+:root.modern #Filters {
+    border-right: 3px solid transparent;
+    box-sizing: border-box;
+}
+
+/* a 1px line with grab room either side, grip dots on it */
+:root.modern .columnHandle {
+    --modern-grip-dot: radial-gradient(
+        circle at 50% 50%,
+        var(--color-text-muted) 1.3px,
+        transparent 1.7px
+    );
+
+    background:
+        var(--modern-grip-dot) 0 calc(50% - 5px) / 5px 5px no-repeat,
+        var(--modern-grip-dot) 0 50% / 5px 5px no-repeat,
+        var(--modern-grip-dot) 0 calc(50% + 5px) / 5px 5px no-repeat,
+        linear-gradient(var(--color-handle-line), var(--color-handle-line)) 2px
+            0 / 1px 100% no-repeat,
+        var(--color-background-surface);
+    border: 0;
+    position: relative; /* above the filters panel, which overlaps it */
+    width: 5px;
+    z-index: 1;
+
+    &:not(:hover) {
+        --color-handle-line: var(--color-border-default);
+    }
+
+    &:hover {
+        --color-handle-line: var(--color-accent-blue);
+
+        background-color: var(--color-accent-blue);
+    }
+}
+
+:root.modern .horizontalHandle {
+    background-clip: content-box;
+    background-color: var(--color-border-default);
+    box-sizing: content-box; /* 1px line, 2px grab room either side */
+    height: 1px;
+    padding: 2px 0;
+    position: relative;
+
+    &:hover {
+        background-clip: border-box;
+        background-color: var(--color-accent-blue);
+    }
+
+    & .handleIcon {
+        background: none;
+    }
+
+    /* grip dots on the line */
+    & > .handleIcon {
+        background: radial-gradient(
+                circle at 50% 50%,
+                var(--color-text-muted) 1.3px,
+                transparent 1.7px
+            )
+            0 0 / 5px 5px repeat-x;
+        height: 5px;
+        left: calc(50% - 7px);
+        pointer-events: none;
+        position: absolute;
+        top: 0;
+        width: 15px; /* three dots */
+    }
+}
+
+/* Mocha gives an empty panel height only through its border */
+:root.modern .panel {
+    border-bottom-color: transparent;
+}
+
+:root.modern .panel-header {
+    background-color: var(--color-background-default);
+    border-bottom: 1px solid var(--color-border-divider);
+}
+
+/* Properties tabs */
+:root.modern #propertiesPanel_header {
+    align-items: center;
+    box-sizing: border-box;
+    display: flex !important;
+    height: calc(var(--modern-control-height) + 12px);
+    padding: 0 6px;
+
+    & .toolbarTabs {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    & .tab-menu {
+        overflow: auto hidden;
+        padding: 4px 2px;
+    }
+
+    & .panel-headerContent {
+        padding-top: 0;
+    }
+
+    & .tab-menu li a {
+        line-height: 18px;
+    }
+
+    /* the collapse toggle after the tabs */
+    & #propertiesPanel_headerCollapseBox {
+        align-items: center;
+        display: flex;
+        margin-left: auto;
+        margin-top: 0;
+        order: 1;
+    }
+
+    & #propertiesPanel_collapseToggle {
+        background: currentcolor;
+        margin: 0;
+        mask: var(--modern-chevron-down) center / 20px no-repeat;
+    }
+}
+
+:root.modern #torrentFilesFilterToolbar {
+    margin: 4px 4px 0 0;
+}
+
+/* Filters sidebar */
+
+:root.modern #filtersColumn {
+    background-color: var(--color-background-surface);
+}
+
+:root.modern .filterWrapper {
+    border-bottom: 1px solid var(--color-border-divider);
+    margin: 0 10px;
+    padding: 4px 0 10px;
+}
+
+:root.modern .filterTitle {
+    align-items: center;
+    color: var(--color-text-muted);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0;
+    padding: 10px 4px 6px 2px;
+    text-transform: none;
+
+    /* the chevron in the header's color */
+    & img {
+        background-color: currentcolor;
+        mask: var(--modern-chevron-down) center / 20px no-repeat;
+        object-position: -100px 0;
+    }
+}
+
+/* a category's toggle for its subcategories */
+:root.modern .categoryToggle {
+    background-image: var(--modern-chevron-down);
+    background-size: 16px;
+}
+
+:root.modern ul.filterList span.link {
+    border-radius: var(--modern-radius-pill);
+    gap: 8px;
+    margin: 0 0 1px;
+    padding: var(--modern-filter-item-padding);
+    white-space: normal; /* a long state's name wraps rather than losing its count */
+
+    &:hover {
+        background-color: var(--color-background-fill);
+        color: var(--color-text-default);
+    }
+
+    &:hover :is(img, button) {
+        filter: none;
+    }
+}
+
+/* the inline indent starts from Classic's 6px */
+:root.modern #categoryFilterList span.link[style*="padding-left"] {
+    border-left: 6px solid transparent;
+}
+
+/* selected rows */
+:root.modern ul.filterList .selectedFilter > span.link {
+    background-color: color-mix(
+        in srgb,
+        var(--color-accent-blue) 22%,
+        transparent
+    );
+    color: var(--color-text-default);
+    font-weight: 600;
+
+    & :is(img, button) {
+        filter: none;
+    }
+}
+
+/* Tables */
+
+:root.modern .dynamicTableFixedHeaderDiv table {
+    background-color: var(--color-background-surface);
+}
+
+:root.modern #propertiesPanel .dynamicTableFixedHeaderDiv,
+:root.modern #torrentsTableFixedHeaderDiv {
+    border-bottom: 1px solid var(--color-border-default);
+}
+
+:root.modern .dynamicTable {
+    /* a short line between headers, the full edge on hover */
+    & th {
+        border-image: linear-gradient(
+                transparent 25%,
+                var(--color-border-divider) 25% 75%,
+                transparent 75%
+            )
+            1;
+        border-right: 1px solid;
+        color: var(--color-text-default);
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0;
+        padding: var(--modern-th-padding);
+        text-transform: none;
+    }
+
+    & th:hover {
+        border-image: none;
+        border-right-color: var(--color-border-default);
+        color: var(--color-text-default);
+    }
+
+    & th.sorted {
+        background-image: var(--modern-chevron-up);
+        background-position: right 0 center;
+        background-size: 16px;
+        color: var(--color-text-default);
+    }
+
+    & th.sorted.reverse {
+        background-image: var(--modern-chevron-down);
+    }
+
+    & td {
+        padding: var(--modern-cell-padding);
+    }
+
+    & tbody tr {
+        height: var(--modern-row-height);
+    }
+
+    & th:not(.sorted) {
+        color: color-mix(
+            in srgb,
+            var(--color-text-default) 75%,
+            var(--color-background-primary)
+        );
+    }
+}
+
+:root.modern #transferList .dynamicTable td {
+    padding: var(--modern-cell-padding);
+}
+
+:root.modern .altRowColors tbody tr:nth-child(odd of :not(.invisible)) {
+    background-color: var(--color-background-zebra);
+}
+
+:root.modern .dynamicTableDiv table.dynamicTable tbody tr:hover {
+    background-color: var(--color-background-fill);
+    color: var(--color-text-default);
+}
+
+:root.modern .dynamicTable tr:hover img:not(.flags) {
+    filter: none;
+}
+
+:root.modern .dynamicTableDiv table.dynamicTable tbody tr.selected {
+    background-color: var(--color-background-blue);
+    color: var(--color-text-white);
+
+    & img:not(.flags) {
+        filter: var(--color-icon-hover);
+    }
+}
+
+:root.modern tr.selected progress-bar {
+    --color-background-default: hsl(0deg 0% 100% / 22%);
+    --color-background-blue: hsl(0deg 0% 100% / 38%);
+    --color-text-default: var(--color-text-white);
+
+    background-color: transparent;
+}
+
+/* progress bars (the variables reach into the shadow DOM) */
+:root.modern progress-bar {
+    --progress-bar-height: 17px;
+    --color-background-default: var(--color-background-track);
+    --color-background-blue: var(--color-accent-blue);
+
+    border: 0 !important;
+    border-color: transparent !important;
+    border-radius: var(--modern-radius-pill);
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    overflow: hidden;
+}
+
+/* Properties panel */
+
+:root.modern #propGeneral {
+    padding: 8px 10px;
+}
+
+:root.modern #propBarsWrapper {
+    /* the value in a fixed column, so both bars end together */
+    column-gap: 4px;
+    /* fits "100.0%" and "99.999" */
+    grid-template-columns: auto minmax(0, 1fr) 3.6em;
+    margin: 4px 2px 8px;
+
+    & .propBarLabel {
+        color: var(--color-text-muted);
+        text-align: left;
+    }
+
+    & :is(#progress, #availability) {
+        border: 1px solid var(--color-border-default);
+        border-radius: var(--modern-radius-pill);
+        display: block;
+        overflow: hidden;
+    }
+
+    & :is(pieces-bar, availability-bar) {
+        border: 0 !important;
+    }
+
+    & :is(#progressPercentage, #averageAvailability) {
+        font-variant-numeric: tabular-nums;
+        font-weight: 600;
+        overflow: hidden;
+        text-align: right;
+        white-space: nowrap;
+    }
+}
+
+:root.modern td.generalLabel {
+    color: var(--color-text-muted);
+    padding-right: 10px;
+    text-align: left;
+}
+
+:root.modern #propGeneral td {
+    padding: 2px 4px;
+}
+
+/* Cards */
+
+:root.modern fieldset {
+    background-color: var(--color-background-card);
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--modern-radius-card);
+    margin: 26px 0 10px;
+    min-width: 0;
+    padding: 4px 14px;
+    position: relative;
+
+    & > legend {
+        color: var(--color-text-muted);
+        float: left;
+        font-size: 11px;
+        font-weight: 600;
+        left: 2px;
+        letter-spacing: 0.06em;
+        margin: 0;
+        max-width: calc(100% - 4px);
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        text-overflow: ellipsis;
+        text-transform: uppercase;
+        top: -21px;
+        white-space: nowrap;
+    }
+
+    & > legend :is(input, label) {
+        text-transform: none;
+        vertical-align: middle;
+    }
+
+    & > legend input[type="checkbox"] {
+        margin: -4px 6px 0 0;
+    }
+
+    & > legend + * {
+        clear: left;
+    }
+}
+
+:root.modern fieldset fieldset {
+    background-color: transparent;
+    border: 0;
+    border-radius: 0;
+    border-top: 1px solid var(--color-border-divider);
+    margin: 0 -14px;
+    padding: 30px 14px 4px 28px;
+
+    & > legend {
+        color: var(--color-text-default);
+        font-size: 12px;
+        left: 14px;
+        letter-spacing: 0;
+        text-transform: none;
+        top: 8px;
+    }
+}
+
+/* Status bar */
+
+:root.modern #desktopFooterWrapper {
+    background-color: var(--color-background-surface);
+    border-top: 1px solid var(--color-border-default);
+    height: var(--modern-footer-height);
+}
+
+:root.modern #desktopFooter {
+    align-items: center;
+    display: flex;
+    font-family: inherit;
+    font-size: 12px;
+    height: 100%;
+    padding: 0 8px;
+
+    & table {
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    & td {
+        vertical-align: middle;
+    }
+
+    & td.statusBarSeparator {
+        display: none;
+    }
+
+    & td:not(.statusBarSeparator, .invisible) {
+        background-color: transparent;
+        border: 0;
+        border-radius: var(--modern-radius-pill);
+        height: 24px;
+        padding: 0 10px;
+        position: relative;
+        white-space: nowrap;
+    }
+
+    & td:has(> img:only-child) {
+        padding: 0 6px;
+    }
+
+    & td img {
+        height: 16px !important;
+        vertical-align: middle;
+    }
+
+    & td.speedLabel {
+        font-variant-numeric: tabular-nums;
+        min-width: 11em;
+    }
+
+    & td.speedLabel img {
+        margin: 0 6px 0 0 !important;
+    }
+
+    & td:is(.speedLabel, [style*="cursor"]):hover {
+        background-color: var(--color-background-fill);
+    }
+
+    &
+        td:not(.statusBarSeparator, .invisible)
+        ~ td:not(.statusBarSeparator, .invisible)::before {
+        background-color: var(--color-border-default);
+        content: "";
+        height: 14px;
+        left: 0;
+        position: absolute;
+        top: 5px;
+        width: 1px;
+    }
+}
+
+@media (width < 1280px) {
+    :root.modern #desktopFooter td.speedLabel {
+        min-width: 0;
+    }
+}
+
+/* Context menus */
+
+:root.modern .contextMenu {
+    background-color: var(--color-background-popup);
+    border-radius: var(--modern-radius-menu);
+    box-shadow: var(--modern-shadow);
+    min-width: 200px;
+    padding: 4px;
+
+    & li a {
+        border-radius: var(--modern-radius-item);
+        font-size: 13px;
+        gap: 4px;
+        padding: 5px 24px 5px 10px;
+    }
+
+    & li a:hover {
+        background-color: var(--color-background-blue);
+        color: var(--color-text-white);
+    }
+
+    & .separator {
+        border-top-color: var(--color-border-divider);
+        margin-top: 4px;
+        padding-top: 4px;
+    }
+
+    & .separatorBottom {
+        border-bottom-color: var(--color-border-divider);
+        margin-bottom: 4px;
+    }
+
+    & li ul {
+        background-color: var(--color-background-popup);
+        border-radius: var(--modern-radius-menu);
+        box-shadow: var(--modern-shadow);
+        margin-top: -33px;
+        padding: 4px;
+    }
+}
+
+/* Mocha windows */
+
+:root.modern .mocha {
+    background-color: var(--color-background-popup);
+    border: 1px solid var(--color-border-default);
+    border-radius: 10px;
+    box-shadow: var(--modern-shadow);
+    overflow: hidden;
+}
+
+:root.modern .mochaOverlay {
+    background-color: var(--color-background-popup);
+    border-radius: 10px;
+}
+
+:root.modern .mochaTitlebar {
+    align-items: center;
+    background-color: var(--color-background-default);
+    border-bottom: 1px solid var(--color-border-divider);
+    border-radius: 0;
+    display: flex;
+
+    & h3 {
+        font-size: 13px;
+        font-weight: 600;
+        line-height: var(--modern-title-height);
+        padding: 0 44px 0 14px;
+    }
+
+    & h3[style*="url"] {
+        background-position: 12px center !important;
+        padding-left: 36px !important;
+    }
+}
+
+:root.modern .mochaControls {
+    height: calc(var(--modern-title-height) - 10px);
+    right: 6px;
+    top: 5px;
+    width: auto;
+}
+
+:root.modern
+    :is(.mochaCloseButton, .mochaMaximizeButton, .mochaMinimizeButton) {
+    border-radius: var(--modern-radius-item);
+    height: calc(var(--modern-title-height) - 10px);
+    width: calc(var(--modern-title-height) - 10px);
+
+    &::before,
+    &::after {
+        width: 11px;
+    }
+
+    &:hover {
+        background-color: var(--color-background-row-hover);
+    }
+}
+
+/* window tabs */
+:root.modern .mocha .tab-menu {
+    box-sizing: border-box;
+    max-width: 100%;
+    overflow-x: auto;
+    padding: 4px 8px;
+
+    & li a {
+        padding: 5px 10px;
+    }
+}
+
+/* no maximize button */
+:root.modern .mochaMaximizeButton {
+    display: none !important;
+}
+
+:root.modern .mochaContentBorder {
+    border: 0;
+}
+
+:root.modern .mochaContentWrapper {
+    background-color: var(--color-background-popup);
+    font-size: 13px;
+}
+
+:root.modern .mochaToolbarWrapper {
+    background-color: var(--color-background-popup);
+}
+
+:root.modern .mochaToolbar {
+    border-top: 0;
+    padding: 6px 8px;
+}
+
+:root.modern .mocha .cornerSE {
+    background-color: transparent;
+}
+
+:root.modern #modalOverlay {
+    background: var(--color-background-scrim);
+}
+
+:root.modern .mocha :is(.mochaContentWrapper, .mochaIframe) {
+    background-color: var(--color-background-popup);
+}
+
+/* Dialogs */
+
+:root.modern body:not(:has(#desktop)) {
+    padding: 12px 16px;
+}
+
+:root.modern body:not(:has(#desktop)) h2 {
+    font-size: 15px;
+    font-weight: 600;
+    padding-bottom: 10px;
+}
+
+:root.modern :is(#urls, #trackersUrls, textarea) {
+    min-height: 120px;
+}
+
+/* Statistics */
+:root.modern #statisticsContent {
+    & table {
+        background-color: var(--color-background-card);
+        border: 1px solid var(--color-border-default);
+        border-radius: var(--modern-radius-card);
+        border-spacing: 0;
+        margin-bottom: 14px;
+        padding: 4px 14px;
+        width: 100%;
+    }
+
+    & td {
+        padding: 4px 0;
+    }
+
+    & tr + tr td {
+        border-top: 1px solid var(--color-border-divider);
+    }
+
+    & h3 {
+        color: var(--color-text-muted);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        margin: 4px 0 6px 2px;
+        padding: 0;
+        text-transform: uppercase;
+    }
+}
+
+/* Speed limit dialog */
+:root.modern .slider {
+    font-weight: normal;
+    margin: 4px 4px 14px;
+
+    & .update {
+        align-items: center;
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        padding-bottom: 12px;
+    }
+}
+
+/* Cookies table */
+:root.modern #manageCookiesTable {
+    border-spacing: 0 4px;
+    width: 100%;
+
+    & th {
+        color: var(--color-text-muted);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        text-align: left;
+        text-transform: uppercase;
+    }
+
+    & input {
+        width: 100%;
+    }
+}
+
+/* Watched folders */
+:root.modern #watched_folders_tab {
+    border: 1px solid var(--color-border-default);
+    border-collapse: separate;
+    border-radius: var(--modern-radius-card);
+    border-spacing: 0;
+    overflow: hidden;
+    width: 100%;
+
+    & th,
+    & td {
+        border: 0;
+        padding: 6px 8px;
+    }
+
+    & thead th {
+        background-color: var(--color-background-default);
+        color: var(--color-text-muted);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        text-align: left;
+        text-transform: uppercase;
+    }
+
+    & tbody tr + tr td {
+        border-top: 1px solid var(--color-border-divider);
+    }
+}
+
+/* Editable selects */
+:root.modern .select-watched-folder-editable {
+    border: 0;
+    height: auto;
+    width: 200px;
+
+    & select {
+        position: relative;
+        width: 100% !important;
+    }
+
+    & input {
+        background: transparent;
+        border: 0;
+        bottom: 0;
+        min-height: 0;
+        right: 30px;
+        width: auto !important;
+    }
+
+    /* the focus ring goes around the whole field */
+    & input:focus-visible {
+        outline: 0;
+    }
+
+    &:has(> input:focus-visible) select {
+        outline: 2px solid var(--color-accent-blue);
+        outline-offset: 1px;
+    }
+}
+
+/* Search, RSS and Log */
+
+:root.modern #searchResults {
+    padding: 0 16px;
+}
+
+:root.modern #searchResultsHeader {
+    height: auto !important;
+    overflow: visible;
+}
+
+:root.modern #searchResultsHeaderContainer {
+    align-items: center;
+    height: auto;
+    margin: 12px 0 10px;
+
+    & #searchPattern {
+        flex: 1 1 260px;
+        max-width: 560px;
+        width: auto;
+    }
+}
+
+:root.modern #searchResultsFilters {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    height: auto;
+    padding: 6px 0;
+
+    &.invisible {
+        display: none;
+    }
+}
+
+:root.modern #searchResultsNoPlugins,
+:root.modern #searchResultsNoSearches,
+:root.modern #torrentCreatorEmpty {
+    color: var(--color-text-muted);
+}
+
+:root.modern :is(#rssTopBar, #logTopBar, #torrentCreatorTopBar) {
+    align-items: center;
+    background-color: var(--color-background-default);
+    border-bottom: 1px solid var(--color-border-divider);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 6px 10px;
+}
+
+:root.modern :is(#rssButtonBar, #logFilterBar, #rssFilterToolbar) {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+:root.modern #rssFilterToolbar {
+    margin-left: auto;
+}
+
+:root.modern #rssDetailsView {
+    padding: 12px 16px;
+}
+
+:root.modern #logFilterSummary {
+    color: var(--color-text-muted);
+    margin-left: auto;
+}
+
+/* Density */
+
+/* Compact density, with a mouse only */
+@media not (pointer: coarse) {
+    :root.modern {
+        --modern-control-height: 32px;
+        --modern-row-height: 30px;
+    }
+
+    :root.modern.compact {
+        --modern-control-height: 28px;
+        --modern-row-height: 26px;
+        --modern-tool-height: 34px;
+        --modern-tool-width: 38px;
+        --modern-tool-icon: 22px;
+        --modern-toolbar-padding: 4px 10px 10px;
+        --modern-menu-item-padding: 3px 10px;
+        --modern-tab-padding: 5px 14px;
+        --modern-filter-item-padding: 5px 10px;
+        --modern-cell-padding: 5px 8px;
+        --modern-th-padding: 8px 8px;
+        --modern-footer-height: 32px;
+    }
+
+    :root.modern.compact progress-bar {
+        --progress-bar-height: 12px;
+
+        font-size: 10px;
+    }
+}
+
+:root.modern.compact body {
+    line-height: normal;
+}
+
+:root.modern
+    :is(
+        #torrentsFilterInput,
+        #torrentsFilterSelect,
+        #filtersButton,
+        #torrentsFilterRegexBox + label
+    ) {
+    background-color: var(--color-background-surface);
+    border-color: var(--color-border-default);
+}
+
+:root.modern .filterWrapper:last-of-type {
+    border-bottom: 0;
+}
+
+:root.modern .panel-header,
+:root.modern #propertiesPanel_header {
+    background-color: var(--color-background-surface);
+    border-bottom: 1px solid var(--color-border-divider);
+}
+
+:root.modern #propertiesPanel,
+:root.modern #properties {
+    background-color: var(--color-background-surface);
+}
+
+:root.modern #propGeneral fieldset {
+    background-color: var(--color-background-surface);
+    margin-top: 32px;
+
+    & > legend {
+        color: var(--color-text-default);
+        font-size: 12px;
+        letter-spacing: 0;
+        text-transform: none;
+        top: -24px;
+    }
+}
+
+/* Motion */
+
+@keyframes modern-pop {
+    from {
+        opacity: 0;
+        transform: translateY(-4px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+:root.modern .contextMenu.visible,
+:root.modern #desktopNavbar li.open > ul {
+    animation: modern-pop 0.12s ease-out;
+    transform-origin: top left;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    :root.modern * {
+        animation: none !important;
+        transition: none !important;
+    }
+}

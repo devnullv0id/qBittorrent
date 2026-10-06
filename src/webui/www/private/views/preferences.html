@@ -40,6 +40,13 @@
                 <option value="compact">QBT_TR(Compact)QBT_TR[CONTEXT=OptionsDialog]</option>
             </select>
         </div>
+        <div class="formRow">
+            <label for="displayModeSelect">QBT_TR(Display:)QBT_TR[CONTEXT=OptionsDialog]</label>
+            <select id="displayModeSelect">
+                <option value="classic">QBT_TR(Classic)QBT_TR[CONTEXT=OptionsDialog]</option>
+                <option value="modern">QBT_TR(Modern)QBT_TR[CONTEXT=OptionsDialog]</option>
+            </select>
+        </div>
     </fieldset>
 
     <fieldset class="settings">
@@ -2502,6 +2509,8 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
                     const dateFormat = clientData.get("date_format");
                     const colorScheme = clientData.get("color_scheme");
                     const displayDensity = clientData.get("display_density") ?? "default";
+                    // anything but Modern, like the "responsive" of earlier builds, is Classic
+                    const displayMode = (clientData.get("display_mode") === "modern") ? "modern" : "classic";
                     const fullUrlTrackerColumn = clientData.get("full_url_tracker_column");
                     const useVirtualList = clientData.get("use_virtual_list") ?? true;
                     const hideZeroStatusFilters = clientData.get("hide_zero_status_filters");
@@ -2527,6 +2536,7 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
                     // Interface
                     updateColoSchemeSelect(colorScheme);
                     document.getElementById("displayDensitySelect").value = displayDensity;
+                    document.getElementById("displayModeSelect").value = displayMode;
                     document.getElementById("addTorrentWindowEnabled").checked = addTorrentWindowEnabled === true;
                     document.getElementById("statusBarExternalIP").checked = pref.status_bar_external_ip;
                     document.getElementById("performanceWarning").checked = pref.performance_warning;
@@ -2990,6 +3000,8 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
                 clientData.color_scheme = "dark";
             const displayDensity = document.getElementById("displayDensitySelect").value;
             clientData.display_density = (displayDensity === "default") ? null : displayDensity;
+            const displayMode = document.getElementById("displayModeSelect").value;
+            clientData.display_mode = (displayMode === "classic") ? null : displayMode;
             settings["status_bar_external_ip"] = document.getElementById("statusBarExternalIP").checked;
             settings["performance_warning"] = document.getElementById("performanceWarning").checked;
             clientData.full_url_tracker_column = document.getElementById("displayFullURLTrackerColumn").checked;

@@ -72,21 +72,27 @@ window.qBittorrent.DynamicTable ??= (() => {
     const localPreferences = new window.qBittorrent.LocalPreferences.LocalPreferences();
     const clientData = window.qBittorrent.ClientData ?? window.parent.qBittorrent.ClientData;
 
+    const isModern = () => clientData.get("display_mode") === "modern";
     const coarseQuery = window.matchMedia("(pointer: coarse)");
     const cardQuery = window.matchMedia("(width < 760px)");
 
-    // row heights, also in responsive.css
+    // row heights, also in responsive.css and modern.css
     const getRowHeight = (compactHeight, defaultHeight) => {
+        const isCompact = clientData.get("display_density") === "compact";
+        const displayMode = clientData.get("display_mode");
         if (coarseQuery.matches)
-            return 30;
-        return (clientData.get("display_density") === "compact") ? compactHeight : defaultHeight;
+            return (displayMode === "modern") ? 44 : 30;
+        if (displayMode === "modern")
+            return isCompact ? 26 : 30;
+        return isCompact ? compactHeight : defaultHeight;
     };
 
     class DynamicTable {
         #DynamicTableHeaderContextMenuClass = null;
-        // looked up each time: it changes with the pointer, and on phones a table of cards takes their height
+        // looked up each time: it changes with the pointer and the display mode, and on phones Classic's cards take
+        // their height
         get rowHeight() {
-            if ((this.constructor.CARD_HEIGHT !== undefined) && cardQuery.matches)
+            if ((this.constructor.CARD_HEIGHT !== undefined) && cardQuery.matches && !isModern())
                 return this.constructor.CARD_HEIGHT;
             return getRowHeight(...this.rowHeights);
         }
@@ -1219,7 +1225,9 @@ window.qBittorrent.DynamicTable ??= (() => {
             this.newColumn("name", "", "QBT_TR(Name)QBT_TR[CONTEXT=TransferListModel]", 200, true);
             this.newColumn("size", "", "QBT_TR(Size)QBT_TR[CONTEXT=TransferListModel]", 100, true);
             this.newColumn("total_size", "", "QBT_TR(Total Size)QBT_TR[CONTEXT=TransferListModel]", 100, false);
-            this.newColumn("progress", "", "QBT_TR(Progress)QBT_TR[CONTEXT=TransferListModel]", 85, true);
+            // room for the percentage in Modern's taller bar
+            const progressWidth = (isModern() && (clientData.get("display_density") !== "compact")) ? 120 : 85;
+            this.newColumn("progress", "", "QBT_TR(Progress)QBT_TR[CONTEXT=TransferListModel]", progressWidth, true);
             this.newColumn("status", "", "QBT_TR(Status)QBT_TR[CONTEXT=TransferListModel]", 100, true);
             this.newColumn("num_seeds", "", "QBT_TR(Seeds)QBT_TR[CONTEXT=TransferListModel]", 100, true);
             this.newColumn("num_leechs", "", "QBT_TR(Peers)QBT_TR[CONTEXT=TransferListModel]", 100, true);

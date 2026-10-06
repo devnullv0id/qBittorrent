@@ -71,6 +71,7 @@ window.qBittorrent.Client ??= (() => {
             "dblclick_download",
             "dblclick_filter",
             "display_density",
+            "display_mode",
             "full_url_tracker_column",
             "hide_zero_status_filters",
             "qbt_selected_log_levels",
@@ -401,6 +402,7 @@ window.addEventListener("DOMContentLoaded", async (event) => {
 
     await window.qBittorrent.Client.initializeClientData();
     window.qBittorrent.ColorScheme.update();
+    window.qBittorrent.ColorScheme.storeLook();
     document.documentElement.classList.toggle("compact", clientData.get("display_density") === "compact");
 
     useAutoHideZeroStatusFilters = clientData.get("hide_zero_status_filters") === true;
