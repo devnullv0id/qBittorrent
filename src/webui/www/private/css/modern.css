@@ -3380,6 +3380,25 @@
     }
 }
 
+/* Seeding limits' action */
+:root.modern
+    #preferencesPage
+    .PrefTab
+    tr:is(
+        :has(> td > #maxRatioSelect),
+        :has(> td > label[for="maxRatioSelect"])
+    ) {
+    overflow: clip;
+    overflow-clip-margin: 4px;
+
+    table:not(:has(input[type="checkbox"]:checked)) & {
+        height: 0;
+        opacity: 0;
+        padding-block: 0;
+        visibility: hidden;
+    }
+}
+
 /* path fields */
 :root.modern #preferencesPage .PrefTab td:has(> input.pathDirectory) {
     box-sizing: border-box;
