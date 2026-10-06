@@ -1347,6 +1347,15 @@
     padding: 12px 16px;
 }
 
+/* prompts: the label above its field */
+:root.modern
+    body:not(:has(#desktop))
+    > div
+    > label:has(+ input:is([type="text"], :not([type]))) {
+    display: block;
+    margin-bottom: 6px;
+}
+
 :root.modern body:not(:has(#desktop)) h2 {
     font-size: 15px;
     font-weight: 600;
