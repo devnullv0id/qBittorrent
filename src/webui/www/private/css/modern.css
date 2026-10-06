@@ -2239,6 +2239,32 @@
     padding: 12px 16px;
 }
 
+/* the fetching disabled notice */
+:root.modern #rssFetchingDisabled {
+    align-items: center;
+    background-color: color-mix(in srgb, var(--color-text-red) 8%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-text-red) 35%, transparent);
+    border-radius: var(--modern-radius-card);
+    box-sizing: border-box;
+    color: var(--color-text-default);
+    display: flex;
+    flex: 1 1 100%;
+    font-style: normal;
+    gap: 12px;
+    justify-content: space-between;
+    margin: 0;
+    padding: 6px 6px 6px 12px;
+
+    /* as wide as its label: the notice's text wraps instead */
+    & > button {
+        flex: none;
+    }
+
+    &.invisible {
+        display: none;
+    }
+}
+
 /* RSS Downloader: the rule buttons as round icons beside the heading */
 :root.modern #RssDownloader .imageButton {
     background-color: transparent;

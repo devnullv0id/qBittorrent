@@ -131,6 +131,7 @@
     <div id="rssTopBar">
         <div id="rssFetchingDisabled" class="invisible">
             QBT_TR(Fetching of RSS feeds is disabled now! You can enable it in application settings.)QBT_TR[CONTEXT=RSSWidget]
+            <button type="button" id="rssFetchingOptionsButton" class="modernOnly">QBT_TR(Options...)QBT_TR[CONTEXT=MainWindow]</button>
         </div>
         <div id="rssButtonBar">
             <button type="button" id="newSubscriptionButton" onclick="qBittorrent.Rss.addRSSFeed()">
@@ -243,6 +244,21 @@
 
             if (!pref.rss_processing_enabled)
                 document.getElementById("rssFetchingDisabled").classList.remove("invisible");
+
+            // Modern: opens Options at its RSS page
+            document.getElementById("rssFetchingOptionsButton").addEventListener("click", (event) => {
+                document.getElementById("preferencesLink").click();
+                const start = performance.now();
+                // a click before the pages have loaded shows nothing
+                const showRssPage = () => {
+                    const link = document.getElementById("PrefRSSLink");
+                    if ((link !== null) && (document.getElementById("RSSTab") !== null))
+                        link.click();
+                    else if ((performance.now() - start) < 5000)
+                        requestAnimationFrame(showRssPage);
+                };
+                showRssPage();
+            });
 
             const rssFeedContextMenu = new window.qBittorrent.ContextMenu.RssFeedContextMenu({
                 targets: "#rssFeedTableDiv tbody tr",
