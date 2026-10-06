@@ -1589,6 +1589,34 @@
     padding: 12px 16px;
 }
 
+/* RSS Downloader: the rule buttons as round icons beside the heading */
+:root.modern #RssDownloader .imageButton {
+    background-color: transparent;
+    background-repeat: no-repeat;
+    background-size: 18px;
+    border-color: transparent;
+    border-radius: 50%;
+    height: var(--modern-control-height);
+    margin: 0 0 0 2px;
+    min-height: 0;
+    min-width: 0;
+    padding: 0;
+    width: var(--modern-control-height);
+
+    &:hover:not(:disabled) {
+        background-color: var(--color-background-fill);
+        border-color: transparent;
+    }
+}
+
+:root.modern #RssDownloader #topMenuBar {
+    margin-bottom: 6px;
+
+    & #rulesTableDesc {
+        line-height: var(--modern-control-height);
+    }
+}
+
 :root.modern #logFilterSummary {
     color: var(--color-text-muted);
     margin-left: auto;
