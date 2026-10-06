@@ -264,6 +264,70 @@ window.qBittorrent.Responsive ??= (() => {
         placeButton();
     };
 
+    /* Menu drawer on phones */
+
+    let menuDrawerScrim = null;
+
+    let releaseMenuDrawerFocus = null;
+
+    const openMenuDrawer = () => {
+        if (!phoneQuery.matches)
+            return;
+
+        root.classList.add("menuDrawerOpen");
+        menuDrawerScrim ??= addScrim(closeMenuDrawer);
+        document.getElementById("menuDrawerButton").setAttribute("aria-expanded", "true");
+        releaseMenuDrawerFocus ??= trapFocus(document.getElementById("desktopNavbar"));
+    };
+
+    const closeMenuDrawer = () => {
+        if (!root.classList.contains("menuDrawerOpen"))
+            return;
+
+        root.classList.remove("menuDrawerOpen");
+        for (const li of document.querySelectorAll("#desktopNavbar > ul > li.menuDrawerExpanded"))
+            li.classList.remove("menuDrawerExpanded");
+        menuDrawerScrim?.remove();
+        menuDrawerScrim = null;
+        document.getElementById("menuDrawerButton").setAttribute("aria-expanded", "false");
+        releaseMenuDrawerFocus?.();
+        releaseMenuDrawerFocus = null;
+    };
+
+    const initMenuDrawer = () => {
+        const navbar = document.getElementById("desktopNavbar");
+        document.getElementById("menuDrawerButton").addEventListener("click", (_event) => openMenuDrawer());
+        document.getElementById("menuDrawerClose").addEventListener("click", (_event) => closeMenuDrawer());
+        // in the drawer a tap on a menu's name opens the menu below it, and closes any other
+        for (const li of navbar.querySelectorAll(":scope > ul > li")) {
+            li.firstElementChild.addEventListener("click", (event) => {
+                if (!root.classList.contains("menuDrawerOpen"))
+                    return;
+
+                const open = !li.classList.contains("menuDrawerExpanded");
+                for (const other of navbar.querySelectorAll(":scope > ul > li.menuDrawerExpanded"))
+                    other.classList.remove("menuDrawerExpanded");
+                li.classList.toggle("menuDrawerExpanded", open);
+            });
+        }
+        // choosing an item closes the drawer; capturing, as the items' handlers stop the click
+        navbar.addEventListener("click", (event) => {
+            if (event.target.closest("li li"))
+                closeMenuDrawer();
+        }, true);
+        phoneQuery.addEventListener("change", (event) => {
+            if (!phoneQuery.matches)
+                closeMenuDrawer();
+        });
+        document.addEventListener("keydown", (event) => {
+            switch (event.key) {
+                case "Escape":
+                    closeMenuDrawer();
+                    break;
+            }
+        });
+    };
+
     /* Header that slides away */
 
     // the header hides once the first torrent has scrolled out of view, unless a field has focus
@@ -774,6 +838,7 @@ window.qBittorrent.Responsive ??= (() => {
         initLayout();
         initRowHeights();
         initFiltersDrawer();
+        initMenuDrawer();
         initWindows();
         initMenus();
         initHeaderAutoHide();
