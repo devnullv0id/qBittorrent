@@ -1287,6 +1287,180 @@ window.qBittorrent.Responsive ??= (() => {
         }, true);
     };
 
+    /* Modern's status bar on phones: the speeds, the rest in a sheet */
+
+    // the speeds as one button, opening a menu of the other items (moved there, so client.js keeps updating them)
+    const initStatusBar = () => {
+        const footer = document.getElementById("desktopFooter");
+        const row = footer.querySelector("tr");
+        const speedButton = row.closest("table");
+        const narrowQuery = window.matchMedia("(width < 520px)");
+        const isCollapsed = () => narrowQuery.matches;
+        const update = () => root.classList.toggle("modernFooterCollapsed", isCollapsed());
+
+        const menu = document.createElement("ul");
+        menu.id = "modernStatusMenu";
+        menu.className = "contextMenu";
+        menu.setAttribute("role", "menu");
+        menu.setAttribute("aria-label", "QBT_TR(Status bar)QBT_TR[CONTEXT=OptionsDialog]");
+        const limitsItem = document.createElement("li");
+        limitsItem.setAttribute("role", "none");
+        const limitsLink = document.createElement("a");
+        limitsLink.setAttribute("role", "menuitem");
+        const limitsIcon = document.createElement("img");
+        limitsIcon.src = "images/slow.svg";
+        limitsIcon.alt = "";
+        limitsLink.append(limitsIcon, "QBT_TR(Global Speed Limits)QBT_TR[CONTEXT=MainWindow]");
+        limitsItem.append(limitsLink);
+        menu.append(limitsItem);
+        // the footer clips what overflows it
+        document.body.append(menu);
+
+        let moved = [];
+        const isOpen = () => moved.length > 0;
+        const open = () => {
+            if (isOpen())
+                return;
+
+            // alternative speed limits first
+            const cells = [...row.children].filter((td) => !td.classList.contains("speedLabel") && !td.classList.contains("statusBarSeparator"));
+            cells.sort((a, b) => Number(b.querySelector("#alternativeSpeedLimits") !== null) - Number(a.querySelector("#alternativeSpeedLimits") !== null));
+            for (const td of cells) {
+                // its separator goes along: client.js shows and hides the two together
+                const separator = td.previousElementSibling?.classList.contains("statusBarSeparator") ? td.previousElementSibling : null;
+                moved.push({ td: td, separator: separator, next: td.nextSibling });
+                // icon-only items get their title as caption
+                const img = td.querySelector("img[id]");
+                if ((img !== null) && (td.textContent.trim() === "")) {
+                    const caption = document.createElement("span");
+                    caption.className = "modernStatusCaption";
+                    caption.textContent = img.title;
+                    td.append(caption);
+                }
+                const li = document.createElement("li");
+                li.setAttribute("role", "none");
+                li.className = "modernStatusItem";
+                const a = document.createElement("a");
+                a.setAttribute("role", "menuitem");
+                if (separator !== null)
+                    a.append(separator);
+                a.append(td);
+                // the whole row toggles them (client.js listens on the icon)
+                const alt = td.querySelector("#alternativeSpeedLimits");
+                if (alt !== null) {
+                    a.addEventListener("click", (event) => {
+                        if (event.target !== alt)
+                            alt.click();
+                        // the caption follows the new state
+                        setTimeout(() => {
+                            td.querySelector(".modernStatusCaption").textContent = alt.title;
+                        }, 0);
+                    });
+                }
+                li.append(a);
+                menu.append(li);
+            }
+            menu.classList.add("visible");
+            speedButton.setAttribute("aria-expanded", "true");
+        };
+
+        const close = () => {
+            if (!isOpen())
+                return;
+
+            for (const { td, separator, next } of moved.reverse()) {
+                td.querySelector(".modernStatusCaption")?.remove();
+                if (separator !== null)
+                    row.insertBefore(separator, next);
+                row.insertBefore(td, next);
+            }
+            moved = [];
+            for (const li of menu.querySelectorAll(".modernStatusItem"))
+                li.remove();
+            menu.classList.remove("visible");
+            speedButton.setAttribute("aria-expanded", "false");
+        };
+
+        limitsLink.addEventListener("click", (event) => {
+            close();
+            globalLimitFN();
+        });
+        // while collapsed, the speeds open this menu instead of the speed limits window
+        footer.addEventListener("click", (event) => {
+            if (!isCollapsed() || (event.target.closest("table") !== speedButton))
+                return;
+
+            event.stopPropagation();
+            if (isOpen())
+                close();
+            else
+                open();
+        }, true);
+        const syncButton = () => {
+            if (isCollapsed()) {
+                speedButton.setAttribute("role", "button");
+                speedButton.setAttribute("tabindex", "0");
+                speedButton.setAttribute("aria-haspopup", "menu");
+                speedButton.setAttribute("aria-expanded", isOpen().toString());
+            }
+            else {
+                for (const attr of ["role", "tabindex", "aria-haspopup", "aria-expanded"])
+                    speedButton.removeAttribute(attr);
+            }
+        };
+
+        speedButton.addEventListener("keydown", (event) => {
+            switch (event.key) {
+                case "Enter":
+                case " ":
+                    if (!isCollapsed())
+                        break;
+
+                    event.preventDefault();
+                    if (isOpen())
+                        close();
+                    else
+                        open();
+                    break;
+            }
+        });
+        document.addEventListener("pointerdown", (event) => {
+            if (isOpen() && !menu.contains(event.target) && !speedButton.contains(event.target))
+                close();
+        });
+        document.addEventListener("keydown", (event) => {
+            switch (event.key) {
+                case "Escape":
+                    close();
+                    break;
+            }
+        });
+
+        // the collapsed bar leaves out the "[limit]" part of the speeds
+        for (const id of ["DlInfos", "UpInfos"]) {
+            const speed = document.getElementById(id);
+            const strip = () => {
+                if (!isCollapsed())
+                    return;
+
+                const text = speed.textContent.replace(/\s*\[[^\]]*\]/, "");
+                if (text !== speed.textContent)
+                    speed.textContent = text;
+            };
+
+            new MutationObserver(strip).observe(speed, { childList: true, characterData: true, subtree: true });
+            strip();
+        }
+
+        narrowQuery.addEventListener("change", (event) => {
+            close();
+            update();
+            syncButton();
+        });
+        update();
+        syncButton();
+    };
+
     /* Options */
 
     // a page opens at its top, as the pages share the window's scrolling
@@ -1319,6 +1493,7 @@ window.qBittorrent.Responsive ??= (() => {
         initNavbar();
         initPhoneToolbar();
         initTorrentCards();
+        initStatusBar();
     };
 
     return exports();

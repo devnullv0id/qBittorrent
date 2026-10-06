@@ -1048,9 +1048,33 @@
         vertical-align: middle;
     }
 
+    /* download and upload as one button */
     & td.speedLabel {
+        border-radius: 0;
+        cursor: pointer;
         font-variant-numeric: tabular-nums;
         min-width: 11em;
+    }
+
+    & td.speedLabel:hover {
+        background-color: transparent !important;
+    }
+
+    &
+        tr:has(> td.speedLabel:hover)
+        > :is(
+            td.speedLabel,
+            td.speedLabel + td.statusBarSeparator:has(+ td.speedLabel)
+        ) {
+        background-color: var(--color-background-fill) !important;
+    }
+
+    & td.speedLabel:not(td.speedLabel ~ td) {
+        border-radius: var(--modern-radius-pill) 0 0 var(--modern-radius-pill);
+    }
+
+    & td.speedLabel ~ td.speedLabel {
+        border-radius: 0 var(--modern-radius-pill) var(--modern-radius-pill) 0;
     }
 
     & td.speedLabel img {
@@ -3858,5 +3882,99 @@
 
     & li:not(.modernExpanded) > ul {
         display: none;
+    }
+}
+
+/* Status bar on phones */
+
+@media (width < 760px) {
+    :root.modern #desktopFooter {
+        & table {
+            margin: 0 auto !important;
+        }
+
+        & td.speedLabel {
+            min-width: 0;
+        }
+    }
+
+    /* only the speeds stay in the bar */
+    :root.modern.modernFooterCollapsed #desktopFooter {
+        cursor: pointer;
+
+        & td:not(.speedLabel) {
+            display: none;
+        }
+
+        /* only the divider between the speeds */
+        & td.statusBarSeparator {
+            display: none !important;
+        }
+
+        /* the divider before the download speed */
+        & td.speedLabel:not(td.speedLabel ~ td)::before {
+            display: none;
+        }
+
+        /* one button around both speeds */
+        & table {
+            border-radius: var(--modern-radius-pill);
+            margin: 4px auto !important;
+            padding: 0 6px;
+            transition: background-color 0.12s;
+        }
+
+        /* the whole button highlights */
+        & td.speedLabel:hover {
+            background-color: transparent !important;
+        }
+
+        & table:hover {
+            background-color: var(--color-background-fill);
+        }
+
+        & table:active {
+            background-color: var(--color-border-divider);
+        }
+
+        & table:focus-visible {
+            outline: 2px solid var(--color-accent-blue);
+            outline-offset: 1px;
+        }
+
+        & td.speedLabel {
+            min-height: 36px;
+        }
+    }
+
+    /* Status menu */
+    :root.modern #modernStatusMenu {
+        &:not(.visible) {
+            display: none;
+        }
+
+        &.visible {
+            display: block;
+        }
+
+        & li a {
+            align-items: center;
+            display: flex;
+            gap: 10px;
+        }
+
+        & li a > td {
+            display: contents;
+        }
+
+        & li:has(td.invisible) {
+            display: none;
+        }
+
+        & img {
+            height: 16px !important;
+            margin: 0 !important;
+            width: 16px;
+        }
     }
 }
