@@ -1461,6 +1461,133 @@ window.qBittorrent.Responsive ??= (() => {
         syncButton();
     };
 
+    /* Modern sort sheet */
+
+    const initPhoneSort = async () => {
+        const button = document.getElementById("modernSortButton");
+        const tableDiv = await whenElement("torrentsTableDiv");
+        const table = window.torrentsTable;
+
+        // sort columns, and the card details that can be hidden
+        const sortColumns = ["priority", "name", "size", "progress", "status", "dlspeed", "upspeed", "eta", "ratio", "added_on"];
+        const cardColumns = ["priority", "progress", "status", "eta", "size", "dlspeed", "upspeed"];
+        const caption = (column) => ((column === "priority") ? "QBT_TR(Queue)QBT_TR[CONTEXT=TransferListWidget]" : table.columns[column].caption);
+
+        const hiddenColumns = () => new Set(localPreferences.get("modern_card_hidden_fields", "").split(",").filter(Boolean));
+        const applyHidden = () => {
+            tableDiv.dataset.hide = [...hiddenColumns()].join(" ");
+        };
+
+        applyHidden();
+
+        const menu = document.createElement("ul");
+        menu.id = "modernSortMenu";
+        menu.className = "contextMenu";
+        menu.setAttribute("role", "menu");
+        menu.setAttribute("aria-label", button.getAttribute("aria-label"));
+        document.body.append(menu);
+
+        const close = () => {
+            menu.classList.remove("visible");
+            button.setAttribute("aria-expanded", "false");
+        };
+
+        const createMenuItem = (role, text, onClick) => {
+            const li = document.createElement("li");
+            li.setAttribute("role", "none");
+            const a = document.createElement("a");
+            a.setAttribute("role", role);
+            a.append(text);
+            a.addEventListener("click", (_event) => onClick());
+            li.append(a);
+            return li;
+        };
+
+        const createHeading = (text) => {
+            const li = document.createElement("li");
+            li.className = "modernSheetHeading";
+            li.setAttribute("role", "presentation");
+            li.textContent = text;
+            return li;
+        };
+
+        // "Show on cards" folds open and closed
+        let cardsOpen = false;
+        const render = () => {
+            const reverse = table.reverseSort === "1";
+            const sortItems = sortColumns.filter((column) => table.columns[column] !== undefined).map((column) => {
+                const li = createMenuItem("menuitemradio", caption(column), () => {
+                    table.setSortedColumn(column);
+                    render();
+                });
+                const a = li.firstElementChild;
+                a.setAttribute("aria-checked", (column === table.sortedColumn).toString());
+                if (column === table.sortedColumn) {
+                    const direction = document.createElement("span");
+                    direction.className = "modernSortDir";
+                    direction.textContent = reverse ? "\u2193" : "\u2191";
+                    a.append(direction);
+                }
+                return li;
+            });
+
+            const fold = createMenuItem("menuitem", "QBT_TR(Show on cards)QBT_TR[CONTEXT=MainWindow]", () => {
+                cardsOpen = !cardsOpen;
+                render();
+            });
+            fold.className = "modernSheetFold";
+            fold.firstElementChild.setAttribute("aria-expanded", cardsOpen.toString());
+
+            const hidden = hiddenColumns();
+            const toggles = !cardsOpen ? [] : cardColumns.map((column) => {
+                const li = createMenuItem("menuitemcheckbox", "", () => {
+                    const set = hiddenColumns();
+                    if (set.has(column))
+                        set.delete(column);
+                    else
+                        set.add(column);
+                    localPreferences.set("modern_card_hidden_fields", [...set].join(","));
+                    applyHidden();
+                    render();
+                });
+                const a = li.firstElementChild;
+                a.className = "modernCardToggle";
+                a.setAttribute("aria-checked", (!hidden.has(column)).toString());
+                const text = document.createElement("span");
+                text.textContent = caption(column);
+                const toggle = document.createElement("span");
+                toggle.className = "modernSwitch";
+                toggle.setAttribute("aria-hidden", "true");
+                a.append(text, toggle);
+                return li;
+            });
+
+            menu.replaceChildren(createHeading("QBT_TR(Sort by)QBT_TR[CONTEXT=MainWindow]"), ...sortItems, fold, ...toggles);
+        };
+
+        button.addEventListener("click", (event) => {
+            event.stopPropagation();
+            if (menu.classList.contains("visible")) {
+                close();
+                return;
+            }
+            render();
+            menu.classList.add("visible");
+            button.setAttribute("aria-expanded", "true");
+        });
+        document.addEventListener("pointerdown", (event) => {
+            if (!menu.contains(event.target) && !button.contains(event.target))
+                close();
+        });
+        document.addEventListener("keydown", (event) => {
+            switch (event.key) {
+                case "Escape":
+                    close();
+                    break;
+            }
+        });
+    };
+
     /* Options */
 
     // a page opens at its top, as the pages share the window's scrolling
@@ -1494,6 +1621,7 @@ window.qBittorrent.Responsive ??= (() => {
         initPhoneToolbar();
         initTorrentCards();
         initStatusBar();
+        initPhoneSort();
     };
 
     return exports();

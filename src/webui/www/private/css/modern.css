@@ -3846,6 +3846,24 @@
         & tr.selected td[data-col="status"] {
             color: inherit;
         }
+
+        &[data-hide~="priority"] td[data-col="priority"],
+        &[data-hide~="progress"] td[data-col="progress"],
+        &[data-hide~="status"] td[data-col="status"],
+        &[data-hide~="eta"] td[data-col="eta"],
+        &[data-hide~="size"] td[data-col="size"],
+        &[data-hide~="dlspeed"] td[data-col="dlspeed"],
+        &[data-hide~="upspeed"] td[data-col="upspeed"] {
+            display: none !important;
+        }
+
+        &[data-hide~="priority"] tbody tr {
+            grid-template-areas:
+                "name name name name"
+                "bar bar bar bar"
+                "status status status eta"
+                "size size dl up" !important;
+        }
     }
 }
 
@@ -3976,5 +3994,136 @@
             margin: 0 !important;
             width: 16px;
         }
+    }
+}
+
+/* Sort sheet */
+
+:root.modern #modernSortButton {
+    display: none;
+}
+
+@media (width < 760px) {
+    :root.modern #modernSortButton {
+        align-items: center;
+        border-radius: var(--modern-radius-pill);
+        display: inline-flex;
+        flex: none;
+        height: var(--modern-phone-filter-height);
+        justify-content: center;
+        margin-right: 6px;
+        min-height: 0;
+        padding: 0;
+        width: var(--modern-phone-filter-height);
+    }
+}
+
+:root.modern .modernGlyph[data-glyph="sort"] {
+    background:
+        linear-gradient(currentcolor 0 0) 0 3px / 100% 2px no-repeat,
+        linear-gradient(currentcolor 0 0) 0 8px / 70% 2px no-repeat,
+        linear-gradient(currentcolor 0 0) 0 13px / 40% 2px no-repeat;
+    height: 16px;
+    width: 16px;
+}
+
+:root.modern #modernSortMenu {
+    &:not(.visible) {
+        display: none;
+    }
+
+    &.visible {
+        display: block;
+    }
+
+    & a[aria-checked="true"] {
+        color: var(--color-accent-blue);
+        font-weight: 600;
+    }
+
+    & .modernSortDir {
+        margin-left: auto;
+    }
+
+    & .modernSheetHeading {
+        color: var(--color-text-muted);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        padding: 14px 12px 6px;
+        text-transform: uppercase;
+    }
+
+    & .modernCardToggle {
+        align-items: center;
+        display: flex;
+        justify-content: space-between;
+    }
+
+    & .modernCardToggle:hover {
+        background-color: var(--color-background-row-hover) !important;
+        color: inherit !important;
+    }
+
+    & .modernSwitch {
+        background-color: var(--color-background-track);
+        border-radius: var(--modern-radius-pill);
+        flex: none;
+        height: var(--modern-switch-height);
+        position: relative;
+        transition: background-color 0.15s;
+        width: var(--modern-switch-width);
+    }
+
+    & .modernSwitch::after {
+        background-color: var(--color-text-white);
+        border-radius: 50%;
+        content: "";
+        height: var(--modern-knob);
+        left: 3px;
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        transition: left 0.15s;
+        width: var(--modern-knob);
+    }
+
+    & a[aria-checked="true"] .modernSwitch {
+        background-color: var(--color-accent-blue);
+    }
+
+    & a[aria-checked="true"] .modernSwitch::after {
+        left: calc(100% - var(--modern-knob) - 3px);
+    }
+
+    & .modernCardToggle[aria-checked] {
+        color: var(--color-text-default);
+        font-weight: normal;
+    }
+}
+
+:root.modern #modernSortMenu .modernSheetFold {
+    border-top: 1px solid var(--color-border-divider);
+    margin-top: 6px;
+
+    & > a {
+        align-items: center;
+        display: flex;
+        font-weight: 600;
+    }
+
+    & > a::after {
+        background-color: currentcolor;
+        content: "";
+        flex: none;
+        height: 20px;
+        margin-left: auto;
+        mask: var(--modern-chevron-down) center / 20px no-repeat;
+        transition: transform 0.15s;
+        width: 20px;
+    }
+
+    & > a[aria-expanded="true"]::after {
+        transform: rotate(180deg);
     }
 }
