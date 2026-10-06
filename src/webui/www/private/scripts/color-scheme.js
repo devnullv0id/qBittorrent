@@ -46,7 +46,7 @@ window.qBittorrent.ColorScheme ??= (() => {
     const isMainWindow = window.parent === window;
 
     // the last look, so the main window doesn't start as Classic before the client data arrives
-    const lookSettings = ["color_scheme", "display_density", "display_mode"];
+    const lookSettings = ["accent_color", "color_scheme", "display_density", "display_mode"];
     const localPreferences = new window.qBittorrent.LocalPreferences.LocalPreferences();
     const storedLook = () => {
         try {
@@ -75,6 +75,12 @@ window.qBittorrent.ColorScheme ??= (() => {
         const displayMode = ((look === null) && (built || !isMainWindow)) ? builtDisplayMode() : setting("display_mode");
         const isModern = (displayMode === "modern");
         root.classList.toggle("modern", isModern);
+        // Modern's accent color, blue when unset
+        const accentColor = setting("accent_color");
+        if (isModern && (accentColor !== undefined) && (accentColor !== null))
+            root.dataset.accent = accentColor;
+        else
+            delete root.dataset.accent;
         root.classList.toggle("responsivePhone", phoneQuery.matches);
         // pages laid out anew: always in Modern, in Classic where the desktop layout doesn't hold
         root.classList.toggle("responsiveRelayout", isModern || relayoutQuery.matches);

@@ -47,6 +47,19 @@
                 <option value="modern">QBT_TR(Modern)QBT_TR[CONTEXT=OptionsDialog]</option>
             </select>
         </div>
+        <div class="formRow modernOnly">
+            <label for="accentColorSelect">QBT_TR(Accent color:)QBT_TR[CONTEXT=OptionsDialog]</label>
+            <select id="accentColorSelect">
+                <option value="blue">QBT_TR(Blue)QBT_TR[CONTEXT=OptionsDialog]</option>
+                <option value="indigo">QBT_TR(Indigo)QBT_TR[CONTEXT=OptionsDialog]</option>
+                <option value="purple">QBT_TR(Purple)QBT_TR[CONTEXT=OptionsDialog]</option>
+                <option value="pink">QBT_TR(Pink)QBT_TR[CONTEXT=OptionsDialog]</option>
+                <option value="red">QBT_TR(Red)QBT_TR[CONTEXT=OptionsDialog]</option>
+                <option value="orange">QBT_TR(Orange)QBT_TR[CONTEXT=OptionsDialog]</option>
+                <option value="green">QBT_TR(Green)QBT_TR[CONTEXT=OptionsDialog]</option>
+                <option value="teal">QBT_TR(Teal)QBT_TR[CONTEXT=OptionsDialog]</option>
+            </select>
+        </div>
     </fieldset>
 
     <fieldset class="settings">
@@ -2543,6 +2556,7 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
                     updateColoSchemeSelect(colorScheme);
                     document.getElementById("displayDensitySelect").value = displayDensity;
                     document.getElementById("displayModeSelect").value = displayMode;
+                    document.getElementById("accentColorSelect").value = clientData.get("accent_color") ?? "blue";
                     document.getElementById("addTorrentWindowEnabled").checked = addTorrentWindowEnabled === true;
                     document.getElementById("statusBarExternalIP").checked = pref.status_bar_external_ip;
                     document.getElementById("performanceWarning").checked = pref.performance_warning;
@@ -3016,6 +3030,8 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
             clientData.display_density = (displayDensity === "default") ? null : displayDensity;
             const displayMode = document.getElementById("displayModeSelect").value;
             clientData.display_mode = (displayMode === "classic") ? null : displayMode;
+            const accentColor = document.getElementById("accentColorSelect").value;
+            clientData.accent_color = (accentColor === "blue") ? null : accentColor;
             settings["status_bar_external_ip"] = document.getElementById("statusBarExternalIP").checked;
             settings["performance_warning"] = document.getElementById("performanceWarning").checked;
             clientData.full_url_tracker_column = document.getElementById("displayFullURLTrackerColumn").checked;

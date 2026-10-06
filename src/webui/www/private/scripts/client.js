@@ -62,6 +62,7 @@ window.qBittorrent.Client ??= (() => {
     const setup = () => {
         // fetch various data and store it in memory
         clientDataPromise = window.qBittorrent.ClientData.fetch([
+            "accent_color",
             "add_new_torrent_dialog_enabled",
             "add_torrent_default_category",
             "add_torrent_separate_dialog_per_torrent",
@@ -732,6 +733,7 @@ window.addEventListener("DOMContentLoaded", async (event) => {
     applyDisplaySettings = () => {
         const displayMode = document.documentElement.classList.contains("modern") ? "modern" : null;
         window.qBittorrent.ColorScheme.update({
+            accent_color: clientData.get("accent_color"),
             color_scheme: clientData.get("color_scheme"),
             display_density: clientData.get("display_density"),
             display_mode: displayMode

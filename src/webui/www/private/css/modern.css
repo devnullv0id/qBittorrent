@@ -27,6 +27,9 @@
         0 8px 28px hsl(0deg 0% 0% / 18%), 0 1px 3px hsl(0deg 0% 0% / 12%);
     --color-background-scrim: hsl(0deg 0% 0% / 45%);
 
+    /* the search fields' magnifier */
+    --modern-search: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cg fill='none' stroke='%23737373' stroke-width='2'%3E%3Ccircle cx='8.5' cy='8.5' r='5.5'/%3E%3Cpath d='m12.5 12.5 4.5 4.5' stroke-linecap='round'/%3E%3C/g%3E%3C/svg%3E");
+
     /* one chevron everywhere */
     --modern-chevron-down: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M4.34 6.79 10 12.45 15.66 6.79' fill='none' stroke='%23545454' stroke-width='2'/%3E%3C/svg%3E");
     --modern-chevron-up: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M4.34 13.21 10 7.55 15.66 13.21' fill='none' stroke='%23545454' stroke-width='2'/%3E%3C/svg%3E");
@@ -66,6 +69,7 @@
     );
 
     &.dark {
+        --modern-search: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cg fill='none' stroke='%23a3a3a3' stroke-width='2'%3E%3Ccircle cx='8.5' cy='8.5' r='5.5'/%3E%3Cpath d='m12.5 12.5 4.5 4.5' stroke-linecap='round'/%3E%3C/g%3E%3C/svg%3E");
         --modern-chevron-down: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M4.34 6.79 10 12.45 15.66 6.79' fill='none' stroke='%23e6e6e6' stroke-width='2'/%3E%3C/svg%3E");
         --modern-chevron-up: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M4.34 13.21 10 7.55 15.66 13.21' fill='none' stroke='%23e6e6e6' stroke-width='2'/%3E%3C/svg%3E");
         --modern-chevron-right: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M6.79 4.34 12.45 10 6.79 15.66' fill='none' stroke='%23e6e6e6' stroke-width='2'/%3E%3C/svg%3E");
@@ -86,6 +90,77 @@
             var(--color-accent-blue) 32%,
             var(--color-background-primary)
         );
+    }
+}
+
+/* Accent colors */
+:root.modern[data-accent="indigo"] {
+    --color-background-blue: hsl(235deg 65% 58%);
+    --color-accent-blue: hsl(235deg 65% 60%);
+
+    &.dark {
+        --color-background-blue: hsl(235deg 42% 54%);
+        --color-accent-blue: hsl(235deg 45% 61%);
+    }
+}
+
+:root.modern[data-accent="purple"] {
+    --color-background-blue: hsl(270deg 65% 55%);
+    --color-accent-blue: hsl(270deg 65% 58%);
+
+    &.dark {
+        --color-background-blue: hsl(270deg 42% 51%);
+        --color-accent-blue: hsl(270deg 45% 59%);
+    }
+}
+
+:root.modern[data-accent="pink"] {
+    --color-background-blue: hsl(330deg 65% 46%);
+    --color-accent-blue: hsl(330deg 65% 49%);
+
+    &.dark {
+        --color-background-blue: hsl(330deg 42% 46%);
+        --color-accent-blue: hsl(330deg 45% 55%);
+    }
+}
+
+:root.modern[data-accent="red"] {
+    --color-background-blue: hsl(0deg 65% 48%);
+    --color-accent-blue: hsl(0deg 65% 51%);
+
+    &.dark {
+        --color-background-blue: hsl(0deg 42% 48%);
+        --color-accent-blue: hsl(0deg 45% 56%);
+    }
+}
+
+:root.modern[data-accent="orange"] {
+    --color-background-blue: hsl(25deg 65% 38%);
+    --color-accent-blue: hsl(25deg 65% 40%);
+
+    &.dark {
+        --color-background-blue: hsl(25deg 42% 39%);
+        --color-accent-blue: hsl(25deg 45% 46%);
+    }
+}
+
+:root.modern[data-accent="green"] {
+    --color-background-blue: hsl(145deg 65% 29%);
+    --color-accent-blue: hsl(145deg 65% 31%);
+
+    &.dark {
+        --color-background-blue: hsl(145deg 42% 32%);
+        --color-accent-blue: hsl(145deg 45% 38%);
+    }
+}
+
+:root.modern[data-accent="teal"] {
+    --color-background-blue: hsl(180deg 65% 28%);
+    --color-accent-blue: hsl(180deg 65% 30%);
+
+    &.dark {
+        --color-background-blue: hsl(180deg 42% 32%);
+        --color-accent-blue: hsl(180deg 45% 37%);
     }
 }
 
@@ -559,35 +634,48 @@
 :root.modern #rssFilterInput,
 :root.modern #filterTextInput,
 :root.modern #searchInNameFilter {
-    background: var(--color-background-primary) url("../images/edit-find.svg")
-        10px center / 14px no-repeat;
+    background: var(--color-background-primary) var(--modern-search) 10px
+        center / 16px no-repeat;
     border-radius: var(--modern-radius-pill);
     padding-left: 32px;
 }
 
 :root.modern #torrentsFilterInput {
-    background: var(--color-background-surface) url("../images/edit-find.svg")
-        11px center / 14px no-repeat;
+    background: var(--color-background-surface) var(--modern-search) 11px
+        center / 16px no-repeat;
     flex: 1 1 200px;
     min-width: 0;
 }
 
+/* the regex toggle's icon in the accent */
 :root.modern #torrentsFilterRegexBox + label {
     background-color: var(--color-background-primary);
-    background-size: 16px;
+    background-image: none;
     border-radius: var(--modern-radius-pill);
     height: var(--modern-control-height);
     margin: 0;
     width: calc(var(--modern-control-height) + 6px);
+
+    &::before {
+        background-color: var(--color-accent-blue);
+        content: "";
+        display: block;
+        height: 100%;
+        mask: url("../images/regex.svg") center / 16px no-repeat;
+    }
 }
 
 :root.modern #torrentsFilterRegexBox:checked + label {
     background-color: var(--color-background-blue);
-    background-size: 16px;
+    background-image: none;
     border-color: var(--color-background-blue);
     height: var(--modern-control-height);
     margin: 0;
     width: calc(var(--modern-control-height) + 6px);
+
+    &::before {
+        background-color: var(--color-text-white);
+    }
 }
 
 :root.modern #torrentsFilterSelect {
@@ -772,6 +860,266 @@
 
 :root.modern #torrentFilesFilterToolbar {
     margin: 4px 4px 0 0;
+}
+
+/* Icons */
+
+/* icons whose color means nothing take the accent */
+:root.modern
+    :where(
+        img[src$="/application-rss.svg"],
+        img[src$="/application-url.svg"],
+        img[src$="/browser-cookies.svg"],
+        img[src$="/configure.svg"],
+        img[src$="/directory.svg"],
+        img[src$="/download.svg"],
+        img[src$="/edit-copy.svg"],
+        img[src$="/edit-find.svg"],
+        img[src$="/edit-rename.svg"],
+        img[src$="/filter-all.svg"],
+        img[src$="/folder-documents.svg"],
+        img[src$="/folder-new.svg"],
+        img[src$="/go-bottom.svg"],
+        img[src$="/go-down.svg"],
+        img[src$="/go-top.svg"],
+        img[src$="/go-up.svg"],
+        img[src$="/hash.svg"],
+        img[src$="/help-about.svg"],
+        img[src$="/help-contents.svg"],
+        img[src$="/insert-link.svg"],
+        img[src$="/list-add.svg"],
+        img[src$="/name.svg"],
+        img[src$="/network-connect.svg"],
+        img[src$="/network-server.svg"],
+        img[src$="/peers.svg"],
+        img[src$="/peers-add.svg"],
+        img[src$="/plugins.svg"],
+        img[src$="/preferences-advanced.svg"],
+        img[src$="/preferences-bittorrent.svg"],
+        img[src$="/preferences-desktop.svg"],
+        img[src$="/preferences-webui.svg"],
+        img[src$="/ratio.svg"],
+        img[src$="/reannounce.svg"],
+        img[src$="/set-location.svg"],
+        img[src$="/tags.svg"],
+        img[src$="/torrent-creator.svg"],
+        img[src$="/torrent-magnet.svg"],
+        img[src$="/trackers.svg"],
+        img[src$="/view-categories.svg"],
+        img[src$="/view-refresh.svg"],
+        img[src$="/view-statistics.svg"],
+        img[src$="/wallet-open.svg"]
+    ) {
+    background-color: var(--color-accent-blue);
+    mask: var(--modern-icon) content-box center / contain no-repeat;
+    object-position: -9999px 0;
+}
+
+:root.modern :where(img[src$="/application-rss.svg"]) {
+    --modern-icon: url("../images/application-rss.svg");
+}
+
+:root.modern :where(img[src$="/application-url.svg"]) {
+    --modern-icon: url("../images/application-url.svg");
+}
+
+:root.modern :where(img[src$="/browser-cookies.svg"]) {
+    --modern-icon: url("../images/browser-cookies.svg");
+}
+
+:root.modern :where(img[src$="/configure.svg"]) {
+    --modern-icon: url("../images/configure.svg");
+}
+
+:root.modern :where(img[src$="/directory.svg"]) {
+    --modern-icon: url("../images/directory.svg");
+}
+
+:root.modern :where(img[src$="/download.svg"]) {
+    --modern-icon: url("../images/download.svg");
+}
+
+:root.modern :where(img[src$="/edit-copy.svg"]) {
+    --modern-icon: url("../images/edit-copy.svg");
+}
+
+:root.modern :where(img[src$="/edit-find.svg"]) {
+    --modern-icon: url("../images/edit-find.svg");
+}
+
+:root.modern :where(img[src$="/edit-rename.svg"]) {
+    --modern-icon: url("../images/edit-rename.svg");
+}
+
+:root.modern :where(img[src$="/filter-all.svg"]) {
+    --modern-icon: url("../images/filter-all.svg");
+}
+
+:root.modern :where(img[src$="/folder-documents.svg"]) {
+    --modern-icon: url("../images/folder-documents.svg");
+}
+
+:root.modern :where(img[src$="/folder-new.svg"]) {
+    --modern-icon: url("../images/folder-new.svg");
+}
+
+:root.modern :where(img[src$="/go-bottom.svg"]) {
+    --modern-icon: url("../images/go-bottom.svg");
+}
+
+:root.modern :where(img[src$="/go-down.svg"]) {
+    --modern-icon: url("../images/go-down.svg");
+}
+
+:root.modern :where(img[src$="/go-top.svg"]) {
+    --modern-icon: url("../images/go-top.svg");
+}
+
+:root.modern :where(img[src$="/go-up.svg"]) {
+    --modern-icon: url("../images/go-up.svg");
+}
+
+:root.modern :where(img[src$="/hash.svg"]) {
+    --modern-icon: url("../images/hash.svg");
+}
+
+:root.modern :where(img[src$="/help-about.svg"]) {
+    --modern-icon: url("../images/help-about.svg");
+}
+
+:root.modern :where(img[src$="/help-contents.svg"]) {
+    --modern-icon: url("../images/help-contents.svg");
+}
+
+:root.modern :where(img[src$="/insert-link.svg"]) {
+    --modern-icon: url("../images/insert-link.svg");
+}
+
+:root.modern :where(img[src$="/list-add.svg"]) {
+    --modern-icon: url("../images/list-add.svg");
+}
+
+:root.modern :where(img[src$="/name.svg"]) {
+    --modern-icon: url("../images/name.svg");
+}
+
+:root.modern :where(img[src$="/network-connect.svg"]) {
+    --modern-icon: url("../images/network-connect.svg");
+}
+
+:root.modern :where(img[src$="/network-server.svg"]) {
+    --modern-icon: url("../images/network-server.svg");
+}
+
+:root.modern :where(img[src$="/peers.svg"]) {
+    --modern-icon: url("../images/peers.svg");
+}
+
+:root.modern :where(img[src$="/peers-add.svg"]) {
+    --modern-icon: url("../images/peers-add.svg");
+}
+
+:root.modern :where(img[src$="/plugins.svg"]) {
+    --modern-icon: url("../images/plugins.svg");
+}
+
+:root.modern :where(img[src$="/preferences-advanced.svg"]) {
+    --modern-icon: url("../images/preferences-advanced.svg");
+}
+
+:root.modern :where(img[src$="/preferences-bittorrent.svg"]) {
+    --modern-icon: url("../images/preferences-bittorrent.svg");
+}
+
+:root.modern :where(img[src$="/preferences-desktop.svg"]) {
+    --modern-icon: url("../images/preferences-desktop.svg");
+}
+
+:root.modern :where(img[src$="/preferences-webui.svg"]) {
+    --modern-icon: url("../images/preferences-webui.svg");
+}
+
+:root.modern :where(img[src$="/ratio.svg"]) {
+    --modern-icon: url("../images/ratio.svg");
+}
+
+:root.modern :where(img[src$="/reannounce.svg"]) {
+    --modern-icon: url("../images/reannounce.svg");
+}
+
+:root.modern :where(img[src$="/set-location.svg"]) {
+    --modern-icon: url("../images/set-location.svg");
+}
+
+/* speed limit icons: the gauge in the accent, the needle keeps its color */
+:root.modern :where(img[src$="/slow.svg"], img[src$="/slow_off.svg"]) {
+    background: var(--modern-needle) content-box center / contain no-repeat
+        var(--color-gauge, var(--color-accent-blue));
+    mask: var(--modern-icon) content-box center / contain no-repeat;
+    object-position: -9999px 0;
+}
+
+/* white where other icons turn white */
+:root.modern
+    :is(.tab-menu .selected, .contextMenu li a:hover)
+    :is(img[src$="/slow.svg"], img[src$="/slow_off.svg"]) {
+    --color-gauge: var(--color-text-white);
+
+    filter: none;
+}
+
+:root.modern :where(img[src$="/slow.svg"]) {
+    --modern-icon: url("../images/slow.svg");
+    --modern-needle: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='m5.3697171 6.0418607 7.0712359 13.7839783.0059-.0053a4 4 0 0 0 .563666.836956 4 4 0 0 0 5.647106.331963 4 4 0 0 0 .331963-5.647105 4 4 0 0 0 -.759274-.663037 4 4 0 0 0 -.0081-.0061z' fill='%23ff0000'/%3E%3C/svg%3E");
+}
+
+/* amber with the red and pink accents, which would hide the red needle */
+:root.modern:is([data-accent="red"], [data-accent="pink"])
+    :where(img[src$="/slow.svg"]) {
+    --modern-needle: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='m5.3697171 6.0418607 7.0712359 13.7839783.0059-.0053a4 4 0 0 0 .563666.836956 4 4 0 0 0 5.647106.331963 4 4 0 0 0 .331963-5.647105 4 4 0 0 0 -.759274-.663037 4 4 0 0 0 -.0081-.0061z' fill='%23ffb000'/%3E%3C/svg%3E");
+}
+
+:root.modern :where(img[src$="/slow_off.svg"]) {
+    --modern-icon: url("../images/slow_off.svg");
+    --modern-needle: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='m26.630281 6.0418607-7.071236 13.7839783-.0059-.0053a4 4 0 0 1 -.563666.836956 4 4 0 0 1 -5.647106.331963 4 4 0 0 1 -.331963-5.647105 4 4 0 0 1 .759274-.663037 4 4 0 0 1 .0081-.0061z' fill='%2332cd32'/%3E%3C/svg%3E");
+}
+
+:root.modern :where(img[src$="/tags.svg"]) {
+    --modern-icon: url("../images/tags.svg");
+}
+
+:root.modern :where(img[src$="/torrent-creator.svg"]) {
+    --modern-icon: url("../images/torrent-creator.svg");
+}
+
+:root.modern :where(img[src$="/torrent-magnet.svg"]) {
+    --modern-icon: url("../images/torrent-magnet.svg");
+}
+
+:root.modern :where(img[src$="/trackers.svg"]) {
+    --modern-icon: url("../images/trackers.svg");
+}
+
+:root.modern :where(img[src$="/view-categories.svg"]) {
+    --modern-icon: url("../images/view-categories.svg");
+}
+
+:root.modern :where(img[src$="/view-refresh.svg"]) {
+    --modern-icon: url("../images/view-refresh.svg");
+}
+
+:root.modern :where(img[src$="/view-statistics.svg"]) {
+    --modern-icon: url("../images/view-statistics.svg");
+}
+
+:root.modern :where(img[src$="/wallet-open.svg"]) {
+    --modern-icon: url("../images/wallet-open.svg");
+}
+
+/* the confirmations' question icon */
+:root.modern .confirmWarning {
+    background: var(--color-accent-blue);
+    mask: url("../images/help-about.svg") center no-repeat;
 }
 
 /* Filters sidebar */
@@ -1269,6 +1617,31 @@
     & h3[style*="url"] {
         background-position: 12px center !important;
         padding-left: 36px !important;
+    }
+
+    /* title icons in the accent, drawn over Mocha's inline background */
+    & h3:is([style*="/torrent-creator.svg"], [style*="/list-add.svg"]) {
+        background-image: none !important;
+        position: relative;
+
+        &::before {
+            background-color: var(--color-accent-blue);
+            content: "";
+            height: 16px;
+            left: 12px;
+            mask: var(--modern-title-icon) center / 16px no-repeat;
+            position: absolute;
+            top: calc(50% - 8px);
+            width: 16px;
+        }
+    }
+
+    & h3[style*="/torrent-creator.svg"] {
+        --modern-title-icon: url("../images/torrent-creator.svg");
+    }
+
+    & h3[style*="/list-add.svg"] {
+        --modern-title-icon: url("../images/list-add.svg");
     }
 }
 
@@ -3793,7 +4166,7 @@
         width: var(--modern-phone-filter-height);
     }
 
-    /* the regex toggle ends the joined field */
+    /* the regex toggle ends the field */
     :root.modern #torrentsFilterToolbar label[for="torrentsFilterRegexBox"] {
         background-color: var(--color-background-primary);
         border: 1px solid var(--color-border-default);
@@ -3803,6 +4176,17 @@
         flex: none;
         height: var(--modern-phone-filter-height);
         margin: 0;
+
+        &::before {
+            background-color: var(--color-text-muted);
+        }
+    }
+
+    :root.modern
+        #torrentsFilterToolbar
+        #torrentsFilterRegexBox:checked
+        + label::before {
+        background-color: var(--color-accent-blue);
     }
 }
 
