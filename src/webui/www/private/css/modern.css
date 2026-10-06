@@ -8,6 +8,7 @@
     --modern-radius-button: 6px;
     --modern-control-height: 28px;
     --modern-row-height: 30px;
+    --modern-select-width: 200px;
     --modern-switch-width: 36px;
     --modern-switch-height: 20px;
     --modern-knob: 14px;
@@ -16,6 +17,7 @@
         --modern-title-height
     ); /* also read by responsive.js */
 
+    --modern-sidebar-width: 184px;
     --color-text-muted: hsl(0deg 0% 45%);
     --color-background-card: hsl(0deg 0% 98%);
     --color-background-row-hover: hsl(0deg 0% 92%);
@@ -1303,11 +1305,11 @@
 
 /* Watched folders */
 :root.modern #watched_folders_tab {
-    border: 1px solid var(--color-border-default);
+    border: 0 !important;
     border-collapse: separate;
-    border-radius: var(--modern-radius-card);
     border-spacing: 0;
-    overflow: hidden;
+    overflow: visible;
+    table-layout: fixed;
     width: 100%;
 
     & th,
@@ -1328,6 +1330,59 @@
 
     & tbody tr + tr td {
         border-top: 1px solid var(--color-border-divider);
+    }
+
+    & td:first-child > input {
+        box-sizing: border-box;
+        width: 100% !important;
+    }
+
+    & th:last-child,
+    & td:last-child {
+        padding-right: 40px;
+        white-space: nowrap;
+    }
+
+    & .select-watched-folder-editable {
+        box-sizing: border-box;
+        overflow: visible;
+        position: relative;
+        width: 100%;
+
+        & select {
+            border-radius: var(--modern-radius-pill);
+        }
+
+        & img {
+            border: 1px solid var(--color-border-default);
+            border-radius: 50%;
+            box-sizing: border-box;
+            cursor: pointer;
+            display: block;
+            height: 24px;
+            left: calc(100% + 8px);
+            padding: 0 !important;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 24px !important;
+        }
+
+        & img:hover {
+            background-color: var(--color-background-hover);
+        }
+
+        /* the "Other..." path field covers the select's text */
+        &:has(> input:not([hidden])) select {
+            color: transparent;
+        }
+
+        & > input:not([hidden]) {
+            color: var(--color-text-default);
+            left: 0;
+            padding-left: 12px;
+            z-index: 1;
+        }
     }
 }
 
@@ -1532,5 +1587,1288 @@
     :root.modern * {
         animation: none !important;
         transition: none !important;
+    }
+}
+
+/* Options window */
+
+/* tabs in a sidebar */
+:root.modern #preferencesPage {
+    & .mochaToolbarWrapper {
+        height: 0 !important;
+        overflow: visible;
+        position: static;
+    }
+
+    & .mochaToolbar {
+        background-color: var(--color-background-default);
+        border-right: 1px solid var(--color-border-divider);
+        bottom: 0;
+        box-sizing: border-box;
+        height: auto !important;
+        left: 0;
+        overflow-y: auto;
+        padding: 10px 8px;
+        position: absolute;
+        top: var(--modern-title-height);
+        width: var(--modern-sidebar-width);
+    }
+
+    /* stretch the overlay to the window */
+    & .mochaOverlay {
+        inset: 0;
+        width: auto !important;
+    }
+
+    & .mochaContentBorder {
+        inset: var(--modern-title-height) 0 0 var(--modern-sidebar-width);
+        margin: 0;
+        position: absolute;
+        width: auto !important;
+    }
+
+    & .mochaContentWrapper {
+        height: 100% !important;
+        width: auto !important;
+    }
+
+    /* the footer at the window's bottom, also below a short page */
+    & .mochaContent {
+        display: flex !important;
+        flex-direction: column;
+        gap: 12px;
+        padding-bottom: 0 !important;
+    }
+}
+
+:root.modern #preferencesTabs {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 2px;
+    overflow: visible;
+
+    & li a {
+        border-radius: var(--modern-radius-pill);
+        font-size: 13px;
+        gap: 10px;
+        padding: 7px 10px;
+        text-align: start;
+        white-space: normal; /* a long page name wraps in the sidebar */
+    }
+
+    & li img {
+        height: 18px;
+        width: 18px;
+    }
+}
+
+/* the page list like the filters sidebar */
+@media (width >= 760px) {
+    :root.modern #preferencesTabs li.selected a {
+        background-color: color-mix(
+            in srgb,
+            var(--color-accent-blue) 22%,
+            transparent
+        );
+        color: var(--color-text-default);
+        font-weight: 600;
+
+        & img {
+            filter: none;
+        }
+    }
+}
+
+:root.modern .PrefTab {
+    --modern-unit-slot: 96px; /* room for a unit beside its field */
+    --modern-field-width: calc(
+        var(--modern-select-width) - var(--modern-unit-slot)
+    );
+
+    margin: 0 auto;
+    max-width: 780px;
+    padding: 4px 18px 8px;
+    width: 100%; /* auto margins would shrink it to its content */
+
+    & > fieldset:first-child {
+        margin-top: 30px;
+    }
+
+    /* label left, control right */
+    & div.formRow {
+        align-items: center;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px 10px;
+        margin: 0 !important;
+        min-height: calc(var(--modern-row-height) + 8px);
+        padding: 4px 0;
+    }
+
+    & fieldset > div.formRow + div.formRow,
+    & fieldset > table + div.formRow,
+    & fieldset > div.formRow + table,
+    & fieldset > fieldset + div.formRow {
+        border-top: 1px solid var(--color-border-divider);
+    }
+
+    & div.formRow > label:first-child,
+    & div.formRow > input[type="checkbox"]:first-child + label {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    /* long switch labels wrap */
+    & div.formRow > input[type="checkbox"]:first-child + label:last-child {
+        flex: 1 1 0;
+    }
+
+    & div.formRow > input[type="checkbox"]:first-child {
+        margin: 0 0 0 auto;
+        order: 99;
+    }
+
+    & fieldset.settings label {
+        padding: 0;
+    }
+
+    & table {
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    & tr + tr > td {
+        border-top: 1px solid var(--color-border-divider);
+    }
+
+    & td {
+        padding: 8px 0;
+        vertical-align: middle;
+    }
+
+    & td:first-child {
+        padding-right: 12px;
+    }
+
+    & td:last-child:not(:first-child) {
+        text-align: right;
+        white-space: nowrap;
+    }
+
+    /* equal-width dropdowns */
+    & select:not([multiple]) {
+        max-width: 100%;
+        width: var(--modern-select-width) !important;
+    }
+
+    & input[type="number"] {
+        text-align: left;
+        width: 110px !important;
+    }
+
+    & input[type="text"],
+    & input[type="password"] {
+        max-width: 100%;
+    }
+
+    & > fieldset {
+        margin: 34px 0 14px;
+        padding: 6px 16px;
+    }
+
+    & td:first-child:not(:last-child) {
+        max-width: 55%;
+        min-width: 0;
+        overflow-wrap: anywhere;
+    }
+
+    & td:has(> input + input) {
+        white-space: nowrap;
+
+        & > input {
+            max-width: 100%;
+        }
+    }
+
+    & td:last-child:has(> input[type="number"]) {
+        text-align: left;
+        width: auto;
+    }
+
+    & td:last-child:has(> i) {
+        white-space: normal;
+    }
+
+    & td > i {
+        color: var(--color-text-muted);
+        display: block;
+        font-size: 12px;
+        margin-top: 4px;
+        text-align: left;
+        width: calc(var(--modern-select-width) - 3.2em);
+    }
+
+    & td[style*="text-align: right"] {
+        text-align: left !important;
+    }
+
+    &
+        td
+        > input:is(
+            [type="text"],
+            [type="number"],
+            [type="password"],
+            :not([type])
+        ):only-of-type,
+    & div.formRow > input:is([type="number"]),
+    & div.formRow.withUnit > input:is([type="text"], :not([type])) {
+        box-sizing: border-box;
+        flex: none;
+        margin-left: 0;
+        margin-right: var(--modern-unit-slot);
+        max-width: 100%;
+        width: var(--modern-field-width) !important;
+    }
+
+    & div.formRow > input:is([type="number"]),
+    & div.formRow.withUnit > input:is([type="text"], :not([type])) {
+        margin-left: auto;
+    }
+
+    &
+        :is(td, div.formRow):not(.withUnit)
+        > input:is(
+            [type="text"],
+            [type="number"],
+            [type="password"],
+            :not([type])
+        ):only-of-type {
+        margin-right: 0;
+        width: var(--modern-select-width) !important;
+    }
+
+    &
+        td:last-child:has(
+            > input:is(
+                    [type="text"],
+                    [type="number"],
+                    [type="password"],
+                    :not([type])
+                ):only-of-type
+        ):not(:has(> select)) {
+        text-align: left;
+        width: var(--modern-select-width);
+    }
+
+    & td:has(> input):has(> select) {
+        text-align: left;
+        white-space: nowrap;
+        width: var(--modern-select-width);
+
+        & > input:is([type="text"], [type="number"], :not([type])) {
+            margin-right: 6px;
+            width: calc(
+                var(--modern-select-width) - var(--modern-unit-slot)
+            ) !important;
+        }
+
+        & > select {
+            width: calc(var(--modern-unit-slot) - 6px) !important;
+        }
+    }
+
+    & .withUnit > .prefUnit {
+        vertical-align: middle;
+    }
+
+    & .withUnit > .prefUnit::before {
+        box-sizing: border-box;
+        display: inline-block;
+        line-height: var(--modern-control-height);
+        margin-left: 6px;
+        text-align: left; /* where a unit dropdown starts */
+        vertical-align: middle;
+        width: calc(var(--modern-unit-slot) - 6px);
+    }
+
+    & td > :is(input, select, span, i, label, button, img),
+    & div.formRow > :is(input, select, span, label, button, img) {
+        vertical-align: middle;
+    }
+
+    & td:has(> :is(input, select)) {
+        vertical-align: middle;
+    }
+
+    & .prefUnit,
+    & .prefUnit::before {
+        vertical-align: middle;
+    }
+}
+
+/* Options: a switch in a legend heads its card */
+:root.modern .PrefTab fieldset:has(> legend input[type="checkbox"]) {
+    padding-top: calc(var(--modern-row-height) + 16px);
+
+    & > legend {
+        align-items: center;
+        color: var(--color-text-default);
+        display: flex;
+        font-size: inherit;
+        font-weight: 600;
+        gap: 10px;
+        height: calc(var(--modern-row-height) + 12px);
+        left: 16px;
+        letter-spacing: 0;
+        max-width: none;
+        right: 16px;
+        text-transform: none;
+        top: 2px;
+        white-space: normal;
+    }
+
+    & > legend label {
+        flex: 1 1 auto;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    & > legend input[type="checkbox"] {
+        margin: 0 0 0 auto;
+        order: 2;
+    }
+
+    &:has(> legend input[type="checkbox"]:not(:checked)) {
+        padding-bottom: 0;
+
+        & > :not(legend) {
+            display: none;
+        }
+    }
+}
+
+:root.modern .PrefTab > fieldset:has(> legend input[type="checkbox"]) {
+    margin-top: 14px;
+}
+
+:root.modern .PrefTab fieldset fieldset:has(> legend input[type="checkbox"]) {
+    padding-left: 16px;
+
+    & > legend {
+        font-weight: normal;
+        left: 16px;
+        top: 4px;
+    }
+}
+
+/* Options: switch rows with a field */
+:root.modern
+    .PrefTab
+    div.formRow:has(
+        > input[type="checkbox"]:first-child + label + input[type="text"]
+    ) {
+    & > label {
+        order: 0;
+    }
+
+    & > input[type="checkbox"]:first-child {
+        order: 1;
+    }
+
+    & > input[type="text"] {
+        box-sizing: border-box;
+        flex: 1 1 100%;
+        order: 2;
+    }
+
+    & > input[type="checkbox"]:not(:checked) ~ input[type="text"] {
+        display: none;
+    }
+}
+
+/* API key */
+:root.modern .PrefTab tr:has(> td > #WebUIAPIKeyText) {
+    align-items: center;
+    display: flex;
+    gap: 6px;
+
+    & > td {
+        padding: 8px 0 !important;
+        white-space: nowrap;
+        width: auto !important;
+    }
+
+    & > td:nth-child(2) {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    & #WebUIAPIKeyText {
+        box-sizing: border-box;
+        width: 100% !important;
+    }
+
+    & button {
+        background-color: transparent;
+        height: var(--modern-control-height);
+        min-width: 0;
+        padding: 0;
+        width: var(--modern-control-height);
+
+        &:disabled {
+            opacity: 0.4;
+        }
+    }
+
+    & button img {
+        margin: 0 !important;
+        position: static !important;
+        top: auto !important;
+    }
+}
+
+/* number fields line up */
+
+:root.modern .prefGap {
+    display: none;
+}
+
+:root.modern .prefUnit {
+    font-size: 0;
+    vertical-align: middle;
+
+    &::before {
+        color: var(--color-text-muted);
+        content: attr(data-unit);
+        font-size: 13px;
+    }
+}
+
+/* Log files' age and unit: the unit as wide as its names, the age the rest */
+:root.modern #preferencesPage .PrefTab td:has(> #filelog_age_type_select) {
+    white-space: nowrap;
+
+    & > #filelog_age_input {
+        flex: 1 1 auto;
+        margin-right: 6px !important;
+        min-width: 0;
+        width: auto !important;
+    }
+
+    & > #filelog_age_type_select {
+        flex: none;
+        width: auto !important;
+    }
+}
+
+:root.modern
+    #preferencesPage
+    .PrefTab
+    td:has(> select):has(> input)
+    > select:not([multiple]) {
+    width: calc(var(--modern-unit-slot) - 6px) !important;
+}
+
+/* control columns */
+:root.modern #preferencesPage .PrefTab {
+    &
+        td:last-child:not(:first-child):has(
+            > :is(input:not([type="checkbox"], [type="radio"]), select)
+        ):not(
+            :has(> input:not([type="checkbox"]) ~ input:not([type="checkbox"])),
+            :has(> label)
+        ) {
+        box-sizing: border-box;
+        max-width: var(--modern-select-width);
+        min-width: var(--modern-select-width);
+        text-align: left;
+        width: var(--modern-select-width);
+    }
+
+    &
+        td:last-child:not(:first-child)
+        > select:not([multiple]):only-of-type:not(.speedUnitSelect) {
+        width: var(--modern-select-width) !important;
+    }
+
+    & td:last-child:not(:first-child) > :is(input, select) {
+        margin-left: 0 !important;
+    }
+
+    &
+        div.formRow
+        > :is(
+            input:not([type="checkbox"], [type="radio"]),
+            select
+        ):last-of-type {
+        margin-left: auto;
+    }
+
+    & div.formRow.withUnit > .prefUnit {
+        flex: none;
+    }
+
+    /* settings outside a group as a card */
+    & > div.formRow {
+        background: var(--color-background-card)
+            linear-gradient(
+                var(--color-border-divider),
+                var(--color-border-divider)
+            )
+            center top / calc(100% - 32px) 1px no-repeat;
+        border: 1px solid var(--color-border-default);
+        border-bottom: 0;
+        border-top: 0;
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+    }
+
+    & > div.formRow:not(div.formRow + div.formRow) {
+        background-image: none;
+        border-radius: var(--modern-radius-card) var(--modern-radius-card) 0 0;
+        border-top: 1px solid var(--color-border-default);
+        margin-top: 14px !important;
+    }
+
+    & > div.formRow:not(:has(+ div.formRow)) {
+        border-bottom: 1px solid var(--color-border-default);
+        border-bottom-left-radius: var(--modern-radius-card);
+        border-bottom-right-radius: var(--modern-radius-card);
+        margin-bottom: 14px !important;
+    }
+
+    /* the port below the address */
+    & td:has(> #webuiAddressValue) {
+        text-align: left;
+        white-space: normal;
+        width: var(--modern-select-width);
+
+        & > #webuiAddressValue {
+            box-sizing: border-box;
+            display: block;
+            width: var(--modern-select-width) !important;
+        }
+
+        & > label {
+            display: inline-block;
+            margin: 6px 6px 0 0 !important;
+        }
+
+        & > #webuiPortValue {
+            box-sizing: border-box;
+            margin-top: 6px;
+            width: calc(var(--modern-select-width) - 4em) !important;
+        }
+    }
+
+    & td:has(> #filelog_age_type_select) {
+        font-size: 0;
+
+        & > * {
+            font-size: 13px;
+        }
+    }
+}
+
+/* never scroll sideways */
+:root.modern #preferencesPage .mochaContentWrapper {
+    overflow-x: hidden !important;
+}
+
+:root.modern #preferencesPage :is(fieldset, .formRow) {
+    min-width: 0;
+}
+
+/* Proxy and I2P */
+@media (width >= 760px) {
+    :root.modern
+        #preferencesPage
+        :is(#peerProxyServerTable, table:has(> tbody > tr > td > #i2pAddress)) {
+        display: block;
+        width: 100%;
+
+        & tbody {
+            display: block;
+        }
+
+        & tr {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) var(--modern-select-width);
+        }
+
+        & td {
+            align-items: center;
+            display: flex;
+        }
+
+        & tr > td:nth-child(n + 3) {
+            border-top: 1px solid var(--color-border-divider);
+        }
+
+        & input {
+            box-sizing: border-box;
+            width: 100% !important;
+        }
+    }
+}
+
+:root.modern #preferencesPage .formRow > fieldset {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+:root.modern #preferencesPage textarea {
+    box-sizing: border-box;
+    max-width: 100%;
+    width: 100%;
+}
+
+/* Options footer */
+:root.modern
+    #preferencesPage
+    .mochaContent
+    > div:not(.PrefTab):has(> input[type="button"]) {
+    background-color: var(--color-background-popup);
+    border-top: 1px solid var(--color-border-divider);
+    bottom: 0;
+    box-shadow: 0 -12px 0 var(--color-background-popup); /* room above the divider */
+    display: flex;
+    justify-content: center;
+    margin: auto 0 0 !important;
+    padding: 10px 18px;
+    position: sticky;
+    z-index: 2;
+
+    & input[type="button"] {
+        background-color: var(--color-background-blue);
+        border-color: var(--color-background-blue);
+        color: var(--color-text-white);
+        font-weight: 600;
+        min-width: 96px;
+    }
+}
+
+/* Field and unit */
+:root.modern #preferencesPage .PrefTab .prefField {
+    align-items: center;
+    display: inline-flex;
+    gap: 6px;
+    vertical-align: middle;
+    width: var(--modern-select-width);
+
+    & > input {
+        flex: 1 1 auto;
+        margin: 0;
+        min-width: 0;
+        width: auto !important;
+    }
+
+    & > .prefUnit {
+        flex: none;
+    }
+
+    /* units have a slot of their own */
+    &:not(:has(#schedule_from_hour, #schedule_to_hour)) > .prefUnit {
+        min-width: calc(var(--modern-unit-slot) - 6px);
+        text-align: left;
+    }
+
+    & > .prefUnit::before {
+        margin: 0;
+        width: auto;
+    }
+}
+
+:root.modern #preferencesPage .PrefTab div.formRow > .prefField {
+    margin-left: auto;
+}
+
+/* a field with a button */
+@media (width >= 760px) {
+    :root.modern #preferencesPage .PrefTab div.formRow:has(> input + button) {
+        flex-wrap: nowrap;
+        gap: 0;
+
+        & > label {
+            flex: none;
+            width: calc(100% - var(--modern-select-width));
+        }
+
+        & > input {
+            flex: 1 1 0;
+            min-width: 0;
+            width: auto !important;
+        }
+
+        & > button {
+            flex: none;
+            margin-left: 8px;
+        }
+    }
+}
+
+/* switches at the row's end */
+:root.modern
+    #preferencesPage
+    .PrefTab
+    div.formRow
+    > span:has(> input[type="checkbox"] + label) {
+    display: contents;
+}
+
+:root.modern
+    #preferencesPage
+    .PrefTab
+    div.formRow:has(> span > input[type="checkbox"] + label) {
+    align-items: center;
+    display: flex;
+    gap: 10px;
+
+    & > span > label {
+        flex: 1 1 0;
+        min-width: 0;
+        order: 0;
+    }
+
+    & > span > input[type="checkbox"] {
+        flex: none;
+        margin: 0 0 0 auto !important;
+        order: 2;
+    }
+}
+
+/* a switch cell, then a field cell */
+:root.modern
+    #preferencesPage
+    .PrefTab
+    tr:has(> td:first-child > input[type="checkbox"] + label):has(
+        > td:last-child:not(:first-child)
+            > :is(input:not([type="checkbox"]), select, .prefField)
+    ) {
+    display: flex;
+    flex-wrap: wrap;
+
+    & > td:first-child {
+        align-items: center;
+        display: flex;
+        flex: 1 1 100%;
+        gap: 10px;
+        padding-right: 0 !important;
+        width: auto !important;
+
+        & > label {
+            flex: 1 1 0;
+            min-width: 0;
+        }
+
+        & > input[type="checkbox"] {
+            flex: none;
+            margin: 0 0 0 auto !important;
+            order: 2;
+        }
+    }
+
+    & > td:last-child {
+        border-top: 0;
+        display: flex;
+        flex: 1 1 100%;
+        justify-content: flex-end;
+        max-width: none !important;
+        padding-top: 0;
+        width: auto !important;
+    }
+
+    &:has(> td:first-child > input[type="checkbox"]:not(:checked))
+        > td:last-child {
+        display: none;
+    }
+}
+
+:root.modern
+    #preferencesPage
+    .PrefTab
+    :is(div.formRow, td:last-child):has(> input[type="checkbox"] + label) {
+    align-items: center;
+    display: flex;
+    gap: 10px;
+
+    & > label {
+        flex: 1 1 0;
+        min-width: 0;
+        order: 0;
+    }
+
+    & > input[type="checkbox"] {
+        flex: none;
+        margin: 0 0 0 auto !important;
+        order: 2;
+    }
+
+    & > :not(label, input[type="checkbox"]) {
+        order: 3;
+    }
+}
+
+:root.modern
+    #preferencesPage
+    .PrefTab
+    div.formRow:has(> input[type="checkbox"] + label) {
+    flex-wrap: wrap;
+}
+
+/* Run external program */
+:root.modern
+    #preferencesPage
+    .PrefTab
+    fieldset:has(#autorun_checkbox):not(
+        :has(#autorun_checkbox:checked, #autorunOnTorrentAddedCheckbox:checked)
+    )
+    > #autorunLabel
+    ~ div,
+:root.modern
+    #preferencesPage
+    .PrefTab
+    fieldset:has(#autorun_checkbox):not(
+        :has(#autorun_checkbox:checked, #autorunOnTorrentAddedCheckbox:checked)
+    )
+    > div.formRow:has(#autorun_checkbox)
+    ~ div:not(.formRow) {
+    display: none;
+}
+
+/* tables of switch rows */
+:root.modern
+    #preferencesPage
+    .PrefTab
+    table:has(tr > td:first-child > input[type="checkbox"] + label) {
+    display: block;
+    width: 100% !important;
+
+    & > tbody {
+        display: block;
+        width: 100%;
+    }
+
+    & tr {
+        display: flex;
+        flex-wrap: wrap;
+        width: 100%;
+    }
+
+    & tr > td:first-child {
+        align-items: center;
+        box-sizing: border-box;
+        display: flex;
+        flex: 1 1 100%;
+        gap: 10px;
+        max-width: none !important;
+        padding-right: 0 !important;
+        width: auto !important;
+
+        & > label {
+            flex: 1 1 0;
+            min-width: 0;
+        }
+
+        & > input[type="checkbox"] {
+            flex: none;
+            margin: 0 0 0 auto !important;
+            order: 2;
+        }
+    }
+
+    & tr > td:last-child:not(:first-child) {
+        border-top: 0;
+        box-sizing: border-box;
+        display: flex;
+        flex: 1 1 100%;
+        padding-top: 0;
+        width: auto !important;
+
+        & > :is(input:not([type="checkbox"]), .prefField) {
+            flex: 1 1 auto;
+            width: auto !important;
+        }
+    }
+
+    &
+        tr:has(> td:first-child > input[type="checkbox"]:not(:checked))
+        > td:last-child:not(:first-child) {
+        display: none;
+    }
+}
+
+/* path fields */
+:root.modern #preferencesPage .PrefTab td:has(> input.pathDirectory) {
+    box-sizing: border-box;
+    flex: 1 1 100%;
+    max-width: none !important;
+    width: 100% !important;
+
+    & > input.pathDirectory {
+        box-sizing: border-box;
+        max-width: none;
+        width: 100% !important;
+    }
+}
+
+:root.modern #preferencesPage .PrefTab input[type="checkbox"] {
+    margin-right: 0 !important;
+}
+
+:root.modern
+    #preferencesPage
+    .PrefTab
+    fieldset
+    > legend:has(> input[type="checkbox"]) {
+    padding-right: 0 !important;
+}
+
+/* rows whose first cell is a switch */
+:root.modern
+    #preferencesPage
+    .PrefTab
+    tr:has(> td:first-child > input[type="checkbox"]:only-child) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    width: 100%;
+
+    & > td {
+        align-items: center;
+        display: flex;
+    }
+
+    & > td:first-child {
+        grid-column: 2;
+        grid-row: 1;
+        padding: 0 !important;
+        width: auto !important;
+    }
+
+    & > td:nth-child(2) {
+        grid-column: 1;
+        grid-row: 1;
+    }
+
+    & > td:nth-child(n + 3) {
+        border-top: 0;
+        gap: 8px;
+        grid-column: 1 / -1;
+        max-width: none !important;
+        padding-top: 0;
+        width: auto !important;
+
+        & > :is(input, .prefField) {
+            flex: 1 1 auto;
+            min-width: 0;
+            width: auto !important;
+        }
+    }
+}
+
+:root.modern
+    #preferencesPage
+    .PrefTab
+    table:has(
+        > tbody > tr > td:first-child > input[type="checkbox"]:only-child
+    ) {
+    display: block;
+    width: 100% !important;
+
+    & > tbody {
+        display: block;
+    }
+}
+
+/* Schedule */
+:root.modern
+    #preferencesPage
+    .PrefTab
+    div.formRow:has(#schedule_from_hour)
+    :is(.prefField, .prefUnit) {
+    display: contents !important;
+}
+
+:root.modern
+    #preferencesPage
+    .PrefTab
+    div.formRow:has(#schedule_from_hour)
+    .prefUnit::before {
+    content: none !important;
+    display: none !important;
+}
+
+:root.modern
+    #preferencesPage
+    .PrefTab
+    div.formRow:has(#schedule_from_hour)
+    .prefUnit {
+    color: var(--color-text-muted);
+    font-size: inherit;
+}
+
+:root.modern #preferencesPage .PrefTab div.formRow:has(#schedule_from_hour) {
+    align-items: center;
+    display: grid !important;
+    gap: 10px 0;
+    grid-template-columns:
+        calc(100% - var(--modern-select-width))
+        91px 18px 91px;
+
+    & #scheduleFromHourLabel {
+        grid-column: 1;
+        grid-row: 1;
+    }
+
+    & #schedule_from_hour {
+        grid-column: 2;
+        grid-row: 1;
+    }
+
+    & #schedule_from_min {
+        grid-column: 4;
+        grid-row: 1;
+    }
+
+    & #scheduleToHourLabel {
+        grid-column: 1;
+        grid-row: 2;
+        margin-left: 0 !important;
+    }
+
+    & #schedule_to_hour {
+        grid-column: 2;
+        grid-row: 2;
+    }
+
+    & #schedule_to_min {
+        grid-column: 4;
+        grid-row: 2;
+    }
+
+    & > *,
+    & .prefField > * {
+        grid-row: 1;
+    }
+
+    & input {
+        box-sizing: border-box;
+        margin: 0;
+        min-width: 0;
+        text-align: center;
+        width: 100% !important;
+    }
+
+    & > label {
+        margin: 0 !important;
+        width: auto !important;
+    }
+
+    & .prefField:has(#schedule_from_hour) .prefUnit {
+        grid-column: 3;
+        grid-row: 1;
+    }
+
+    & .prefField:has(#schedule_to_hour) .prefUnit,
+    & #schedule_to_hour + .prefUnit,
+    & #schedule_to_hour ~ .prefUnit {
+        grid-column: 3;
+        grid-row: 2;
+    }
+
+    & #schedule_from_hour + .prefUnit {
+        grid-column: 3;
+        grid-row: 1;
+    }
+
+    & #scheduleToHourLabel,
+    & #schedule_to_hour,
+    & #schedule_to_min {
+        grid-row: 2;
+    }
+
+    & .prefUnit {
+        display: block !important;
+        text-align: center;
+    }
+
+    &
+        :is(
+            #schedule_from_hour,
+            #schedule_to_hour,
+            #schedule_from_min,
+            #schedule_to_min
+        ) {
+        appearance: textfield;
+        box-sizing: border-box;
+        font-variant-numeric: tabular-nums;
+        height: var(--modern-control-height) !important;
+        margin: 0;
+    }
+
+    &
+        :is(
+            #schedule_from_hour,
+            #schedule_to_hour,
+            #schedule_from_min,
+            #schedule_to_min
+        )::-webkit-inner-spin-button,
+    &
+        :is(
+            #schedule_from_hour,
+            #schedule_to_hour,
+            #schedule_from_min,
+            #schedule_to_min
+        )::-webkit-outer-spin-button {
+        appearance: none;
+        margin: 0;
+    }
+
+    & :is(#schedule_from_hour, #schedule_to_hour) {
+        border-radius: var(--modern-radius-pill) 0 0 var(--modern-radius-pill);
+        border-right: 0 !important;
+        padding: 0 2px 0 12px !important;
+        text-align: right !important;
+    }
+
+    & :is(#schedule_from_min, #schedule_to_min) {
+        border-left: 0 !important;
+        border-radius: 0 var(--modern-radius-pill) var(--modern-radius-pill) 0;
+        padding: 0 12px 0 2px !important;
+        text-align: left !important;
+    }
+
+    & :is(#schedule_from_hour, #schedule_to_hour) + .prefUnit {
+        align-items: center;
+        align-self: stretch;
+        background-color: var(--color-background-primary);
+        border-bottom: 1px solid var(--color-border-default);
+        border-top: 1px solid var(--color-border-default);
+        box-sizing: border-box;
+        color: var(--color-text-default);
+        display: flex !important;
+        height: auto !important; /* as tall as the fields */
+        justify-content: center;
+        margin: 0;
+        padding: 0 2px;
+    }
+
+    &
+        :is(
+            #schedule_from_hour,
+            #schedule_to_hour,
+            #schedule_from_min,
+            #schedule_to_min
+        ):focus-visible {
+        outline-offset: -2px;
+    }
+}
+
+/* Schedule: shown while switched on */
+:root.modern
+    #preferencesPage
+    .PrefTab
+    fieldset:has(> legend > #limitSchedulingCheckbox:not(:checked))
+    > div.formRow {
+    display: none !important;
+}
+
+/* a card switched off shows its heading only */
+:root.modern
+    #preferencesPage
+    .PrefTab
+    fieldset:has(> legend > input[type="checkbox"]:not(:checked))
+    > :not(legend) {
+    display: none !important;
+}
+
+:root.modern
+    #preferencesPage
+    .PrefTab
+    fieldset
+    > legend:not(:has(input))
+    > label {
+    color: inherit;
+    font: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+}
+
+/* Schedule times: hours and minutes as one field */
+
+/* Options window: a fixed size, as tall as the screen allows */
+@media (width >= 760px) {
+    :root.modern #preferencesPage {
+        height: min(calc(100dvh - 16px), 840px) !important;
+
+        & [id^="preferencesPage_resizeHandle"],
+        & .mochaMaximizeButton {
+            display: none;
+        }
+    }
+}
+
+/* a switch's list */
+:root.modern
+    #preferencesPage
+    .PrefTab
+    div.formRow:has(> input[type="checkbox"]:not(:checked))
+    + div.formRow:has(> textarea, > .listEditor) {
+    display: none !important;
+}
+
+:root.modern
+    #preferencesPage
+    .PrefTab
+    div.formRow:has(> input[type="checkbox"])
+    + div.formRow:has(> textarea, > .listEditor) {
+    padding-left: 0 !important; /* override the inline indent */
+}
+
+/* nested sections don't indent */
+@media (width >= 760px) {
+    :root.modern #preferencesPage .PrefTab fieldset fieldset,
+    :root.modern
+        #preferencesPage
+        .PrefTab
+        fieldset
+        fieldset:has(> legend input[type="checkbox"]) {
+        padding-left: 14px;
+        padding-right: 14px;
+
+        & > legend {
+            left: 14px;
+        }
+
+        & > legend:has(> input[type="checkbox"]) {
+            box-sizing: border-box;
+            right: 14px;
+            width: auto !important;
+
+            & > input[type="checkbox"] {
+                margin-right: 0 !important;
+            }
+        }
+    }
+
+    :root.modern #preferencesPage #webuiPortValue {
+        float: right;
+        margin-right: 0 !important;
+    }
+
+    :root.modern
+        #preferencesPage
+        .PrefTab
+        fieldset
+        fieldset
+        > :is(table, div.formRow) {
+        margin-left: 0;
+        padding-left: 0 !important;
+    }
+
+    :root.modern #preferencesPage .PrefTab fieldset fieldset td:first-child {
+        padding-left: 0 !important;
     }
 }

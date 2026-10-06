@@ -592,7 +592,7 @@ QBT_TR((best choice if supported))QBT_TR[CONTEXT=OptionsDialog] QBT_TR(Default p
 
     <fieldset class="settings">
         <legend>QBT_TR(Proxy Server)QBT_TR[CONTEXT=OptionsDialog]</legend>
-        <table>
+        <table id="peerProxyServerTable">
             <tbody>
                 <tr>
                     <td>
@@ -3613,9 +3613,47 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
             for (const id of ["src_email_txt", "dest_email_txt", "smtp_server_txt"])
                 document.getElementById(id).addEventListener("input", (_event) => updateMailTestButton());
 
+            if (document.documentElement.classList.contains("modern"))
+                markFieldUnits();
+
             loadPreferences();
 
             window.qBittorrent.pathAutofill.attachPathAutofill();
+        };
+
+        // Modern lines fields and their units up with the dropdowns
+        const markFieldUnits = () => {
+            for (const cell of document.querySelectorAll(".PrefTab td, .PrefTab div.formRow")) {
+                if (!cell.querySelector(":scope > input"))
+                    continue;
+                for (const node of [...cell.childNodes]) {
+                    if (node.nodeType !== Node.TEXT_NODE)
+                        continue;
+                    if (node.textContent.trim().length === 0) {
+                        // &nbsp; spacers
+                        if (node.textContent.includes("\u00A0")) {
+                            const gap = document.createElement("span");
+                            gap.className = "prefGap";
+                            node.replaceWith(gap);
+                            gap.append(node);
+                        }
+                        continue;
+                    }
+                    const unit = document.createElement("span");
+                    unit.className = "prefUnit";
+                    unit.dataset.unit = node.textContent.trim();
+                    node.replaceWith(unit);
+                    unit.append(node);
+                    cell.classList.add("withUnit");
+                    const input = cell.querySelector(":scope > input");
+                    if (input && !input.closest(".prefField") && ((input.nextElementSibling === unit) || input.nextElementSibling?.classList.contains("prefGap"))) {
+                        const box = document.createElement("span");
+                        box.className = "prefField";
+                        input.before(box);
+                        box.append(input, ...[...cell.querySelectorAll(":scope > .prefGap")].filter((gap) => gap.previousElementSibling === box), unit);
+                    }
+                }
+            }
         };
 
         // show static prefix plus 6 sensitive characters

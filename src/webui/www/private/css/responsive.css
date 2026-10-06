@@ -619,13 +619,13 @@ body:not(:has(#desktop)) {
     row-gap: 4px;
 }
 
-/* Options: the settings rows wrap in a narrow window */
+/* Options rows wrap in narrow windows */
 #preferencesPage .mochaContentWrapper {
     container: options / inline-size;
 }
 
 @container options (width < 600px) {
-    .PrefTab {
+    :root:not(.modern) .PrefTab {
         & fieldset {
             min-width: 0;
         }
