@@ -212,9 +212,31 @@
 }
 
 /* Torrent cards on phones, their height also in dynamicTable.js (--card-height) */
+#torrentsSelectionBar {
+    display: none;
+}
+
 @media (width < 760px) {
     #torrentsTableFixedHeaderDiv {
         display: none;
+    }
+
+    /* in the column header's place, it counts the selected cards (responsive.js) */
+    #torrentsSelectionBar {
+        align-items: center;
+        border-bottom: 1px solid var(--color-border-default);
+        display: flex;
+        gap: 8px;
+        padding: 4px 12px;
+    }
+
+    #torrentsSelectionCount {
+        flex: 1 1 auto;
+        font-weight: bold;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
     #transferList #torrentsTableDiv {
@@ -235,17 +257,38 @@
             display: grid;
             gap: 0 10px;
             grid-template-areas:
-                "queue name name menu"
-                "bar bar bar bar"
-                "status status status eta"
-                "size size dl up";
-            grid-template-columns: auto minmax(0, 1fr) auto auto;
+                "check queue name name menu"
+                "check bar bar bar bar"
+                "check status status status eta"
+                "check size size dl up";
+            grid-template-columns: 20px auto minmax(0, 1fr) auto auto;
             height: var(--card-height) !important;
             left: 0;
             overflow: hidden;
             padding: 0 12px;
             right: 0;
             width: auto !important;
+        }
+
+        /* the selection checkbox (responsive.js) */
+        & tbody tr::before {
+            align-self: start;
+            background-color: var(--color-background-popup);
+            border: 1px solid var(--color-border-default);
+            border-radius: 3px;
+            box-sizing: border-box;
+            color: var(--color-text-default);
+            content: "";
+            font-size: 14px;
+            grid-area: check;
+            height: 20px;
+            line-height: 18px;
+            text-align: center;
+            width: 20px;
+        }
+
+        & tbody tr.selected::before {
+            content: "\2713";
         }
 
         /* opens the torrent's menu (responsive.js) */
