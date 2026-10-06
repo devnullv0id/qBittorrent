@@ -830,6 +830,12 @@
         padding: var(--modern-cell-padding);
     }
 
+    /* checkboxes fill their narrow column */
+    & td:has(> input[type="checkbox"]) {
+        padding-left: 4px;
+        padding-right: 4px;
+    }
+
     & tbody tr {
         height: var(--modern-row-height);
     }
