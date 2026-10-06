@@ -45,9 +45,11 @@ window.qBittorrent.Responsive ??= (() => {
     const root = document.documentElement;
     const isModern = () => root.classList.contains("modern");
 
-    const addScrim = (onClick) => {
+    const addScrim = (onClick, zIndex) => {
         const scrim = document.createElement("div");
         scrim.className = "responsiveScrim";
+        if (zIndex !== undefined)
+            scrim.style.zIndex = zIndex;
         scrim.addEventListener("click", (_event) => onClick());
         document.body.append(scrim);
         return scrim;
@@ -357,7 +359,7 @@ window.qBittorrent.Responsive ??= (() => {
             lockedUntil = performance.now() + 250;
         };
 
-        const busy = () => (document.querySelector("#desktopNavbar li.open") !== null)
+        const busy = () => (document.querySelector("#desktopNavbar li.open, #toolbarOverflowMenu.visible") !== null)
             || (header.contains(document.activeElement) && document.activeElement.matches("input, select"));
 
         list.addEventListener("scroll", (event) => {
@@ -877,6 +879,102 @@ window.qBittorrent.Responsive ??= (() => {
         });
     };
 
+    /* Modern phone header */
+
+    let navScrim = null;
+
+    const setNavDrawer = (open) => {
+        const navbar = document.getElementById("desktopNavbar");
+        if (open && !navbar.querySelector(".modernDrawerHead")) {
+            // drawer header: logo, title, close
+            const head = document.createElement("div");
+            head.className = "modernDrawerHead";
+            const logo = document.createElement("img");
+            logo.src = "images/qbittorrent-tray.svg";
+            logo.alt = "";
+            logo.width = 22;
+            logo.height = 22;
+            const title = document.createElement("span");
+            title.textContent = "QBT_TR(qBittorrent WebUI)QBT_TR[CONTEXT=Login]";
+            const close = document.createElement("button");
+            close.type = "button";
+            close.className = "modernDrawerClose";
+            close.title = "QBT_TR(Close)QBT_TR[CONTEXT=MainWindow]";
+            close.setAttribute("aria-label", close.title);
+            const glyph = document.createElement("span");
+            glyph.className = "modernGlyph";
+            glyph.dataset.glyph = "close";
+            close.append(glyph);
+            close.addEventListener("click", (event) => setNavDrawer(false));
+            head.append(logo, title, close);
+            navbar.prepend(head);
+        }
+        if (!open) {
+            for (const li of navbar.querySelectorAll(":scope > ul > li.open"))
+                li.classList.remove("open");
+        }
+        root.classList.toggle("navDrawerOpen", open);
+        document.getElementById("mobileMenuButton").setAttribute("aria-expanded", open.toString());
+        if (open) {
+            // below the drawer
+            navScrim ??= addScrim(() => setNavDrawer(false), 9780);
+        }
+        else {
+            navScrim?.remove();
+            navScrim = null;
+        }
+    };
+
+    const initPhoneToolbar = () => {
+        document.getElementById("mobileMenuButton").addEventListener("click", (event) => setNavDrawer(!root.classList.contains("navDrawerOpen")));
+        // capturing, as the items' handlers stop the click
+        document.getElementById("desktopNavbar").addEventListener("click", (event) => {
+            if (event.target.closest("li li"))
+                setNavDrawer(false);
+        }, true);
+        phoneQuery.addEventListener("change", (event) => setNavDrawer(false));
+        document.addEventListener("keydown", (event) => {
+            switch (event.key) {
+                case "Escape":
+                    if (root.classList.contains("navDrawerOpen"))
+                        setNavDrawer(false);
+                    break;
+            }
+        });
+
+        // the overflow menu's items click the toolbar's buttons
+        const button = document.getElementById("toolbarOverflowButton");
+        const menu = document.getElementById("toolbarOverflowMenu");
+        const close = () => {
+            menu.classList.remove("visible");
+            button.setAttribute("aria-expanded", "false");
+        };
+
+        button.addEventListener("click", (event) => {
+            event.stopPropagation();
+            const open = !menu.classList.contains("visible");
+            // only what the toolbar offers now
+            for (const item of menu.querySelectorAll("a[data-target]")) {
+                const target = document.getElementById(item.dataset.target);
+                item.parentElement.classList.toggle("invisible", (target === null) || (target.closest(".invisible") !== null));
+            }
+            menu.classList.toggle("visible", open);
+            button.setAttribute("aria-expanded", open.toString());
+        });
+        menu.addEventListener("click", (event) => {
+            const item = event.target.closest("a[data-target]");
+            if (item === null)
+                return;
+
+            close();
+            document.getElementById(item.dataset.target).click();
+        });
+        document.addEventListener("pointerdown", (event) => {
+            if (!menu.contains(event.target) && !button.contains(event.target))
+                close();
+        });
+    };
+
     /* Context menus */
 
     // menus taller than the screen scroll; fitted after each input
@@ -926,6 +1024,7 @@ window.qBittorrent.Responsive ??= (() => {
             return;
 
         initNavbar();
+        initPhoneToolbar();
     };
 
     return exports();
