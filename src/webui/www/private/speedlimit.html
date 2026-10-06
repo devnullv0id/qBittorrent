@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="css/style.css?v=${CACHEID}" type="text/css">
     <script defer src="scripts/localpreferences.js?v=${CACHEID}"></script>
     <script defer src="scripts/color-scheme.js?v=${CACHEID}"></script>
+    <script defer src="scripts/speed-slider.js?locale=${LANG}&v=${CACHEID}"></script>
     <script>
         "use strict";
 
@@ -59,10 +60,11 @@
                 });
                 // Set default value
                 setLimitUpdateValue(limit);
+                window.qBittorrent.SpeedSlider.upgrade(input, limitUpdateValue, limitUnit);
             };
 
             applyButton.addEventListener("click", (event) => {
-                const limit = Number(limitUpdateValue.value) * 1024;
+                const limit = window.qBittorrent.SpeedSlider.readKiB(limitUpdateValue) * 1024;
 
                 fetch(`api/v2/torrents/${setLimitMethod}`, {
                         method: "POST",
