@@ -73,6 +73,7 @@ window.qBittorrent.DynamicTable ??= (() => {
     const clientData = window.qBittorrent.ClientData ?? window.parent.qBittorrent.ClientData;
 
     const coarseQuery = window.matchMedia("(pointer: coarse)");
+    const cardQuery = window.matchMedia("(width < 760px)");
 
     // row heights, also in responsive.css
     const getRowHeight = (compactHeight, defaultHeight) => {
@@ -83,8 +84,10 @@ window.qBittorrent.DynamicTable ??= (() => {
 
     class DynamicTable {
         #DynamicTableHeaderContextMenuClass = null;
-        // looked up each time: it changes with the pointer
+        // looked up each time: it changes with the pointer, and on phones a table of cards takes their height
         get rowHeight() {
+            if ((this.constructor.CARD_HEIGHT !== undefined) && cardQuery.matches)
+                return this.constructor.CARD_HEIGHT;
             return getRowHeight(...this.rowHeights);
         }
 
@@ -1202,6 +1205,9 @@ window.qBittorrent.DynamicTable ??= (() => {
     }
 
     class TorrentsTable extends DynamicTable {
+        // the torrents' cards on phones, also in responsive.css (--card-height)
+        static CARD_HEIGHT = 112;
+
         setupVirtualList() {
             super.setupVirtualList();
             this.rowHeights = [18, 22];

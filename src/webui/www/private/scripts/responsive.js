@@ -315,6 +315,53 @@ window.qBittorrent.Responsive ??= (() => {
         header.addEventListener("focusin", (event) => setHidden(false));
     };
 
+    /* Torrent cards on phones */
+
+    // on phones each torrent is a card (responsive.css), laid out by the column of each cell
+    const initCards = async () => {
+        root.style.setProperty("--card-height", `${window.qBittorrent.DynamicTable.TorrentsTable.CARD_HEIGHT}px`);
+        const tableDiv = await whenElement("torrentsTableDiv");
+        const tag = () => {
+            if (!phoneQuery.matches)
+                return;
+
+            const headers = [...document.querySelectorAll("#torrentsTableFixedHeaderDiv th")];
+            const names = headers.map((th) => (th.className.match(/column_(\S+)/) ?? [])[1] ?? "");
+            const labels = headers.map((th) => th.textContent.trim());
+            for (const tr of tableDiv.querySelectorAll("tbody tr")) {
+                for (const [i, td] of [...tr.children].entries()) {
+                    if (td.dataset.col !== names[i])
+                        td.dataset.col = names[i];
+                    if (td.dataset.label !== labels[i])
+                        td.dataset.label = labels[i];
+                }
+            }
+        };
+
+        new MutationObserver(tag).observe(tableDiv, { childList: true, subtree: true });
+        // rows and cards differ in height
+        phoneQuery.addEventListener("change", (event) => {
+            window.torrentsTable.rerender();
+            tag();
+        });
+        tag();
+
+        // the ⋯ at a card's top right opens the torrent's menu, as a long press does
+        document.addEventListener("click", (event) => {
+            const tr = phoneQuery.matches ? event.target.closest?.("#torrentsTableDiv tbody tr") : null;
+            if (!tr)
+                return;
+
+            const box = tr.getBoundingClientRect();
+            if ((event.clientX < (box.right - 44)) || (event.clientY > (box.top + 40)))
+                return;
+
+            event.preventDefault();
+            event.stopPropagation();
+            tr.dispatchEvent(new MouseEvent("contextmenu", { bubbles: true, cancelable: true, button: 2, clientX: event.clientX, clientY: event.clientY }));
+        }, true);
+    };
+
     /* Windows */
 
     // distance from the screen's edges, and the least width
@@ -676,6 +723,7 @@ window.qBittorrent.Responsive ??= (() => {
         initWindows();
         initMenus();
         initHeaderAutoHide();
+        initCards();
         initKeyboardItems();
         initOptionsPages();
     };
