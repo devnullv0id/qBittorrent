@@ -735,6 +735,10 @@ QBT_TR((best choice if supported))QBT_TR[CONTEXT=OptionsDialog] QBT_TR(Default p
 
     <fieldset class="settings">
         <legend>QBT_TR(Alternative Rate Limits)QBT_TR[CONTEXT=OptionsDialog]</legend>
+        <div class="formRow modernOnly">
+            <input type="checkbox" id="useAltSpeedLimits">
+            <label for="useAltSpeedLimits">QBT_TR(Use alternative rate limits)QBT_TR[CONTEXT=OptionsDialog]</label>
+        </div>
         <table>
             <tbody>
                 <tr>
@@ -3010,6 +3014,45 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
             window.parent.qBittorrent.Client.closeWindow(document.getElementById("preferencesPage"));
         };
 
+        // Modern's switch for the alternative rate limits, sent only when changed here
+        let speedLimitsMode = null;
+        const updateSpeedPageIcon = () => {
+            const icon = document.querySelector("#PrefSpeedLink img");
+            if (icon)
+                icon.src = document.getElementById("useAltSpeedLimits").checked ? "images/slow.svg" : "images/slow_off.svg";
+        };
+        const loadSpeedLimitsMode = () => {
+            const checkbox = document.getElementById("useAltSpeedLimits");
+            checkbox.addEventListener("change", (_event) => updateSpeedPageIcon());
+            fetch("api/v2/transfer/speedLimitsMode", {
+                    method: "GET",
+                    cache: "no-store"
+                })
+                .then(async (response) => {
+                    if (!response.ok)
+                        return;
+
+                    speedLimitsMode = (await response.text()) === "1";
+                    checkbox.checked = speedLimitsMode;
+                    updateSpeedPageIcon();
+                });
+        };
+        const saveSpeedLimitsMode = async () => {
+            const enabled = document.getElementById("useAltSpeedLimits").checked;
+            if ((speedLimitsMode === null) || (enabled === speedLimitsMode))
+                return;
+
+            const response = await fetch("api/v2/transfer/setSpeedLimitsMode", {
+                method: "POST",
+                body: new URLSearchParams({
+                    mode: enabled ? "1" : "0"
+                })
+            });
+            if (!response.ok)
+                throw new Error("Failed to set the speed limits mode");
+            speedLimitsMode = enabled;
+        };
+
         const applyPreferences = (close = true) => {
             const settings = {};
             const clientData = {};
@@ -3572,7 +3615,8 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
             // Send data to qBT
             Promise.allSettled([
                 window.parent.qBittorrent.ClientData.set(clientData),
-                window.parent.qBittorrent.Cache.preferences.set(settings)
+                window.parent.qBittorrent.Cache.preferences.set(settings),
+                saveSpeedLimitsMode()
             ]).then((results) => {
                 if (results.every((result) => result.status === "fulfilled")) {
                     if (!close) {
@@ -3655,6 +3699,7 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
             if (document.documentElement.classList.contains("modern")) {
                 attachModernEditors();
                 markFieldUnits();
+                loadSpeedLimitsMode();
             }
 
             loadPreferences();
