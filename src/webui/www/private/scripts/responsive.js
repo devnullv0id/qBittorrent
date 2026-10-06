@@ -1851,6 +1851,66 @@ window.qBittorrent.Responsive ??= (() => {
         label();
     };
 
+    // a control too wide for the column of controls gets a row of its own
+    const dropdownSelector = "select:not([multiple]):only-of-type:not(.speedUnitSelect)";
+    const textFieldSelector = "input[type='text']:only-child";
+    const splitWideSettings = (page) => {
+        const context = document.createElement("canvas").getContext("2d");
+        const neededWidth = (control) => {
+            const style = getComputedStyle(control);
+            // a text field: its width in preferences.html, in em
+            if (control.tagName !== "SELECT")
+                return control.style.width.endsWith("em") ? (Number.parseFloat(control.style.width) * Number.parseFloat(style.fontSize)) : 0;
+
+            context.font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+            const text = Math.max(0, ...[...control.options].map((option) => context.measureText(option.textContent).width));
+            return text + Number.parseFloat(style.paddingLeft) + Number.parseFloat(style.paddingRight)
+                + Number.parseFloat(style.borderLeftWidth) + Number.parseFloat(style.borderRightWidth);
+        };
+
+        const tabs = [...page.querySelectorAll(".PrefTab")];
+
+        const split = () => {
+            const controls = page.querySelectorAll([dropdownSelector, textFieldSelector].flatMap((control) => [
+                `.PrefTab tr > td:last-child:not(:first-child) > ${control}`,
+                `.PrefTab tr.modernSettingValue > td > ${control}`
+            ]).join(", "));
+            for (const control of controls) {
+                const cell = control.parentElement;
+                const row = cell.parentElement;
+                const labelRow = row.classList.contains("modernSettingValue") ? row.previousElementSibling : row;
+                // phones already do: their column isn't in px
+                const column = getComputedStyle(control.closest(".PrefTab")).getPropertyValue("--modern-select-width").trim();
+                // a setting the page hides keeps its control
+                const shown = !labelRow.hidden && (labelRow.style.display !== "none");
+                const wide = shown && column.endsWith("px") && (neededWidth(control) > Number.parseFloat(column));
+                if (wide && !row.classList.contains("modernSettingValue")) {
+                    const valueRow = document.createElement("tr");
+                    valueRow.className = "modernSettingValue";
+                    cell.colSpan = row.cells.length;
+                    row.cells[0].colSpan = row.cells.length;
+                    row.after(valueRow);
+                    valueRow.append(cell);
+                }
+                else if (!wide && row.classList.contains("modernSettingValue")) {
+                    cell.colSpan = 1;
+                    labelRow.cells[0].colSpan = 1;
+                    labelRow.append(cell);
+                    row.remove();
+                }
+            }
+        };
+
+        // the page fills in some dropdowns later, and hides the settings it doesn't offer
+        const observer = new MutationObserver(split);
+        for (const tab of tabs)
+            observer.observe(tab, { childList: true, subtree: true, attributes: true, attributeFilter: ["style", "hidden"] });
+        const listening = new AbortController();
+        phoneQuery.addEventListener("change", ((_event) => split()), { signal: listening.signal });
+        MochaUI.Windows.instances[page.id].addEvent("close", () => listening.abort());
+        split();
+    };
+
     const initPreferences = () => {
         // the Options window is built on each opening, its pages loaded after
         new MutationObserver((mutations) => {
@@ -1868,6 +1928,7 @@ window.qBittorrent.Responsive ??= (() => {
                         tabsObserver.disconnect();
                         setupPrefsMore(tabs);
                         labelWatchedFolders(watchedFolders);
+                        splitWideSettings(node);
                     });
                     tabsObserver.observe(node, { childList: true, subtree: true });
                 }

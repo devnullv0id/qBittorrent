@@ -1915,6 +1915,19 @@
         width: var(--modern-select-width) !important;
     }
 
+    /* wide controls on a row of their own */
+    & tr.modernSettingValue > td {
+        border-top: 0;
+        padding-right: 0;
+        padding-top: 0;
+
+        & > :is(select, input) {
+            --modern-select-width: 100%;
+
+            box-sizing: border-box;
+        }
+    }
+
     & input[type="number"] {
         text-align: left;
         width: 110px !important;
