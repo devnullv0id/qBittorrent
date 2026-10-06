@@ -180,6 +180,71 @@
     color: var(--color-text-default);
 }
 
+/* Multi-choice dropdowns (vanillaSelectBox) */
+:root.modern :is(#btn-group-logLevelSelect, #btn-group-tagsSelect) > button {
+    background: var(--color-background-primary) var(--modern-chevron-down) right
+        8px center / 16px no-repeat;
+    border-radius: var(--modern-radius-pill);
+    font-size: var(--modern-field-font-size, 13px);
+    justify-content: flex-start;
+    padding: 2px 30px 2px 12px;
+
+    & .caret {
+        display: none;
+    }
+}
+
+:root.modern .vsb-menu {
+    background-color: var(--color-background-popup);
+    border-radius: var(--modern-radius-menu);
+    box-shadow: var(--modern-shadow);
+    padding: 4px;
+
+    /* as tall as the check box beside it */
+    & li {
+        border-radius: var(--modern-radius-item);
+        font-size: 13px;
+        line-height: 16px;
+        padding-bottom: 5px;
+        padding-top: 5px;
+    }
+
+    & li:hover {
+        background-color: var(--color-background-blue);
+    }
+
+    /* check boxes like the selection boxes */
+    & .multi li:not(.grouped-option) {
+        position: relative;
+
+        &::before {
+            border: 1.5px solid var(--color-text-muted);
+            border-radius: 4px;
+            box-sizing: border-box;
+            height: 16px;
+            padding: 0;
+            width: 16px;
+        }
+
+        &.active::before {
+            background-color: var(--color-accent-blue);
+            border-color: var(--color-accent-blue);
+        }
+
+        &.active::after {
+            border-color: var(--color-text-white);
+            border-width: 0 2px 2px 0;
+            float: none;
+            height: 8px;
+            left: 10px;
+            margin: 0;
+            position: absolute;
+            top: 8px;
+            width: 4px;
+        }
+    }
+}
+
 :root.modern textarea {
     background-color: var(--color-background-primary);
     border: 1px solid var(--color-border-default);
