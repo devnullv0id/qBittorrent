@@ -5730,6 +5730,15 @@
         width: 100% !important;
     }
 
+    :root.modern
+        #preferencesPage
+        .PrefTab
+        fieldset
+        > :is(input[type="button"], button, textarea):last-child {
+        margin-bottom: 12px !important;
+        vertical-align: top;
+    }
+
     :root.modern #preferencesPage .PrefTab td:has(> #webuiPortValue) {
         display: flex;
         flex-wrap: wrap;
