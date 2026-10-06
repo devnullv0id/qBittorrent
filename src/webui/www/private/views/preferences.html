@@ -3722,7 +3722,7 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
         };
 
         // Modern edits some lists entry by entry, writing every change back to the original field
-        const attachListEditor = (fieldId, { joiner, splitter, placeholder, tiers = false, wholeLines = false }) => {
+        const attachListEditor = (fieldId, { joiner, splitter, placeholder, tiers = false, wholeLines = false, emptyHint = false }) => {
             const field = document.getElementById(fieldId);
             // entries, with null for a tier separator
             const parse = () => {
@@ -3747,7 +3747,6 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
             addRow.className = "listEditorAdd";
             const input = document.createElement("input");
             input.type = "text";
-            input.placeholder = placeholder;
             input.setAttribute("aria-label", placeholder);
             input.autocomplete = "off";
             input.spellcheck = false;
@@ -3758,6 +3757,14 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
             editor.append(list, addRow);
             field.classList.add("hasListEditor");
             field.after(editor);
+            // in a table the list takes the whole row
+            const cell = field.closest("td");
+            const labelCell = cell?.previousElementSibling;
+            if (labelCell) {
+                cell.prepend(...labelCell.childNodes);
+                labelCell.remove();
+                cell.colSpan = 2;
+            }
 
             // no tier separator at either end or next to another one
             const normalize = (entries) => entries.filter((entry, i, all) => (entry !== null) || ((i > 0) && (i < (all.length - 1)) && (all[i - 1] !== null)));
@@ -3795,6 +3802,8 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
                 }
                 list.replaceChildren(...items);
                 list.classList.toggle("empty", items.length === 0);
+                // the field's own placeholder says what an empty list means
+                input.placeholder = (emptyHint && (items.length === 0)) ? field.placeholder : placeholder;
                 input.disabled = addButton.disabled = field.disabled;
             };
             const add = (raw) => {
@@ -3923,6 +3932,8 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
             attachListEditor("bypass_auth_subnet_whitelist_textarea", { joiner: "\n", splitter: /[\n,]/, placeholder: "QBT_TR(IP subnet, e.g. 172.17.32.0/24)QBT_TR[CONTEXT=OptionsDialog]" });
             attachListEditor("webuiDomainTextarea", { joiner: ";", splitter: /[;\n]/, placeholder: "QBT_TR(Domain, e.g. *.example.com)QBT_TR[CONTEXT=OptionsDialog]" });
             attachListEditor("webUIReverseProxiesListTextarea", { joiner: ";", splitter: /[;\n]/, placeholder: "QBT_TR(Proxy IP or subnet)QBT_TR[CONTEXT=OptionsDialog]" });
+            attachListEditor("dhtBootstrapNodes", { joiner: ", ", splitter: /,/, placeholder: "QBT_TR(Node, e.g. dht.libtorrent.org:25401)QBT_TR[CONTEXT=OptionsDialog]", emptyHint: true });
+            attachListEditor("webUICustomHTTPHeadersTextarea", { joiner: "\n", splitter: /\n/, placeholder: "QBT_TR(Header: value, e.g. X-Frame-Options: DENY)QBT_TR[CONTEXT=OptionsDialog]", wholeLines: true });
             for (const id of ["upLimitValue", "dlLimitValue", "altUpLimitValue", "altDlLimitValue", "dlRateThresholdValue", "ulRateThresholdValue"])
                 attachSpeedUnitPicker(id);
         };

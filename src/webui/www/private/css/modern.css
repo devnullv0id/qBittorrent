@@ -6131,19 +6131,17 @@
     }
 }
 
-/* List editors: the label on top, the list across the card */
-:root.modern #preferencesPage .PrefTab tr:has(> td > .listEditor) {
-    display: flex !important;
-    flex-direction: column;
-    gap: 8px;
-    padding: 10px 0;
+/* list editors span the card */
+:root.modern #preferencesPage .PrefTab td:has(> .listEditor) {
+    max-width: none !important;
+    min-width: 0 !important;
+    padding: 10px 0 !important;
+    text-align: left !important;
+    width: 100% !important;
 
-    & > td {
-        max-width: none !important;
-        min-width: 0 !important;
-        padding: 0 !important;
-        text-align: left !important;
-        width: 100% !important;
+    & > label {
+        display: block;
+        margin-bottom: 8px;
     }
 }
 
