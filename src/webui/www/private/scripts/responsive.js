@@ -486,6 +486,8 @@ window.qBittorrent.Responsive ??= (() => {
     const WINDOW_MARGIN = 8;
     const PHONE_WINDOW_MARGIN = 12;
     const MIN_WINDOW_WIDTH = 300;
+    // the least height of a page that scrolls anyway or fills whatever height it is given
+    const MIN_WINDOW_HEIGHT = 240;
     // the largest a window grows to fit its page
     const MAX_WINDOW_WIDTH = 1200;
     const MAX_WINDOW_HEIGHT = 800;
@@ -586,23 +588,49 @@ window.qBittorrent.Responsive ??= (() => {
         return (page.scrollWidth > page.clientWidth) ? (fullWidth - page.clientWidth) : 0;
     }) ?? 0;
 
-    // the smallest size a page fits in at the given width
-    const pageMinSize = (instance, width) => ({
-        width: Math.max(MIN_WINDOW_WIDTH, pageOverflow(instance, MIN_WINDOW_WIDTH, instance.contentWrapperEl.offsetHeight).width),
-        height: measurePage(instance, width, 1, (page) => page.scrollHeight + pageBottomPadding(instance)) ?? 0
-    });
-
-    // a window can't be resized smaller than its page needs
-    const limitResize = (instance) => {
-        if (!root.classList.contains("responsiveRelayout"))
-            return;
-
+    // the largest content size a window has room for on the screen
+    const roomOnScreen = (instance) => {
         const wrapper = instance.contentWrapperEl;
-        const min = pageMinSize(instance, wrapper.offsetWidth);
+        const margin = phoneQuery.matches ? PHONE_WINDOW_MARGIN : WINDOW_MARGIN;
+        return {
+            width: window.innerWidth - (2 * margin) - (instance.windowEl.offsetWidth - wrapper.offsetWidth),
+            height: window.innerHeight - (2 * margin) - (instance.windowEl.offsetHeight - wrapper.offsetHeight)
+        };
+    };
+
+    // whether a fitted window shows all of its page at the given width; not where the page scrolls anyway or fills
+    // whatever height it is given
+    const pageFits = (instance, width) => {
+        const room = roomOnScreen(instance).height;
+        const ownHeight = pageHeight(instance, width, room) ?? 0;
+        return (ownHeight > 0) && (ownHeight <= Math.min(room, MAX_WINDOW_HEIGHT));
+    };
+
+    // the smallest size a page is shown in at the given width, within the screen: all of it where it fits (pageFits),
+    // else MIN_WINDOW_HEIGHT of it
+    const pageMinSize = (instance, width, fits) => {
+        const room = roomOnScreen(instance);
+        const height = fits ? (measurePage(instance, width, 1, (page) => page.scrollHeight + pageBottomPadding(instance)) ?? 0) : MIN_WINDOW_HEIGHT;
+        return {
+            width: Math.min(room.width, Math.max(MIN_WINDOW_WIDTH, pageOverflow(instance, MIN_WINDOW_WIDTH, instance.contentWrapperEl.offsetHeight).width)),
+            height: Math.min(room.height, height)
+        };
+    };
+
+    // a window can't be resized smaller than its page needs or its own limit, unless it already is
+    const limitResize = (instance) => {
+        const wrapper = instance.contentWrapperEl;
+        instance.responsivePageFits = pageFits(instance, wrapper.offsetWidth);
+        const page = pageMinSize(instance, wrapper.offsetWidth, instance.responsivePageFits);
         const frameWidth = instance.windowEl.offsetWidth - wrapper.offsetWidth;
         const frameHeight = instance.windowEl.offsetHeight - wrapper.offsetHeight;
-        const { x, y } = instance.options.resizeLimit;
-        instance.options.resizeLimit = { x: [min.width + frameWidth, x[1]], y: [min.height + frameHeight, y[1]] };
+        // the limits the window was opened with
+        const own = instance.responsiveResizeLimit ??= { x: [...instance.options.resizeLimit.x], y: [...instance.options.resizeLimit.y] };
+        const min = {
+            width: Math.min(wrapper.offsetWidth, Math.max(page.width, own.x[0] - frameWidth)),
+            height: Math.min(wrapper.offsetHeight, Math.max(page.height, own.y[0] - frameHeight))
+        };
+        instance.options.resizeLimit = { x: [min.width + frameWidth, own.x[1]], y: [min.height + frameHeight, own.y[1]] };
         for (const drag of [instance.resizable2, instance.resizable3, instance.resizable4]) {
             if (drag?.options.limit.x)
                 drag.options.limit.x[0] = min.width;
@@ -613,11 +641,8 @@ window.qBittorrent.Responsive ??= (() => {
 
     // a narrower page needs more height
     const keepPageHeight = (instance) => {
-        if (!root.classList.contains("responsiveRelayout"))
-            return;
-
         const wrapper = instance.contentWrapperEl;
-        const minHeight = pageMinSize(instance, wrapper.offsetWidth).height;
+        const minHeight = pageMinSize(instance, wrapper.offsetWidth, instance.responsivePageFits).height;
         if (wrapper.offsetHeight >= minHeight)
             return;
 
