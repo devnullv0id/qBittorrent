@@ -5247,8 +5247,16 @@
             width: 100% !important;
         }
 
+        /* the second row fades with the toolbar */
+        & > li:nth-child(n + 6) {
+            transition:
+                opacity 0.2s,
+                visibility 0.2s;
+        }
+
         &:not(.modernExpanded) > li:nth-child(n + 6) {
-            display: none;
+            opacity: 0;
+            visibility: hidden;
         }
 
         & .modernPrefsMore a {
@@ -5270,6 +5278,11 @@
     :root.modern #preferencesPage .mochaToolbarWrapper,
     :root.modern #preferencesPage .mochaToolbar {
         height: var(--modern-prefs-strip, 76px) !important;
+        transition: height 0.2s;
+    }
+
+    :root.modern #preferencesPage .mochaContentBorder {
+        transition: top 0.2s;
     }
 
     :root.modern #preferencesPage:has(#preferencesTabs.modernExpanded) {
@@ -5286,7 +5299,9 @@
         }
     }
 
+    /* clipped, not scrollable: a tap would scroll it */
     :root.modern #preferencesPage .mochaToolbar {
+        overflow: clip;
         padding: 6px 8px !important;
     }
 
