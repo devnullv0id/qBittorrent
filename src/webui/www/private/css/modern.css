@@ -2194,7 +2194,11 @@
 :root.modern #preferencesPage .PrefTab {
     &
         td:last-child:not(:first-child):has(
-            > :is(input:not([type="checkbox"], [type="radio"]), select)
+            > :is(
+                input:not([type="checkbox"], [type="radio"]),
+                select,
+                .listEditor
+            )
         ):not(
             :has(> input:not([type="checkbox"]) ~ input:not([type="checkbox"])),
             :has(> label)
@@ -4830,6 +4834,53 @@
             width: 100% !important;
         }
     }
+
+    :root.modern
+        #preferencesPage
+        .PrefTab
+        div.formRow
+        > fieldset:has(.listEditor) {
+        border: 0;
+        display: block !important;
+        flex: 1 1 100%;
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+
+        & > legend {
+            color: var(--color-text-default);
+            float: none !important;
+            font-size: 13px;
+            font-weight: 400 !important;
+            letter-spacing: 0 !important;
+            margin: 0 0 8px !important;
+            padding: 0 !important;
+            position: static;
+            text-transform: none !important;
+            transform: none !important;
+            width: 100% !important;
+        }
+    }
+
+    :root.modern #preferencesPage .PrefTab .listEditor {
+        box-sizing: border-box;
+        margin: 0 !important;
+        max-width: none;
+        width: 100% !important;
+
+        & .listEditorItems li {
+            align-items: center;
+            display: flex;
+            gap: 8px;
+            min-height: 44px;
+
+            & > span {
+                flex: 1 1 auto;
+                min-width: 0;
+                overflow-wrap: anywhere;
+            }
+        }
+    }
 }
 
 /* Proxy server */
@@ -4957,6 +5008,172 @@
                 margin: 0 !important;
                 top: 0 !important;
             }
+        }
+    }
+}
+
+/* List editors */
+
+/* list editors: the field they write to stays hidden */
+:root.modern .hasListEditor {
+    display: none !important;
+}
+
+:root.modern td .listEditor,
+:root.modern div.formRow > .listEditor {
+    flex: 1 1 100%;
+    text-align: left;
+    white-space: normal;
+}
+
+:root.modern .listEditor {
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--modern-radius-card);
+    overflow: hidden;
+}
+
+:root.modern .listEditorItems {
+    list-style: none;
+    margin: 0;
+    max-height: 220px;
+    overflow-y: auto;
+    padding: 0;
+
+    &.empty {
+        display: none;
+    }
+
+    & li {
+        align-items: center;
+        border-bottom: 1px solid var(--color-border-divider);
+        display: flex;
+        gap: 8px;
+        min-height: var(--modern-control-height);
+        padding: 2px 4px 2px 12px;
+
+        &:hover {
+            background-color: var(--color-background-row-hover);
+        }
+    }
+
+    & span {
+        flex: 1 1 auto;
+        font-variant-numeric: tabular-nums;
+        min-width: 0;
+        overflow-wrap: anywhere;
+    }
+}
+
+:root.modern button.listEditorRemove {
+    background: transparent;
+    border-color: transparent;
+    flex: none;
+    min-width: 28px;
+    padding: 0;
+    position: relative;
+
+    &::before,
+    &::after {
+        background-color: currentcolor;
+        content: "";
+        height: 1.5px;
+        left: 50%;
+        position: absolute;
+        top: 50%;
+        width: 11px;
+    }
+
+    &::before {
+        transform: translate(-50%, -50%) rotate(45deg);
+    }
+
+    &::after {
+        transform: translate(-50%, -50%) rotate(-45deg);
+    }
+
+    &:hover:not(:disabled) {
+        background-color: var(--color-background-row-hover);
+        border-color: transparent;
+        color: var(--color-text-red);
+    }
+}
+
+:root.modern .listEditorAdd {
+    display: flex;
+    gap: 8px;
+    padding: 8px;
+
+    & input[type="text"] {
+        flex: 1 1 auto;
+        min-width: 0;
+        width: auto !important;
+    }
+
+    & button {
+        flex: none;
+    }
+}
+
+/* List editors: the label on top, the list across the card */
+:root.modern #preferencesPage .PrefTab tr:has(> td > .listEditor) {
+    display: flex !important;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px 0;
+
+    & > td {
+        max-width: none !important;
+        min-width: 0 !important;
+        padding: 0 !important;
+        text-align: left !important;
+        width: 100% !important;
+    }
+}
+
+:root.modern #preferencesPage .PrefTab .listEditor {
+    box-sizing: border-box;
+    max-width: none;
+    width: 100% !important;
+
+    & .listEditorAdd {
+        display: flex;
+        gap: 8px;
+
+        & > input {
+            flex: 1 1 auto;
+            min-width: 0;
+            width: auto !important;
+        }
+
+        & > button {
+            flex: none;
+        }
+    }
+
+    & .listEditorItems li {
+        align-items: center;
+        display: flex;
+        gap: 8px;
+
+        & > span {
+            flex: 1 1 auto;
+            min-width: 0;
+            overflow-wrap: anywhere;
+        }
+    }
+}
+
+/* phones */
+@media (width < 760px) {
+    :root.modern #preferencesPage .PrefTab .listEditor .listEditorAdd {
+        flex-wrap: wrap;
+
+        & > input {
+            flex-basis: 100%;
+        }
+
+        & > button {
+            flex: 1 1 0;
         }
     }
 }

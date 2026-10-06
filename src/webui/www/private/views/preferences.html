@@ -3632,6 +3632,116 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
                 refresh();
         };
 
+        // Modern edits some lists entry by entry, writing every change back to the original field
+        const attachListEditor = (fieldId, { joiner, splitter, placeholder, tiers = false, wholeLines = false }) => {
+            const field = document.getElementById(fieldId);
+            // entries, with null for a tier separator
+            const parse = () => {
+                if (!tiers)
+                    return field.value.split(splitter).map((entry) => entry.trim()).filter((entry) => entry.length > 0);
+                const entries = [];
+                for (const line of field.value.split("\n").map((entry) => entry.trim())) {
+                    if (line.length > 0)
+                        entries.push(line);
+                    else if ((entries.length > 0) && (entries.at(-1) !== null))
+                        entries.push(null);
+                }
+                if (entries.at(-1) === null)
+                    entries.pop();
+                return entries;
+            };
+            const editor = document.createElement("div");
+            editor.className = "listEditor";
+            const list = document.createElement("ul");
+            list.className = "listEditorItems";
+            const addRow = document.createElement("div");
+            addRow.className = "listEditorAdd";
+            const input = document.createElement("input");
+            input.type = "text";
+            input.placeholder = placeholder;
+            input.setAttribute("aria-label", placeholder);
+            input.autocomplete = "off";
+            input.spellcheck = false;
+            const addButton = document.createElement("button");
+            addButton.type = "button";
+            addButton.textContent = "QBT_TR(Add)QBT_TR[CONTEXT=HttpServer]";
+            addRow.append(input, addButton);
+            editor.append(list, addRow);
+            field.classList.add("hasListEditor");
+            field.after(editor);
+
+            // no tier separator at either end or next to another one
+            const normalize = (entries) => entries.filter((entry, i, all) => (entry !== null) || ((i > 0) && (i < (all.length - 1)) && (all[i - 1] !== null)));
+            const write = (entries) => {
+                field.value = normalize(entries).map((entry) => entry ?? "").join(joiner);
+                render();
+                // MooTools replaces window.Event
+                field.dispatchEvent(new CustomEvent("change", { bubbles: true }));
+            };
+            const createRemoveButton = (label, onClick) => {
+                const button = document.createElement("button");
+                button.type = "button";
+                button.className = "listEditorRemove";
+                button.disabled = field.disabled;
+                button.title = "QBT_TR(Remove)QBT_TR[CONTEXT=TransferListWidget]";
+                button.setAttribute("aria-label", `${button.title} ${label}`);
+                button.addEventListener("click", (_event) => onClick());
+                return button;
+            };
+            const render = () => {
+                const entries = parse();
+                const items = [];
+                for (const [index, entry] of entries.entries()) {
+                    // tier separators are kept, but not shown
+                    if (entry === null)
+                        continue;
+                    const item = document.createElement("li");
+                    const text = document.createElement("span");
+                    text.textContent = entry;
+                    item.append(text, createRemoveButton(entry, () => {
+                        entries.splice(index, 1);
+                        write(entries);
+                    }));
+                    items.push(item);
+                }
+                list.replaceChildren(...items);
+                list.classList.toggle("empty", items.length === 0);
+                input.disabled = addButton.disabled = field.disabled;
+            };
+            const add = (raw) => {
+                const entries = parse();
+                const values = raw.split(wholeLines ? /\n/ : (tiers ? /\s+/ : /[,;\s]+/)).map((value) => value.trim()).filter((value) => value.length > 0);
+                for (const value of values) {
+                    if (entries.includes(value))
+                        continue;
+                    entries.push(value);
+                }
+                input.value = "";
+                write(entries);
+                input.focus();
+            };
+            addButton.addEventListener("click", (event) => add(input.value));
+            input.addEventListener("keydown", (event) => {
+                switch (event.key) {
+                    case "Enter":
+                        event.preventDefault();
+                        add(input.value);
+                        break;
+                }
+            });
+            input.addEventListener("paste", (event) => {
+                const text = event.clipboardData?.getData("text") ?? "";
+                if (!(wholeLines ? /\n/ : /[,;\s]/).test(text.trim()))
+                    return;
+                event.preventDefault();
+                add(text);
+            });
+            // the field is switched on and off with its setting
+            new MutationObserver(render).observe(field, { attributes: true, attributeFilter: ["disabled"] });
+            modernEditors.push(render);
+            render();
+        };
+
         // Modern's Enable proxy server switch: off is the type (None), on the type used last
         const attachProxySwitch = () => {
             const select = document.getElementById("peer_proxy_type_select");
@@ -3677,6 +3787,11 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
         const attachModernEditors = () => {
             attachProxySwitch();
             attachI2PSwitch();
+            attachListEditor("banned_IPs_textarea", { joiner: "\n", splitter: /\n/, placeholder: "QBT_TR(IP address or range)QBT_TR[CONTEXT=OptionsDialog]", wholeLines: true });
+            attachListEditor("add_trackers_textarea", { joiner: "\n", splitter: /\n/, placeholder: "QBT_TR(Tracker URL)QBT_TR[CONTEXT=OptionsDialog]", tiers: true });
+            attachListEditor("bypass_auth_subnet_whitelist_textarea", { joiner: "\n", splitter: /[\n,]/, placeholder: "QBT_TR(IP subnet, e.g. 172.17.32.0/24)QBT_TR[CONTEXT=OptionsDialog]" });
+            attachListEditor("webuiDomainTextarea", { joiner: ";", splitter: /[;\n]/, placeholder: "QBT_TR(Domain, e.g. *.example.com)QBT_TR[CONTEXT=OptionsDialog]" });
+            attachListEditor("webUIReverseProxiesListTextarea", { joiner: ";", splitter: /[;\n]/, placeholder: "QBT_TR(Proxy IP or subnet)QBT_TR[CONTEXT=OptionsDialog]" });
         };
 
         // Modern lines fields and their units up with the dropdowns
