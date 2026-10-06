@@ -13,6 +13,7 @@
     --modern-switch-height: 20px;
     --modern-knob: 14px;
     --modern-title-height: 34px;
+    --window-footer-height: 0;
     --window-title-height: var(
         --modern-title-height
     ); /* also read by responsive.js */
@@ -1562,6 +1563,26 @@
     order: 1;
 }
 
+/* the footer's buttons sit in the middle of its space */
+:root.modern :is(body:not(:has(#desktop)), .mochaContent) :has(.dialogFooter) {
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+/* the space below is the footer's */
+:root.modern .mocha .mochaContent.pad:has(.dialogFooter) {
+    padding-bottom: 0 !important;
+
+    & .dialogFooter {
+        padding-bottom: 12px;
+    }
+}
+
+:root.modern #createTorrentButton {
+    margin-bottom: 0;
+    margin-top: 0;
+}
+
 /* Confirmations */
 :root.modern .modalDialog .mochaContent.pad {
     padding: 12px 16px !important;
@@ -1863,6 +1884,21 @@
         background-color: var(--color-background-fill);
         border-color: transparent;
     }
+}
+
+/* RSS Downloader: the page takes the window's height */
+:root.modern #rssdownloaderpage_content {
+    height: 100%;
+
+    & > #RssDownloader {
+        height: auto;
+        min-height: 100%;
+    }
+}
+
+:root.modern #RssDownloader #saveButton {
+    bottom: 12px;
+    margin-bottom: 12px;
 }
 
 :root.modern #RssDownloader #topMenuBar {

@@ -667,6 +667,13 @@ window.qBittorrent.Responsive ??= (() => {
         if (!windowEl.isConnected || (windowEl.style.display === "none") || instance.isMaximized)
             return;
 
+        // Mocha's strip below the content, its height from the stylesheet
+        const footerHeight = Number.parseInt(getComputedStyle(root).getPropertyValue("--window-footer-height"), 10);
+        if ((footerHeight >= 0) && (instance.options.footerHeight !== footerHeight)) {
+            instance.options.footerHeight = footerHeight;
+            instance.drawWindow();
+        }
+
         const phone = phoneQuery.matches;
         // a content box placed by the stylesheet sizes its window
         const fullScreen = (getComputedStyle(instance.contentBorderEl).position !== "absolute") ? fitWindowSize(instance, phone) : phone;
