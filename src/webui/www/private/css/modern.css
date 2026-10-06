@@ -3118,6 +3118,59 @@
     }
 }
 
+/* Tablets and phones: icon-only view tabs */
+@media (width < 1100px) {
+    :root.modern #mainWindowTabs {
+        --modern-tab-circle: 36px;
+
+        & .tab-menu {
+            gap: 2px;
+        }
+
+        & .tab-menu li {
+            flex: none;
+        }
+
+        & .tab-menu li a {
+            align-items: center;
+            background-color: transparent;
+            box-sizing: border-box;
+            display: flex;
+            font-size: 0;
+            gap: 0;
+            height: var(--modern-tab-circle);
+            justify-content: center;
+            margin-left: 0; /* override Tabs.css's 6px */
+            padding: 0;
+            position: relative;
+            width: var(--modern-tab-circle);
+
+            &::before {
+                border-radius: 50%;
+                content: "";
+                height: var(--modern-tab-circle);
+                position: absolute;
+                width: var(--modern-tab-circle);
+            }
+
+            & img {
+                height: 18px;
+                margin: 0;
+                position: relative;
+                width: 18px;
+            }
+        }
+
+        & .tab-menu li:not(.selected):hover a::before {
+            background-color: var(--color-background-fill);
+        }
+
+        & .tab-menu li.selected a::before {
+            background-color: var(--color-background-blue);
+        }
+    }
+}
+
 /* touch phones: 16px fields, so iOS doesn't zoom */
 @media (width < 760px) and (pointer: coarse) {
     :root.modern {
@@ -3355,34 +3408,6 @@
         order: 0;
         overflow-x: auto;
         scrollbar-width: none;
-
-        & .tab-menu {
-            gap: 2px;
-        }
-
-        & .tab-menu li {
-            flex: none;
-        }
-
-        /* icons only, a circle when selected */
-        & .tab-menu li a {
-            align-items: center;
-            border-radius: 50% !important;
-            box-sizing: border-box;
-            display: flex;
-            font-size: 0;
-            gap: 0 !important; /* the hidden label would push the icon aside */
-            height: 36px;
-            justify-content: center;
-            padding: 0;
-            width: 36px;
-
-            & img {
-                height: 18px;
-                margin: 0;
-                width: 18px;
-            }
-        }
     }
 
     :root.modern #filtersButton {
@@ -3437,6 +3462,10 @@
 
     :root.modern #mochaToolbar .divider::before {
         left: -6px;
+    }
+
+    :root.modern #mainWindowTabs {
+        --modern-tab-circle: 32px;
     }
 }
 
