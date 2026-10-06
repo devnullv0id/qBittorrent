@@ -90,6 +90,9 @@ window.qBittorrent.DynamicTable ??= (() => {
 
     class DynamicTable {
         #DynamicTableHeaderContextMenuClass = null;
+        // Modern widens this column to the room the others leave
+        fillColumnName = null;
+
         // looked up each time: it changes with the pointer and the display mode, and on phones Classic's and Modern's
         // cards take their height
         get rowHeight() {
@@ -132,6 +135,29 @@ window.qBittorrent.DynamicTable ??= (() => {
             this.setupHeaderMenu();
             this.setupAltRow();
             this.setupVirtualList();
+            this.setupFillColumn();
+        }
+
+        setupFillColumn() {
+            if ((this.fillColumnName === null) || !isModern())
+                return;
+            const column = this.columns[this.fillColumnName];
+            const ownWidth = column.width;
+            const fit = () => {
+                if (!column.isVisible() || (this.dynamicTableDiv.clientWidth === 0))
+                    return;
+                const others = this.columns.reduce((sum, other) => (((other !== column) && other.isVisible()) ? (sum + other.width) : sum), 0);
+                const own = Number(localPreferences.get(`column_${column.name}_width_${this.dynamicTableDivId}`, ownWidth));
+                const width = Math.max(own, this.dynamicTableDiv.clientWidth - others - 1);
+                if (width !== column.width)
+                    this.#setColumnWidth(column.name, width);
+            };
+            const fitSoon = window.qBittorrent.Misc.createDebounceHandler(100, fit);
+            for (const other of this.columns) {
+                if ((other !== column) && (other.onResize === null))
+                    other.onResize = fitSoon;
+            }
+            new ResizeObserver(fitSoon).observe(this.dynamicTableDiv);
         }
 
         setupVirtualList() {
@@ -3496,6 +3522,7 @@ window.qBittorrent.DynamicTable ??= (() => {
 
     class LogMessageTable extends DynamicTable {
         filterText = "";
+        fillColumnName = "message";
 
         initColumns() {
             this.newColumn("rowId", "", "QBT_TR(ID)QBT_TR[CONTEXT=ExecutionLogWidget]", 50, true);
@@ -3572,6 +3599,8 @@ window.qBittorrent.DynamicTable ??= (() => {
     }
 
     class LogPeerTable extends LogMessageTable {
+        fillColumnName = "reason";
+
         initColumns() {
             this.newColumn("rowId", "", "QBT_TR(ID)QBT_TR[CONTEXT=ExecutionLogWidget]", 50, true);
             this.newColumn("ip", "", "QBT_TR(IP)QBT_TR[CONTEXT=ExecutionLogWidget]", 150, true);
