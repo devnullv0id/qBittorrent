@@ -836,6 +836,16 @@
         padding-right: 4px;
     }
 
+    /* dropdowns in cells (file priority) */
+    & td > select {
+        box-sizing: border-box;
+        height: calc(var(--modern-row-height) - 6px);
+        max-width: 100%;
+        min-height: 0;
+        padding-bottom: 0;
+        padding-top: 0;
+    }
+
     & tbody tr {
         height: var(--modern-row-height);
     }
