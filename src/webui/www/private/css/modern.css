@@ -4323,6 +4323,179 @@
             width: 16px;
         }
     }
+
+    /* Peer and tracker cards */
+    :root.modern :is(#torrentPeersTableDiv, #torrentTrackersTableDiv) {
+        & thead {
+            display: none;
+        }
+
+        & table,
+        & tbody {
+            display: block;
+            width: 100% !important;
+        }
+
+        /* fixed height, also set in dynamicTable.js */
+        & tbody tr {
+            align-content: center;
+            border-bottom: 1px solid var(--color-border-divider);
+            box-sizing: border-box;
+            display: grid;
+            gap: 0 12px;
+            left: 0;
+            overflow: hidden;
+            padding: 0 16px;
+            right: 0;
+            width: auto !important;
+        }
+
+        & td {
+            border: 0;
+            display: none;
+            font-size: 12px;
+            font-variant-numeric: tabular-nums;
+            height: auto !important;
+            line-height: 18px;
+            max-width: none !important; /* override the inline widths */
+            min-width: 0;
+            overflow: hidden;
+            padding: 0 !important;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            width: auto !important;
+        }
+    }
+
+    :root.modern #torrentPeersTableDiv {
+        & tbody tr {
+            grid-template-areas:
+                "country ip port dl"
+                ". client client up"
+                ". progress connection flags";
+            grid-template-columns: 18px minmax(0, 1fr) auto auto;
+            height: var(--modern-peer-card-height) !important;
+        }
+
+        & td[data-col="country"] {
+            display: block;
+            grid-area: country;
+        }
+
+        & td[data-col="ip"] {
+            display: block;
+            font-size: 14px;
+            grid-area: ip;
+            line-height: 20px;
+        }
+
+        & td[data-col="port"] {
+            color: var(--color-text-muted);
+            display: block;
+            grid-area: port;
+            line-height: 20px;
+        }
+
+        & td[data-col="client"] {
+            display: block;
+            grid-area: client;
+        }
+
+        & td[data-col="dl_speed"] {
+            display: block;
+            grid-area: dl;
+            line-height: 20px;
+            text-align: right;
+        }
+
+        & td[data-col="up_speed"] {
+            display: block;
+            grid-area: up;
+            text-align: right;
+        }
+
+        & td[data-col="dl_speed"]:not(:empty)::before {
+            content: "↓ ";
+        }
+
+        & td[data-col="up_speed"]:not(:empty)::before {
+            content: "↑ ";
+        }
+
+        &
+            td:is(
+                [data-col="progress"],
+                [data-col="connection"],
+                [data-col="flags"]
+            ) {
+            color: var(--color-text-muted);
+            display: block;
+        }
+
+        & td[data-col="progress"] {
+            grid-area: progress;
+        }
+
+        & td[data-col="connection"] {
+            grid-area: connection;
+        }
+
+        & td[data-col="flags"] {
+            grid-area: flags;
+            text-align: right;
+        }
+    }
+
+    :root.modern #torrentTrackersTableDiv {
+        & tbody tr {
+            grid-template-areas:
+                "url url url url"
+                "status seeds leeches peers"
+                "message message message message";
+            grid-template-columns: minmax(0, 1fr) auto auto auto;
+            height: var(--modern-tracker-card-height) !important;
+        }
+
+        & td[data-col="url"] {
+            display: block;
+            font-size: 14px;
+            grid-area: url;
+            line-height: 20px;
+        }
+
+        & td[data-col="status"] {
+            display: block;
+            grid-area: status;
+        }
+
+        & td:is([data-col="seeds"], [data-col="leeches"], [data-col="peers"]) {
+            display: block;
+            text-align: right;
+
+            &::before {
+                color: var(--color-text-muted);
+                content: attr(data-label) " ";
+            }
+        }
+
+        & td[data-col="seeds"] {
+            grid-area: seeds;
+        }
+
+        & td[data-col="leeches"] {
+            grid-area: leeches;
+        }
+
+        & td[data-col="peers"] {
+            grid-area: peers;
+        }
+
+        & td[data-col="message"] {
+            color: var(--color-text-muted);
+            display: block;
+            grid-area: message;
+        }
+    }
 }
 
 /* Sort sheet */

@@ -1926,6 +1926,9 @@ window.qBittorrent.DynamicTable ??= (() => {
     }
 
     class TorrentPeersTable extends DynamicTable {
+        // Modern's card height on phones, also in modern.css
+        static MODERN_CARD_HEIGHT = 72;
+
         initColumns() {
             this.newColumn("country", "", "QBT_TR(Country/Region)QBT_TR[CONTEXT=PeerListWidget]", 22, true);
             this.newColumn("ip", "", "QBT_TR(IP/Address)QBT_TR[CONTEXT=PeerListWidget]", 80, true);
@@ -2175,6 +2178,9 @@ window.qBittorrent.DynamicTable ??= (() => {
     }
 
     class TorrentTrackersTable extends DynamicTable {
+        // Modern's card height on phones, also in modern.css
+        static MODERN_CARD_HEIGHT = 72;
+
         collapseState = new Map(); // { rowId: String, isCollapsed: bool }
 
         isTrackerCollapsed(id) {

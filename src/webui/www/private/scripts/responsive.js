@@ -1221,16 +1221,13 @@ window.qBittorrent.Responsive ??= (() => {
         header.prepend(bar);
     };
 
-    const initTorrentCards = async () => {
-        // also used in modern.css
-        root.style.setProperty("--modern-card-height", `${window.qBittorrent.DynamicTable.TorrentsTable.MODERN_CARD_HEIGHT}px`);
-        const tableDiv = await whenElement("torrentsTableDiv");
-        // the cells tell the card layout which column they are
+    // tags each cell with its column and heading for the cards
+    const tagColumns = (tableDiv) => {
         const tag = () => {
             if (!phoneQuery.matches)
                 return;
 
-            const headers = [...document.querySelectorAll("#torrentsTableFixedHeaderDiv th")];
+            const headers = [...document.querySelectorAll(`#${tableDiv.id.replace(/Div$/, "FixedHeaderDiv")} th`)];
             const names = headers.map((th) => (th.className.match(/column_(\S+)/) ?? [])[1] ?? "");
             const labels = headers.map((th) => th.textContent.trim());
             for (const tr of tableDiv.querySelectorAll("tbody tr")) {
@@ -1244,12 +1241,20 @@ window.qBittorrent.Responsive ??= (() => {
         };
 
         new MutationObserver(tag).observe(tableDiv, { childList: true, subtree: true });
+        tag();
+        return tag;
+    };
+
+    const initTorrentCards = async () => {
+        // also used in modern.css
+        root.style.setProperty("--modern-card-height", `${window.qBittorrent.DynamicTable.TorrentsTable.MODERN_CARD_HEIGHT}px`);
+        const tableDiv = await whenElement("torrentsTableDiv");
+        const tag = tagColumns(tableDiv);
         // rows and cards differ in height
         phoneQuery.addEventListener("change", (event) => {
             window.torrentsTable.rerender();
             tag();
         });
-        tag();
 
         // tapping a card opens its properties as a sheet
         const wrapper = await whenElement("propertiesPanel_wrapper");
@@ -1279,6 +1284,17 @@ window.qBittorrent.Responsive ??= (() => {
                     break;
             }
         });
+    };
+
+    // peers and trackers as cards
+    const initPropertyCards = async () => {
+        // also used in modern.css
+        root.style.setProperty("--modern-peer-card-height", `${window.qBittorrent.DynamicTable.TorrentPeersTable.MODERN_CARD_HEIGHT}px`);
+        root.style.setProperty("--modern-tracker-card-height", `${window.qBittorrent.DynamicTable.TorrentTrackersTable.MODERN_CARD_HEIGHT}px`);
+        for (const id of ["torrentPeersTableDiv", "torrentTrackersTableDiv"]) {
+            const tag = tagColumns(await whenElement(id));
+            phoneQuery.addEventListener("change", (_event) => tag());
+        }
     };
 
     /* Context menus */
@@ -1956,6 +1972,7 @@ window.qBittorrent.Responsive ??= (() => {
         initNavbar();
         initPhoneToolbar();
         initTorrentCards();
+        initPropertyCards();
         initStatusBar();
         initPhoneSort();
         initSelectionCheckboxes();
