@@ -2976,6 +2976,8 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
                     document.getElementById("i2pOutboundLength").value = pref.i2p_outbound_length;
                     document.getElementById("i2pInboundLengthVariance").value = pref.i2p_inbound_length_variance;
                     document.getElementById("i2pOutboundLengthVariance").value = pref.i2p_outbound_length_variance;
+
+                    refreshModernEditors();
                 }).catch((error) => {
                     console.error(error);
                     alert("QBT_TR(Unable to load program preferences, qBittorrent is probably unreachable.)QBT_TR[CONTEXT=HttpServer]");
@@ -3613,12 +3615,68 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
             for (const id of ["src_email_txt", "dest_email_txt", "smtp_server_txt"])
                 document.getElementById(id).addEventListener("input", (_event) => updateMailTestButton());
 
-            if (document.documentElement.classList.contains("modern"))
+            if (document.documentElement.classList.contains("modern")) {
+                attachModernEditors();
                 markFieldUnits();
+            }
 
             loadPreferences();
 
             window.qBittorrent.pathAutofill.attachPathAutofill();
+        };
+
+        // Modern's additions follow the loaded preferences
+        const modernEditors = [];
+        const refreshModernEditors = () => {
+            for (const refresh of modernEditors)
+                refresh();
+        };
+
+        // Modern's Enable proxy server switch: off is the type (None), on the type used last
+        const attachProxySwitch = () => {
+            const select = document.getElementById("peer_proxy_type_select");
+            const row = document.createElement("div");
+            row.className = "formRow modernEnableRow";
+            const box = document.createElement("input");
+            box.type = "checkbox";
+            box.id = "modernProxyEnabled";
+            const label = document.createElement("label");
+            label.htmlFor = box.id;
+            label.textContent = "QBT_TR(Enable proxy server)QBT_TR[CONTEXT=OptionsDialog]";
+            row.append(box, label);
+            select.closest("fieldset").querySelector(":scope > legend").after(row);
+            let lastType = "SOCKS5";
+            const sync = () => {
+                if (select.value !== "None")
+                    lastType = select.value;
+                box.checked = select.value !== "None";
+            };
+            box.addEventListener("change", (event) => {
+                select.value = box.checked ? lastType : "None";
+                // MooTools replaces window.Event
+                select.dispatchEvent(new CustomEvent("change", { bubbles: true }));
+                sync();
+            });
+            select.addEventListener("change", (_event) => sync());
+            modernEditors.push(sync);
+        };
+
+        // Modern moves the I2P switch into an Enable I2P row
+        const attachI2PSwitch = () => {
+            const box = document.getElementById("i2pEnabledCheckbox");
+            const row = document.createElement("div");
+            row.className = "formRow modernEnableRow";
+            const label = document.createElement("label");
+            label.htmlFor = box.id;
+            label.textContent = "QBT_TR(Enable I2P)QBT_TR[CONTEXT=OptionsDialog]";
+            const legend = box.parentElement;
+            row.append(box, label);
+            legend.after(row);
+        };
+
+        const attachModernEditors = () => {
+            attachProxySwitch();
+            attachI2PSwitch();
         };
 
         // Modern lines fields and their units up with the dropdowns

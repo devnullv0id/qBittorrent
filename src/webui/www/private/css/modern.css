@@ -2900,8 +2900,6 @@
     text-transform: inherit;
 }
 
-/* Schedule times: hours and minutes as one field */
-
 /* Options window: a fixed size, as tall as the screen allows */
 @media (width >= 760px) {
     :root.modern #preferencesPage {
@@ -3065,6 +3063,11 @@
             );
         height: 14px;
         width: 14px;
+    }
+
+    &[data-glyph="chevron"] {
+        background-color: currentcolor;
+        mask: var(--modern-chevron-down) center / 20px no-repeat;
     }
 
     &[data-glyph="more"] {
@@ -4246,6 +4249,699 @@
             > td:not(.invisible, td:not(.invisible) ~ td)::after {
             border-color: var(--color-accent-blue);
             left: 23px;
+        }
+    }
+
+    /* Options on phones */
+    /* the sidebar as a tab strip */
+    :root.modern #preferencesPage .mochaToolbarWrapper {
+        height: 50px !important;
+        position: relative;
+    }
+
+    :root.modern #preferencesPage .mochaToolbar {
+        border-bottom: 1px solid var(--color-border-divider);
+        border-right: 0;
+        height: 50px !important;
+        overflow: auto hidden;
+        padding: 6px 8px;
+        position: static;
+        width: 100%;
+    }
+
+    :root.modern #preferencesPage .mochaContentBorder {
+        left: 0;
+        top: calc(
+            var(--modern-title-height) + var(--modern-prefs-strip, 76px)
+        ) !important;
+    }
+
+    :root.modern .mocha .mochaTitlebar {
+        width: 100% !important;
+    }
+
+    :root.modern #preferencesTabs {
+        flex-direction: row;
+        overflow-x: auto;
+    }
+
+    :root.modern .PrefTab {
+        padding: 4px 12px 8px;
+    }
+
+    :root.modern .PrefTab table,
+    :root.modern .PrefTab tbody,
+    :root.modern .PrefTab tr {
+        display: block;
+        width: 100%;
+    }
+
+    :root.modern .PrefTab tr {
+        align-items: center;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px 10px;
+        justify-content: space-between;
+        padding: 6px 0;
+    }
+
+    :root.modern .PrefTab tr + tr {
+        border-top: 1px solid var(--color-border-divider);
+    }
+
+    :root.modern .PrefTab tr + tr > td {
+        border-top: 0;
+    }
+
+    :root.modern .PrefTab td {
+        padding: 0;
+    }
+
+    :root.modern .PrefTab td:last-child:not(:first-child) {
+        white-space: normal;
+    }
+
+    :root.modern .PrefTab select:not([multiple]) {
+        width: min(var(--modern-select-width), 100%) !important;
+    }
+}
+
+/* one column */
+@media (width < 760px) {
+    :root.modern #preferencesPage .PrefTab {
+        --modern-select-width: 100%;
+        --modern-unit-slot: 40px; /* a unit's name only */
+
+        padding: 0 0 24px;
+
+        & fieldset {
+            margin: 30px 0 0;
+            padding: 0 14px;
+        }
+
+        & fieldset fieldset {
+            border: 0;
+            border-top: 1px solid var(--color-border-divider);
+            margin: 0 -14px;
+            padding: 0 14px;
+
+            & > legend {
+                color: var(--color-text-muted);
+                font-size: 12px;
+                font-weight: 600;
+                padding: 14px 0 0 !important;
+                position: static;
+            }
+        }
+
+        /* setting rows */
+        &
+            tr:not(
+                :has(
+                    > td > input[type="checkbox"] + label,
+                    > td > input[type="checkbox"]:only-child
+                )
+            ),
+        &
+            div.formRow:not(
+                :has(
+                    > input[type="checkbox"] + label,
+                    > span > input[type="checkbox"] + label
+                )
+            ) {
+            align-items: stretch;
+            display: flex !important;
+            flex-flow: column nowrap !important;
+            gap: 8px;
+            padding: 12px 0 !important;
+        }
+
+        /* watched folders: an entry's fields stacked, named after the column headings */
+        & #watched_folders_tab thead {
+            display: none;
+        }
+
+        & #watched_folders_tab td {
+            border-top: 0;
+        }
+
+        & tr > td,
+        &
+            div.formRow
+            > :is(
+                label,
+                select,
+                input:not([type="checkbox"]),
+                .prefField,
+                textarea
+            ) {
+            box-sizing: border-box;
+            margin-left: 0 !important;
+            max-width: none !important;
+            min-width: 0 !important;
+            text-align: left !important;
+            width: 100% !important;
+        }
+
+        & tr > td:empty {
+            display: none;
+        }
+
+        &
+            :is(
+                select:not([multiple]),
+                input:is(
+                    [type="text"],
+                    [type="number"],
+                    [type="password"],
+                    :not([type])
+                ),
+                textarea
+            ) {
+            box-sizing: border-box;
+            max-width: 100%;
+            min-height: max(40px, var(--modern-control-height));
+        }
+
+        & td > select:not([multiple]):only-of-type,
+        &
+            td
+            > input:is(
+                [type="text"],
+                [type="number"],
+                [type="password"],
+                :not([type])
+            ):only-of-type,
+        & div.formRow > select:not([multiple]),
+        &
+            div.formRow
+            > input:is(
+                [type="text"],
+                [type="number"],
+                [type="password"],
+                :not([type])
+            ) {
+            width: 100% !important;
+        }
+
+        /* value and unit: the value grows */
+        & td:has(> #filelog_age_type_select) {
+            align-items: center;
+            display: flex !important;
+            gap: 8px;
+
+            & > input {
+                flex: 1 1 auto;
+                margin: 0 !important;
+                min-width: 0;
+                width: auto !important;
+            }
+
+            & > select {
+                flex: 0 0 auto;
+                width: 7.5em !important;
+            }
+        }
+
+        & .prefField {
+            display: flex !important;
+            width: 100% !important;
+
+            & > input {
+                flex: 1 1 auto;
+                min-width: 0;
+                width: auto !important;
+            }
+        }
+
+        /* switch rows */
+        & tr:has(> td > input[type="checkbox"] + label),
+        &
+            div.formRow:has(
+                > input[type="checkbox"] + label,
+                > span > input[type="checkbox"] + label
+            ) {
+            min-height: 48px;
+            padding: 6px 0 !important;
+        }
+
+        & tr + tr,
+        & div.formRow + div.formRow {
+            border-top: 1px solid var(--color-border-divider);
+        }
+
+        & label {
+            line-height: 1.35;
+        }
+
+        /* a switch in a heading heads the card */
+        & fieldset > legend:has(> input[type="checkbox"]) {
+            align-items: center;
+            border-bottom: 1px solid var(--color-border-divider);
+            box-sizing: border-box;
+            display: flex !important;
+            float: left;
+            gap: 12px;
+            inset: auto !important;
+            margin: 0 !important;
+            min-height: 48px;
+            padding: 6px 0 !important;
+            position: static;
+            transform: none !important;
+            width: 100% !important;
+
+            & > input[type="checkbox"] {
+                flex: none;
+                margin: 0 0 0 auto !important;
+                order: 2;
+                position: relative;
+            }
+
+            & > label {
+                color: var(--color-text-default);
+                font-size: 13px;
+                font-weight: 600;
+                letter-spacing: 0;
+                order: 1;
+                text-transform: none;
+            }
+        }
+
+        & fieldset:has(> legend > input[type="checkbox"]) {
+            margin-top: 18px;
+
+            & > legend + * {
+                clear: both;
+            }
+        }
+
+        & tr:has(> td:first-child > input[type="checkbox"]:only-child) {
+            gap: 8px 12px;
+            padding: 12px 0 !important;
+
+            & > td {
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            & input[type="checkbox"] {
+                margin: 0 !important;
+            }
+        }
+
+        &
+            tr:has(> td:last-child > input[type="checkbox"]:only-child):not(
+                :has(> td:first-child > input[type="checkbox"])
+            ) {
+            align-items: center;
+            display: flex !important;
+            flex-direction: row !important;
+            gap: 12px;
+            min-height: 48px;
+            padding: 6px 0 !important;
+
+            & > td:first-child {
+                flex: 1 1 0;
+                min-width: 0 !important;
+                white-space: normal !important;
+                width: auto !important;
+            }
+
+            & > td:first-child label {
+                white-space: normal !important;
+            }
+
+            & > td:last-child {
+                flex: none;
+                width: auto !important;
+            }
+
+            & input[type="checkbox"] {
+                margin: 0 !important;
+            }
+        }
+
+        /* settings outside a group */
+        &
+            > div.formRow:not(
+                :has(
+                    > input[type="checkbox"] + label,
+                    > span > input[type="checkbox"] + label
+                )
+            ),
+        &
+            > div.formRow:has(
+                > input[type="checkbox"] + label,
+                > span > input[type="checkbox"] + label
+            ) {
+            background-size: calc(100% - 28px) 1px;
+            box-sizing: border-box;
+            padding-left: 14px !important;
+            padding-right: 14px !important;
+        }
+
+        & fieldset > legend label {
+            flex: 1 1 auto;
+            min-width: 0;
+            overflow: visible !important;
+            text-overflow: clip;
+            white-space: normal;
+        }
+    }
+
+    /* window tabs as tiles */
+    :root.modern :is(#preferencesTabs, .mocha .tab-menu) {
+        flex-wrap: wrap;
+        gap: 4px;
+
+        & li {
+            flex: none;
+        }
+
+        & li a {
+            align-items: center;
+            border-radius: var(--modern-radius-button);
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            font-size: 11px;
+            gap: 4px;
+            height: 100%;
+            hyphens: auto;
+            justify-content: center;
+            line-height: 13px;
+            /* taller, with the rest of its row, where a label needs four lines */
+            min-height: 64px;
+            overflow-wrap: anywhere; /* a word longer than the tile (Comportamiento) */
+            padding: 0 !important; /* all of the tile's width for its label */
+            text-align: center;
+            white-space: normal;
+            width: 68px;
+
+            & img {
+                height: 20px;
+                margin: 0 !important;
+                width: 20px;
+            }
+        }
+    }
+
+    /* Options: four pages and More per row */
+    :root.modern #preferencesTabs {
+        display: grid !important;
+        gap: 4px;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        overflow: visible !important;
+
+        & li a {
+            width: 100% !important;
+        }
+
+        &:not(.modernExpanded) > li:nth-child(n + 6) {
+            display: none;
+        }
+
+        & .modernPrefsMore a {
+            cursor: pointer;
+        }
+
+        & .modernPrefsMore .modernGlyph {
+            height: 20px;
+            transition: transform 0.2s;
+            width: 20px;
+        }
+
+        & .modernPrefsMore a[aria-expanded="true"] .modernGlyph {
+            transform: rotate(180deg);
+        }
+    }
+
+    /* one row of tiles, both once More is open (measured by responsive.js) */
+    :root.modern #preferencesPage .mochaToolbarWrapper,
+    :root.modern #preferencesPage .mochaToolbar {
+        height: var(--modern-prefs-strip, 76px) !important;
+    }
+
+    :root.modern #preferencesPage:has(#preferencesTabs.modernExpanded) {
+        & .mochaToolbarWrapper,
+        & .mochaToolbar {
+            height: var(--modern-prefs-strip-expanded, 144px) !important;
+        }
+
+        & .mochaContentBorder {
+            top: calc(
+                var(--modern-title-height) +
+                    var(--modern-prefs-strip-expanded, 144px)
+            ) !important;
+        }
+    }
+
+    :root.modern #preferencesPage .mochaToolbar {
+        padding: 6px 8px !important;
+    }
+
+    :root.modern #preferencesPage .mochaContentWrapper {
+        height: 100% !important;
+    }
+
+    :root.modern
+        #preferencesPage
+        .mochaContent
+        > div:not(.PrefTab):has(> input[type="button"]) {
+        padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+
+        & > input[type="button"] {
+            min-height: 44px;
+            width: 100%;
+        }
+    }
+
+    /* buttons and the port on phones */
+    :root.modern
+        #preferencesPage
+        .PrefTab
+        fieldset
+        > :is(input[type="button"], button) {
+        box-sizing: border-box;
+        margin: 8px 0 0 !important;
+        width: 100% !important;
+    }
+
+    :root.modern #preferencesPage .PrefTab td:has(> #webuiPortValue) {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+
+        & > input {
+            flex: 1 1 100%;
+            width: auto !important;
+        }
+
+        & > label {
+            flex-basis: 100%;
+            margin-left: 0 !important;
+        }
+    }
+
+    /* Proxy and I2P on phones */
+    :root.modern
+        #preferencesPage
+        #peerProxyServerTable
+        tr:has(#peer_proxy_host_text) {
+        align-items: end;
+        display: grid !important;
+        gap: 8px 10px;
+        grid-template-columns: minmax(0, 1fr) 6.5em !important;
+
+        & > td:nth-child(1) {
+            grid-column: 1 / -1;
+            grid-row: 1;
+        }
+
+        & > td:nth-child(2) {
+            grid-column: 1 / -1;
+            grid-row: 2;
+            margin-bottom: 8px;
+        }
+
+        & > td:nth-child(3) {
+            grid-column: 1;
+            grid-row: 3;
+        }
+
+        & > td:nth-child(4) {
+            grid-column: 1;
+            grid-row: 4;
+        }
+
+        & > td:nth-child(5) {
+            grid-column: 2;
+            grid-row: 3;
+        }
+
+        & > td:nth-child(6) {
+            grid-column: 2;
+            grid-row: 4;
+        }
+
+        & input {
+            width: 100% !important;
+        }
+    }
+
+    :root.modern #preferencesPage tr:has(> td > #i2pAddress) {
+        align-items: end;
+        display: grid !important;
+        gap: 8px 10px;
+        grid-template-columns: minmax(0, 1fr) 6.5em !important;
+
+        & > td:nth-child(-n + 2) {
+            grid-column: 1;
+        }
+
+        & > td:nth-child(n + 3) {
+            grid-column: 2;
+        }
+
+        & > td:nth-child(odd) {
+            grid-row: 1;
+        }
+
+        & > td:nth-child(even) {
+            grid-row: 2;
+        }
+
+        & input {
+            width: 100% !important;
+        }
+    }
+}
+
+/* Proxy server */
+:root.modern
+    #preferencesPage
+    .PrefTab
+    fieldset:has(> .modernEnableRow > input[type="checkbox"]:not(:checked))
+    > :not(legend, .modernEnableRow) {
+    display: none !important;
+}
+
+/* Schedule on phones */
+@media (width < 760px) {
+    :root.modern
+        #preferencesPage
+        .PrefTab
+        div.formRow:has(#schedule_from_hour) {
+        align-items: stretch;
+        display: grid !important;
+        gap: 8px 0;
+        grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important;
+
+        & #scheduleFromHourLabel {
+            grid-column: 1 / -1;
+            grid-row: 1;
+        }
+
+        & #schedule_from_hour {
+            grid-column: 1;
+            grid-row: 2;
+        }
+
+        & .prefField > #schedule_from_hour + .prefUnit,
+        & #schedule_from_hour + .prefUnit {
+            grid-column: 2;
+            grid-row: 2;
+        }
+
+        & #schedule_from_min {
+            grid-column: 3;
+            grid-row: 2;
+        }
+
+        & #scheduleToHourLabel {
+            grid-column: 1 / -1;
+            grid-row: 3;
+            margin-top: 8px;
+        }
+
+        & #schedule_to_hour {
+            grid-column: 1;
+            grid-row: 4;
+        }
+
+        & #schedule_to_hour + .prefUnit {
+            grid-column: 2;
+            grid-row: 4;
+        }
+
+        & #schedule_to_min {
+            grid-column: 3;
+            grid-row: 4;
+        }
+
+        & input {
+            box-sizing: border-box;
+            width: 100% !important;
+        }
+
+        &
+            :is(
+                #schedule_from_hour,
+                #schedule_to_hour,
+                #schedule_from_min,
+                #schedule_to_min
+            ) {
+            height: max(40px, var(--modern-control-height)) !important;
+        }
+    }
+}
+
+/* More only on phones */
+@media (width >= 760px) {
+    :root.modern #preferencesTabs > .modernPrefsMore {
+        display: none;
+    }
+}
+
+/* API key on phones */
+@media (width < 760px) {
+    :root.modern #preferencesPage .PrefTab tr:has(> td > #WebUIAPIKeyText) {
+        align-items: center;
+        display: grid !important;
+        gap: 8px 6px;
+        grid-template-columns: minmax(0, 1fr) repeat(
+                3,
+                max(40px, var(--modern-control-height))
+            ) !important;
+
+        & > td {
+            padding: 0 !important;
+            width: auto !important;
+        }
+
+        & > td:first-child {
+            grid-column: 1 / -1;
+        }
+
+        & #WebUIAPIKeyText {
+            box-sizing: border-box;
+            min-width: 0;
+            width: 100% !important;
+        }
+
+        & button {
+            align-items: center;
+            display: flex;
+            height: max(40px, var(--modern-control-height));
+            justify-content: center;
+            min-height: 0;
+            padding: 0 !important;
+            width: max(40px, var(--modern-control-height));
+
+            & img {
+                margin: 0 !important;
+                top: 0 !important;
+            }
         }
     }
 }

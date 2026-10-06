@@ -1703,11 +1703,106 @@ window.qBittorrent.Responsive ??= (() => {
     // a page opens at its top, as the pages share the window's scrolling
     const initOptionsPages = () => {
         document.addEventListener("click", (event) => {
-            if (event.target.closest("#preferencesTabs a") === null)
+            const link = event.target.closest("#preferencesTabs a");
+            if ((link === null) || (link.closest(".modernPrefsMore") !== null))
                 return;
 
             document.getElementById("preferencesPage_contentWrapper").scrollTop = 0;
         });
+    };
+
+    /* Modern Options */
+
+    // phones: a More tile shows the other pages in a second row
+    const setupPrefsMore = (tabs) => {
+        const items = [...tabs.children].filter((li) => li.tagName === "LI");
+        const li = document.createElement("li");
+        li.className = "modernPrefsMore";
+        const a = document.createElement("a");
+        a.setAttribute("role", "button");
+        const glyph = document.createElement("span");
+        glyph.className = "modernGlyph";
+        glyph.dataset.glyph = "chevron";
+        glyph.setAttribute("aria-hidden", "true");
+        const label = document.createElement("span");
+        label.textContent = "QBT_TR(More)QBT_TR[CONTEXT=OptionsDialog]";
+        a.append(glyph, label);
+        li.append(a);
+        items[3].after(li);
+        const sync = () => {
+            a.setAttribute("aria-expanded", tabs.classList.contains("modernExpanded").toString());
+        };
+
+        a.addEventListener("click", (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            tabs.classList.toggle("modernExpanded");
+            sync();
+        });
+        new MutationObserver(() => {
+            if (!tabs.classList.contains("modernExpanded") && items.slice(4).some((item) => item.classList.contains("selected"))) {
+                tabs.classList.add("modernExpanded");
+                sync();
+            }
+        }).observe(tabs, { attributes: true, subtree: true, attributeFilter: ["class"] });
+        sync();
+
+        // the strip is as tall as its tiles, one row or both: a long translation can give a tile a fourth line
+        const page = tabs.closest(".mocha");
+        const toolbar = tabs.closest(".mochaToolbar");
+        const stripObserver = new ResizeObserver(() => {
+            const style = getComputedStyle(toolbar);
+            const padding = Number.parseFloat(style.paddingTop) + Number.parseFloat(style.paddingBottom);
+            const rows = tabs.lastElementChild.getBoundingClientRect().bottom - items[0].getBoundingClientRect().top;
+            page.style.setProperty("--modern-prefs-strip", `${items[0].offsetHeight + padding}px`);
+            page.style.setProperty("--modern-prefs-strip-expanded", `${Math.ceil(rows + padding)}px`);
+        });
+        stripObserver.observe(tabs);
+        MochaUI.Windows.instances[page.id].addEvent("close", () => stripObserver.disconnect());
+    };
+
+    // watched folders' fields named after the hidden column headings
+    const labelWatchedFolders = (table) => {
+        const [folderHeading, locationHeading] = [...table.tHead.rows[0].cells].map((th) => th.textContent);
+        const label = () => {
+            for (const row of table.tBodies[0].rows) {
+                const folder = row.cells[0]?.querySelector("input");
+                const location = row.cells[1]?.querySelector("select");
+                if (folder) {
+                    folder.placeholder = folderHeading;
+                    folder.setAttribute("aria-label", folderHeading);
+                }
+                if (location)
+                    location.setAttribute("aria-label", locationHeading);
+            }
+        };
+
+        new MutationObserver(label).observe(table.tBodies[0], { childList: true });
+        label();
+    };
+
+    const initPreferences = () => {
+        // the Options window is built on each opening, its pages loaded after
+        new MutationObserver((mutations) => {
+            for (const { addedNodes } of mutations) {
+                for (const node of addedNodes) {
+                    if (node.id !== "preferencesPage")
+                        continue;
+
+                    const tabsObserver = new MutationObserver(() => {
+                        const tabs = document.getElementById("preferencesTabs");
+                        const watchedFolders = document.getElementById("watched_folders_tab");
+                        if ((tabs === null) || (watchedFolders === null))
+                            return;
+
+                        tabsObserver.disconnect();
+                        setupPrefsMore(tabs);
+                        labelWatchedFolders(watchedFolders);
+                    });
+                    tabsObserver.observe(node, { childList: true, subtree: true });
+                }
+            }
+        }).observe(document.getElementById("desktop"), { childList: true });
     };
 
     // called by client.js once the main window is built
@@ -1733,6 +1828,7 @@ window.qBittorrent.Responsive ??= (() => {
         initStatusBar();
         initPhoneSort();
         initSelectionCheckboxes();
+        initPreferences();
     };
 
     return exports();
