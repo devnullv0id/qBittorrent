@@ -2214,6 +2214,23 @@
     color: var(--color-text-muted);
 }
 
+/* Search without plugins */
+:root.modern #searchNoPluginsHint {
+    display: none;
+}
+
+:root.modern #searchNoPluginsButton {
+    display: flex;
+    margin: 14px auto 0;
+    width: fit-content;
+}
+
+:root.modern
+    #searchResults:has(#searchResultsNoPlugins:not(.invisible))
+    :is(#searchResultsHeader, div:has(> #manageSearchPlugins)) {
+    display: none;
+}
+
 :root.modern :is(#rssTopBar, #logTopBar, #torrentCreatorTopBar) {
     align-items: center;
     background-color: var(--color-background-default);
