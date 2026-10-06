@@ -1588,6 +1588,116 @@ window.qBittorrent.Responsive ??= (() => {
         });
     };
 
+    /* Modern selection checkboxes */
+
+    // row checkboxes select several torrents without Ctrl or Shift; switched off in the header menu
+    const initSelectionCheckboxes = async () => {
+        const tableDiv = await whenElement("torrentsTableDiv");
+        const enabled = () => localPreferences.get("torrents_row_checkboxes") !== "false";
+        const update = () => root.classList.toggle("modernSelectMode", enabled());
+
+        const addMenuItem = (ul) => {
+            if (ul.querySelector(".modernCheckboxesItem"))
+                return;
+
+            const li = document.createElement("li");
+            li.className = "modernCheckboxesItem separator";
+            const anchor = document.createElement("a");
+            anchor.href = "#modernCheckboxes";
+            const img = document.createElement("img");
+            img.src = "images/checked-completed.svg";
+            img.alt = "";
+            img.style.visibility = enabled() ? "visible" : "hidden";
+            anchor.append(img, "QBT_TR(Checkboxes)QBT_TR[CONTEXT=MainWindow]");
+            li.append(anchor);
+            // capturing: contextmenu.js knows no such action
+            anchor.addEventListener("click", (event) => {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                localPreferences.set("torrents_row_checkboxes", (!enabled()).toString());
+                img.style.visibility = enabled() ? "visible" : "hidden";
+                update();
+                window.torrentsTable.headerContextMenu.hide();
+            }, true);
+            ul.append(li);
+        };
+
+        // the table rebuilds its header menu
+        const ul = await whenElement("torrentsTableDiv_headerMenu");
+        addMenuItem(ul);
+        new MutationObserver(() => addMenuItem(ul)).observe(ul, { childList: true });
+        update();
+
+        const header = document.getElementById("torrentsTableFixedHeaderDiv");
+        const table = window.torrentsTable;
+        // the checkbox zone: before the row (on phones, the card), or the header's box
+        const hitCheckbox = (event) => {
+            if (!root.classList.contains("modernSelectMode"))
+                return null;
+
+            const point = event.changedTouches?.[0] ?? event;
+            const tr = event.target.closest?.("#torrentsTableDiv tbody tr");
+            if (tr) {
+                const left = phoneQuery.matches ? (tr.getBoundingClientRect().left + 48) : tr.closest("table").getBoundingClientRect().left;
+                return (point.clientX < left) ? tr : null;
+            }
+            if (header.contains(event.target) && (point.clientX < (header.getBoundingClientRect().left + 36)))
+                return header;
+
+            return null;
+        };
+
+        const updateHeader = () => {
+            if (!root.classList.contains("modernSelectMode"))
+                return;
+
+            const total = table.getFilteredAndSortedRows().length;
+            const selected = table.selectedRowsIds().length;
+            header.classList.toggle("modernAllSelected", (total > 0) && (selected === total));
+            header.classList.toggle("modernSomeSelected", (selected > 0) && (selected < total));
+        };
+
+        // the table's selection and long press stay out of the checkbox zone
+        const stop = (event) => {
+            if (hitCheckbox(event))
+                event.stopPropagation();
+        };
+
+        tableDiv.addEventListener("touchstart", ((event) => stop(event)), { capture: true, passive: true });
+        tableDiv.addEventListener("touchend", ((event) => stop(event)), { capture: true, passive: true });
+        document.addEventListener("pointerdown", (event) => stop(event), true);
+        document.addEventListener("dblclick", (event) => stop(event), true);
+        document.addEventListener("click", (event) => {
+            const hit = hitCheckbox(event);
+            if (hit === null)
+                return;
+
+            event.preventDefault();
+            event.stopPropagation();
+            if (hit === header) {
+                if (table.selectedRowsIds().length === table.getFilteredAndSortedRows().length) {
+                    table.deselectAll();
+                    table.setRowClass();
+                }
+                else {
+                    table.selectAll();
+                }
+                table.onSelectedRowChanged();
+            }
+            else if (table.isRowSelected(hit.rowId)) {
+                table.deselectRow(hit.rowId);
+            }
+            else {
+                table.selectRow(hit.rowId);
+            }
+            updateHeader();
+        }, true);
+        // selecting marks the rows, the list and its filters render them anew, the menu switches the boxes on
+        const headerObserver = new MutationObserver(window.qBittorrent.Misc.createDebounceHandler(100, updateHeader));
+        headerObserver.observe(tableDiv.querySelector("tbody"), { childList: true, subtree: true, attributes: true, attributeFilter: ["class"] });
+        headerObserver.observe(root, { attributes: true, attributeFilter: ["class"] });
+    };
+
     /* Options */
 
     // a page opens at its top, as the pages share the window's scrolling
@@ -1622,6 +1732,7 @@ window.qBittorrent.Responsive ??= (() => {
         initTorrentCards();
         initStatusBar();
         initPhoneSort();
+        initSelectionCheckboxes();
     };
 
     return exports();

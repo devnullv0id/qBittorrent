@@ -4127,3 +4127,125 @@
         transform: rotate(180deg);
     }
 }
+
+/* Selection checkboxes */
+
+/* pseudo-elements, so the column indexes stay */
+:root.modern.modernSelectMode {
+    & #torrentsTableDiv table,
+    & #torrentsTableFixedHeaderDiv table {
+        margin-left: 36px;
+    }
+
+    & #torrentsTableFixedHeaderDiv {
+        position: relative;
+    }
+
+    /* drawn by the first visible cell: Chrome gives a row's ::before a cell of its own */
+    & #torrentsTableDiv tbody tr {
+        position: relative;
+    }
+
+    &
+        #torrentsTableDiv
+        tbody
+        tr
+        > td:not(.invisible, td:not(.invisible) ~ td)::before,
+    & #torrentsTableFixedHeaderDiv::before {
+        background-color: var(--color-background-primary);
+        border: 1.5px solid var(--color-text-muted);
+        border-radius: 4px;
+        box-sizing: border-box;
+        content: "";
+        height: 18px;
+        left: -27px;
+        position: absolute;
+        top: calc(50% - 9px);
+        width: 18px;
+    }
+
+    & #torrentsTableFixedHeaderDiv::before {
+        left: 9px;
+        z-index: 1;
+    }
+
+    &
+        #torrentsTableDiv
+        tbody
+        tr.selected
+        > td:not(.invisible, td:not(.invisible) ~ td)::before {
+        background-color: var(--color-accent-blue);
+        border-color: var(--color-accent-blue);
+    }
+
+    &
+        #torrentsTableDiv
+        tbody
+        tr.selected
+        > td:not(.invisible, td:not(.invisible) ~ td)::after,
+    & #torrentsTableFixedHeaderDiv.modernAllSelected::after {
+        border-bottom: 2px solid var(--color-text-white);
+        border-right: 2px solid var(--color-text-white);
+        content: "";
+        height: 9px;
+        left: -21px;
+        position: absolute;
+        top: calc(50% - 6px);
+        transform: rotate(45deg);
+        width: 5px;
+    }
+
+    & #torrentsTableFixedHeaderDiv.modernAllSelected::before {
+        background-color: var(--color-accent-blue);
+        border-color: var(--color-accent-blue);
+    }
+
+    & #torrentsTableFixedHeaderDiv.modernAllSelected::after {
+        left: 15px;
+        z-index: 1;
+    }
+
+    & #torrentsTableFixedHeaderDiv.modernSomeSelected::after {
+        background-color: var(--color-accent-blue);
+        content: "";
+        height: 2px;
+        left: 13px;
+        position: absolute;
+        top: calc(50% - 1px);
+        width: 10px;
+        z-index: 1;
+    }
+}
+
+@media (width < 760px) {
+    :root.modern.modernSelectMode #transferList #torrentsTableDiv {
+        & table {
+            margin-left: 0;
+        }
+
+        & tbody tr {
+            padding-left: 52px;
+        }
+
+        & tbody tr > td:not(.invisible, td:not(.invisible) ~ td)::before {
+            left: 17px;
+            top: calc(50% - 9px);
+        }
+
+        &
+            tbody
+            tr.selected
+            > td:not(.invisible, td:not(.invisible) ~ td)::before {
+            background-color: var(--color-text-white);
+            border-color: var(--color-text-white);
+        }
+
+        &
+            tbody
+            tr.selected
+            > td:not(.invisible, td:not(.invisible) ~ td)::after {
+            border-color: var(--color-accent-blue);
+            left: 23px;
+        }
+    }
+}
