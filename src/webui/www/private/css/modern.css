@@ -928,6 +928,15 @@
     padding: var(--modern-cell-padding);
 }
 
+/* properties tables: narrow columns, less padding */
+:root.modern
+    #propertiesPanel_wrapper
+    .dynamicTable
+    :is(th, td:not(:has(> input[type="checkbox"]))) {
+    padding-left: 6px;
+    padding-right: 6px;
+}
+
 :root.modern .altRowColors tbody tr:nth-child(odd of :not(.invisible)) {
     background-color: var(--color-background-zebra);
 }
