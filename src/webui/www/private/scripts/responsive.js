@@ -77,8 +77,11 @@ window.qBittorrent.Responsive ??= (() => {
 
     /* Focus */
 
-    // the focus stays in an open drawer
+    // the focus stays in an open drawer or sheet
     const focusableSelector = "a[href], button:not([disabled]), input:not([disabled], [type='hidden']), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex='-1'])";
+    // a dialog opened above a drawer or sheet gets the keys
+    const inWindow = (element) => (element instanceof Element) && (element.closest(".mocha") !== null);
+
     const trapFocus = (container) => {
         const returnTo = document.activeElement;
         const focusable = () => [...container.querySelectorAll(focusableSelector)].filter((element) => element.getClientRects().length > 0);
@@ -91,7 +94,7 @@ window.qBittorrent.Responsive ??= (() => {
             container.focus();
         }
         const onKeyDown = (event) => {
-            if (event.key !== "Tab")
+            if ((event.key !== "Tab") || inWindow(document.activeElement))
                 return;
 
             const items = focusable();
@@ -119,12 +122,14 @@ window.qBittorrent.Responsive ??= (() => {
         };
     };
 
-    // filters reachable and activated from the keyboard
+    // filters and menu items reachable and activated from the keyboard (the menubar only in Modern)
     const keyboardItems = "ul.filterList span.link";
+    const modernKeyboardItems = "#desktopNavbar a, #toolbarOverflowMenu a, #modernStatusMenu a, #modernSortMenu a";
 
     const initKeyboardItems = () => {
+        const selector = isModern() ? `${keyboardItems}, ${modernKeyboardItems}` : keyboardItems;
         const mark = (container) => {
-            for (const item of container.querySelectorAll(keyboardItems)) {
+            for (const item of container.querySelectorAll(selector)) {
                 if (!item.hasAttribute("tabindex"))
                     item.tabIndex = 0;
             }
@@ -140,7 +145,7 @@ window.qBittorrent.Responsive ??= (() => {
             switch (event.key) {
                 case "Enter":
                 case " ":
-                    if (!event.target.matches?.(keyboardItems))
+                    if (!event.target.matches?.(selector))
                         break;
 
                     event.preventDefault();
@@ -885,6 +890,7 @@ window.qBittorrent.Responsive ??= (() => {
     /* Modern phone header */
 
     let navScrim = null;
+    let releaseNavFocus = null;
 
     const setNavDrawer = (open) => {
         const navbar = document.getElementById("desktopNavbar");
@@ -921,10 +927,13 @@ window.qBittorrent.Responsive ??= (() => {
         if (open) {
             // below the drawer
             navScrim ??= addScrim(() => setNavDrawer(false), 9780);
+            releaseNavFocus ??= trapFocus(navbar);
         }
         else {
             navScrim?.remove();
             navScrim = null;
+            releaseNavFocus?.();
+            releaseNavFocus = null;
         }
     };
 
@@ -948,9 +957,12 @@ window.qBittorrent.Responsive ??= (() => {
         // the overflow menu's items click the toolbar's buttons
         const button = document.getElementById("toolbarOverflowButton");
         const menu = document.getElementById("toolbarOverflowMenu");
+        let releaseFocus = null;
         const close = () => {
             menu.classList.remove("visible");
             button.setAttribute("aria-expanded", "false");
+            releaseFocus?.();
+            releaseFocus = null;
         };
 
         button.addEventListener("click", (event) => {
@@ -961,8 +973,13 @@ window.qBittorrent.Responsive ??= (() => {
                 const target = document.getElementById(item.dataset.target);
                 item.parentElement.classList.toggle("invisible", (target === null) || (target.closest(".invisible") !== null));
             }
-            menu.classList.toggle("visible", open);
-            button.setAttribute("aria-expanded", open.toString());
+            if (!open) {
+                close();
+                return;
+            }
+            menu.classList.add("visible");
+            button.setAttribute("aria-expanded", "true");
+            releaseFocus ??= trapFocus(menu);
         });
         menu.addEventListener("click", (event) => {
             const item = event.target.closest("a[data-target]");
@@ -976,6 +993,24 @@ window.qBittorrent.Responsive ??= (() => {
             if (!menu.contains(event.target) && !button.contains(event.target))
                 close();
         });
+        menu.addEventListener("keydown", (event) => {
+            const items = [...menu.querySelectorAll("li:not(.invisible) a")];
+            const index = items.indexOf(document.activeElement);
+            switch (event.key) {
+                case "ArrowDown":
+                    items[(index + 1) % items.length].focus();
+                    break;
+                case "ArrowUp":
+                    items[(index - 1 + items.length) % items.length].focus();
+                    break;
+                case "Escape":
+                    close();
+                    break;
+                default:
+                    return;
+            }
+            event.preventDefault();
+        });
     };
 
     /* Modern torrent cards and properties sheet */
@@ -984,6 +1019,7 @@ window.qBittorrent.Responsive ??= (() => {
     let sheetWired = false;
     // a collapsed panel opened for the sheet
     let collapseAfterSheet = false;
+    let releaseSheetFocus = null;
 
     const openHalfSheet = (wrapper) => {
         wrapper.style.removeProperty("--modern-sheet-top");
@@ -1007,6 +1043,8 @@ window.qBittorrent.Responsive ??= (() => {
             if (isOpen())
                 return;
 
+            releaseSheetFocus?.();
+            releaseSheetFocus = null;
             for (const cls of ["modernSheetHalf", "modernSheetDragging"]) {
                 if (wrapper.classList.contains(cls))
                     wrapper.classList.remove(cls);
@@ -1226,6 +1264,7 @@ window.qBittorrent.Responsive ??= (() => {
             wrapper.classList.add("modernSheet");
             wrapper.querySelector(".modernSheetTitle").textContent = tr.querySelector("td[data-col='name']")?.textContent.trim() ?? "";
             expandPanelForSheet();
+            releaseSheetFocus ??= trapFocus(wrapper);
         });
         // tapping the selected tab mustn't collapse the panel
         document.addEventListener("click", (event) => {
@@ -1235,7 +1274,8 @@ window.qBittorrent.Responsive ??= (() => {
         document.addEventListener("keydown", (event) => {
             switch (event.key) {
                 case "Escape":
-                    wrapper.classList.remove("modernSheet");
+                    if (!inWindow(event.target))
+                        wrapper.classList.remove("modernSheet");
                     break;
             }
         });
@@ -1308,6 +1348,7 @@ window.qBittorrent.Responsive ??= (() => {
         limitsItem.setAttribute("role", "none");
         const limitsLink = document.createElement("a");
         limitsLink.setAttribute("role", "menuitem");
+        limitsLink.tabIndex = 0;
         const limitsIcon = document.createElement("img");
         limitsIcon.src = "images/slow.svg";
         limitsIcon.alt = "";
@@ -1318,6 +1359,7 @@ window.qBittorrent.Responsive ??= (() => {
         document.body.append(menu);
 
         let moved = [];
+        let releaseFocus = null;
         const isOpen = () => moved.length > 0;
         const open = () => {
             if (isOpen())
@@ -1343,6 +1385,7 @@ window.qBittorrent.Responsive ??= (() => {
                 li.className = "modernStatusItem";
                 const a = document.createElement("a");
                 a.setAttribute("role", "menuitem");
+                a.tabIndex = 0;
                 if (separator !== null)
                     a.append(separator);
                 a.append(td);
@@ -1363,6 +1406,7 @@ window.qBittorrent.Responsive ??= (() => {
             }
             menu.classList.add("visible");
             speedButton.setAttribute("aria-expanded", "true");
+            releaseFocus = trapFocus(menu);
         };
 
         const close = () => {
@@ -1380,6 +1424,8 @@ window.qBittorrent.Responsive ??= (() => {
                 li.remove();
             menu.classList.remove("visible");
             speedButton.setAttribute("aria-expanded", "false");
+            releaseFocus?.();
+            releaseFocus = null;
         };
 
         limitsLink.addEventListener("click", (event) => {
@@ -1488,9 +1534,12 @@ window.qBittorrent.Responsive ??= (() => {
         menu.setAttribute("aria-label", button.getAttribute("aria-label"));
         document.body.append(menu);
 
+        let releaseFocus = null;
         const close = () => {
             menu.classList.remove("visible");
             button.setAttribute("aria-expanded", "false");
+            releaseFocus?.();
+            releaseFocus = null;
         };
 
         const createMenuItem = (role, text, onClick) => {
@@ -1498,6 +1547,7 @@ window.qBittorrent.Responsive ??= (() => {
             li.setAttribute("role", "none");
             const a = document.createElement("a");
             a.setAttribute("role", role);
+            a.tabIndex = 0;
             a.append(text);
             a.addEventListener("click", (_event) => onClick());
             li.append(a);
@@ -1563,7 +1613,11 @@ window.qBittorrent.Responsive ??= (() => {
                 return li;
             });
 
+            // the item chosen from the keyboard keeps the focus, in its new copy
+            const focused = [...menu.querySelectorAll("a")].indexOf(document.activeElement);
             menu.replaceChildren(createHeading("QBT_TR(Sort by)QBT_TR[CONTEXT=MainWindow]"), ...sortItems, fold, ...toggles);
+            if (focused >= 0)
+                menu.querySelectorAll("a")[focused]?.focus();
         };
 
         button.addEventListener("click", (event) => {
@@ -1575,6 +1629,7 @@ window.qBittorrent.Responsive ??= (() => {
             render();
             menu.classList.add("visible");
             button.setAttribute("aria-expanded", "true");
+            releaseFocus ??= trapFocus(menu);
         });
         document.addEventListener("pointerdown", (event) => {
             if (!menu.contains(event.target) && !button.contains(event.target))
