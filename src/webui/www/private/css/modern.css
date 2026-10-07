@@ -1703,8 +1703,23 @@
     padding: 6px 8px;
 }
 
+/* a grip at the resize corner */
 :root.modern .mocha .cornerSE {
-    background-color: transparent;
+    background: linear-gradient(
+        to bottom right,
+        transparent 50%,
+        var(--color-background-popup) 50%
+    );
+    opacity: 1;
+
+    &::before {
+        background-color: var(--color-text-muted);
+        content: "";
+        inset: 0;
+        mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M9 3 3 9M9 7 7 9' stroke='black' stroke-width='1.4' stroke-linecap='round'/%3E%3C/svg%3E")
+            right 4px bottom 4px / 10px 10px no-repeat;
+        position: absolute;
+    }
 }
 
 :root.modern #modalOverlay {
