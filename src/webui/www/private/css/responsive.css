@@ -552,7 +552,8 @@ body:not(:has(#desktop)) {
     #submitbutton,
     #preferencesPage
         .mochaContent
-        > div:not(.PrefTab):has(> input[type="button"])
+        > div:not(.PrefTab):has(> input[type="button"]),
+    #searchPluginsContainer > div:last-child
 ) {
     border-top: 1px solid var(--color-border-default);
     padding-bottom: var(--button-row-space);
@@ -584,7 +585,14 @@ body:not(:has(#desktop)) {
 }
 
 /* windows that end with their button row: its space is the window's last */
-:is(.modalDialog, #globalSpeedLimitsPage, #installSearchPlugin, #cookiesPage)
+:is(
+        .modalDialog,
+        #globalSpeedLimitsPage,
+        #installSearchPlugin,
+        #cookiesPage,
+        #searchPlugins,
+        #multiRenamePage
+    )
     .mochaContent {
     padding-bottom: 0 !important; /* override Mocha's padding */
 
@@ -896,10 +904,12 @@ body:not(:has(#desktop)) {
     }
 }
 
-/* Search plugins: the list takes the height left */
-:root.responsiveRelayout .mocha #searchPluginsContainer {
+/* Search plugins: the list takes the height left, the button row ends the window */
+.mocha #searchPluginsContainer {
     display: flex;
     flex-direction: column;
+    height: calc(100% - 10px); /* its top margin */
+    margin-bottom: 0;
 
     & > * {
         flex: none;
@@ -1384,16 +1394,36 @@ body:not(:has(#desktop)) {
     }
 }
 
-/* Renaming: the buttons follow the settings */
-:root.responsiveRelayout #multiRenamePage_content #operation_btns {
-    clear: left;
-    margin-bottom: 12px !important;
+/* Renaming: its buttons a row's space below the page's line, like the other rows */
+#multiRenamePage_content #operation_btns > hr {
+    margin-bottom: var(--button-row-space);
 }
 
-/* in the window's flow, where the page doesn't scroll under them (below) */
+/* the buttons follow the settings, in the window's flow where the page doesn't scroll under them (below); where the
+   window has room they end it, a row's space above its edge like the file list beside them */
 @media (width >= 760px) and (height >= 620px) {
-    :root.responsiveRelayout #multiRenamePage_content #operation_btns {
-        position: static !important; /* override the inline position */
+    #multiRenamePage_content {
+        box-sizing: border-box;
+        display: flex !important; /* override Mocha's inline display */
+        flex-direction: column;
+        min-height: 100%;
+
+        & > div {
+            display: flex;
+            flex: 1 0 auto;
+            flex-direction: column;
+        }
+
+        & #operation_btns {
+            margin: auto 0 0 !important; /* override the inline margins */
+            padding-bottom: var(--button-row-space);
+            position: static !important; /* override the inline position */
+        }
+
+        & #torrentFiles {
+            /* override the inline margin */
+            margin-bottom: var(--button-row-space) !important;
+        }
     }
 }
 
