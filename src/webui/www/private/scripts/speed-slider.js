@@ -88,12 +88,12 @@ window.qBittorrent.SpeedSlider ??= (() => {
      * @param {HTMLInputElement} slider the range input
      * @param {HTMLInputElement} input the field showing its value
      */
-    const upgrade = (slider, input, unitEl = null) => {
+    const upgrade = (slider, input) => {
         if (!document.documentElement.classList.contains("modern") || slider.dataset.speedScale)
             return;
 
         slider.dataset.speedScale = "log";
-        unitEl ??= (input.nextElementSibling?.tagName === "SPAN") ? input.nextElementSibling : null;
+        const unitEl = (input.nextElementSibling?.tagName === "SPAN") ? input.nextElementSibling : null;
 
         let kib = Number(input.value) || 0;
         const show = () => {

@@ -35,6 +35,28 @@
             window.qBittorrent.SpeedSlider.upgrade(slider, input);
         };
 
+        // the limit the torrents share, else none (a field Apply leaves alone while it stays at none)
+        const loadTorrentLimits = (hashes, uploadValue, downloadValue) => {
+            const limitOf = (method, input) => fetch(`api/v2/torrents/${method}`, {
+                    method: "POST",
+                    body: new URLSearchParams({
+                        hashes: hashes
+                    })
+                })
+                .then(async (response) => {
+                    const limits = Object.values(await response.json());
+                    input.dataset.mixed = limits.some((limit) => limit !== limits[0]).toString();
+                    return (input.dataset.mixed === "false") ? Math.max(limits[0], 0) : 0;
+                });
+
+            Promise.all([limitOf("uploadLimit", uploadValue), limitOf("downloadLimit", downloadValue)])
+                .then(([upload, download]) => {
+                    setupSlider("uploadSlider", uploadValue, (upload / 1024));
+                    setupSlider("downloadSlider", downloadValue, (download / 1024));
+                })
+                .catch(console.error);
+        };
+
         const init = () => {
             const uploadValue = document.getElementById("uploadValue");
             const downloadValue = document.getElementById("downloadValue");
@@ -42,9 +64,43 @@
             const altDownloadValue = document.getElementById("altDownloadValue");
 
             const applyButton = document.getElementById("applyButton");
+            // Modern opens it for torrents too: their limits, without the alternative ones
+            const hashes = window.MUI.Windows.instances[applyButton.closest(".mocha")?.id]?.options.data?.hashes?.join("|");
+            if (hashes !== undefined)
+                altUploadValue.closest("fieldset").classList.add("invisible");
+
+            // close the page's window once the limits are set
+            const applied = (ok) => {
+                if (!ok)
+                    alert("QBT_TR(Failed to set speed limits)QBT_TR[CONTEXT=SpeedLimit]");
+
+                window.parent.updateMainData();
+                window.parent.qBittorrent.Client.closeWindow(applyButton.closest(".mocha"));
+            };
+
             applyButton.addEventListener("click", (_event) => {
                 const upload = window.qBittorrent.SpeedSlider.readKiB(uploadValue) * 1024 || 0;
                 const download = window.qBittorrent.SpeedSlider.readKiB(downloadValue) * 1024 || 0;
+
+                if (hashes !== undefined) {
+                    const setLimit = (method, limit) => fetch(`api/v2/torrents/${method}`, {
+                        method: "POST",
+                        body: new URLSearchParams({
+                            hashes: hashes,
+                            limit: limit
+                        })
+                    });
+                    const requests = [];
+                    if ((uploadValue.dataset.mixed !== "true") || (upload !== 0))
+                        requests.push(setLimit("setUploadLimit", upload));
+                    if ((downloadValue.dataset.mixed !== "true") || (download !== 0))
+                        requests.push(setLimit("setDownloadLimit", download));
+                    Promise.all(requests)
+                        .then((responses) => applied(responses.every((response) => response.ok)))
+                        .catch(console.error);
+                    return;
+                }
+
                 const altUpload = window.qBittorrent.SpeedSlider.readKiB(altUploadValue) * 1024 || 0;
                 const altDownload = window.qBittorrent.SpeedSlider.readKiB(altDownloadValue) * 1024 || 0;
 
@@ -56,14 +112,13 @@
                         alt_up_limit: altUpload,
                         alt_dl_limit: altDownload,
                     })
-                }).then((response) => {
-                    if (!response.ok)
-                        alert("QBT_TR(Failed to set speed limits)QBT_TR[CONTEXT=SpeedLimit]");
-
-                    window.parent.updateMainData();
-                    window.parent.qBittorrent.Client.closeWindow(document.getElementById("globalSpeedLimitsPage"));
-                });
+                }).then((response) => applied(response.ok));
             });
+
+            if (hashes !== undefined) {
+                loadTorrentLimits(hashes, uploadValue, downloadValue);
+                return;
+            }
 
             fetch("api/v2/transfer/getSpeedLimits", {
                     method: "GET",

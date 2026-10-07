@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="css/style.css?v=${CACHEID}" type="text/css">
     <script defer src="scripts/localpreferences.js?v=${CACHEID}"></script>
     <script defer src="scripts/color-scheme.js?v=${CACHEID}"></script>
-    <script defer src="scripts/speed-slider.js?locale=${LANG}&v=${CACHEID}"></script>
     <script>
         "use strict";
 
@@ -60,11 +59,10 @@
                 });
                 // Set default value
                 setLimitUpdateValue(limit);
-                window.qBittorrent.SpeedSlider.upgrade(input, limitUpdateValue, limitUnit);
             };
 
             applyButton.addEventListener("click", (event) => {
-                const limit = window.qBittorrent.SpeedSlider.readKiB(limitUpdateValue) * 1024;
+                const limit = Number(limitUpdateValue.value) * 1024;
 
                 fetch(`api/v2/torrents/${setLimitMethod}`, {
                         method: "POST",
@@ -136,7 +134,6 @@
             <input type="range" id="limitSliderInput" min="0" value="0" style="width: 100%;" aria-label="QBT_TR(Speed limit)QBT_TR[CONTEXT=SpeedLimit]">
         </div>
         <div class="dialogFooter">
-            <button type="button" class="dialogCancel modernOnly" onclick="parent.qBittorrent.Client.closeFrameWindow(window);">QBT_TR(Cancel)QBT_TR[CONTEXT=MainWindow]</button>
             <input type="button" id="applyButton" class="primary" value="QBT_TR(Apply)QBT_TR[CONTEXT=HttpServer]">
         </div>
     </div>

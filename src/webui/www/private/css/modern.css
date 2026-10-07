@@ -1752,6 +1752,13 @@
 
 /* Context menus */
 
+/* one Speed limits item replaces these */
+:root.modern
+    #torrentsTableMenu
+    li:has(> a:is([href="#downloadLimit"], [href="#uploadLimit"])) {
+    display: none;
+}
+
 :root.modern .contextMenu {
     background-color: var(--color-background-popup);
     border-radius: var(--modern-radius-menu);
@@ -2279,20 +2286,6 @@
         margin: 4px 0 6px 2px;
         padding: 0;
         text-transform: uppercase;
-    }
-}
-
-/* Speed limit dialog */
-:root.modern .slider {
-    font-weight: normal;
-    margin: 4px 4px 14px;
-
-    & .update {
-        align-items: center;
-        display: flex;
-        gap: 8px;
-        justify-content: center;
-        padding-bottom: 12px;
     }
 }
 

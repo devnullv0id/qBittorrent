@@ -35,6 +35,7 @@ window.qBittorrent.Responsive ??= (() => {
         return {
             init: init,
             openOptionsPage: openOptionsPage,
+            openTorrentSpeedLimits: openTorrentSpeedLimits,
             updateStatusBar: updateStatusBar
         };
     };
@@ -1540,7 +1541,7 @@ window.qBittorrent.Responsive ??= (() => {
         footer.append(bar);
 
         for (const { cell } of [download, upload])
-            cell.addEventListener("click", (event) => globalLimitFN());
+            cell.addEventListener("click", (event) => afterWindowsClose(["torrentSpeedLimitsPage"], globalLimitFN));
 
         let inlineOpen = localPreferences.get("status_bar_details_open") === "true";
         let popupOpen = false;
@@ -1654,6 +1655,50 @@ window.qBittorrent.Responsive ??= (() => {
         });
         new ResizeObserver(updateLayout).observe(bar);
         updateLayout();
+    };
+
+    /* Modern torrent speed limits */
+
+    // the speed limits' page has fixed ids, so it shows once at a time: these windows close first
+    const afterWindowsClose = (ids, then) => {
+        const open = ids.map((id) => MochaUI.Windows.instances[id]).filter((instance) => instance?.windowEl.isConnected);
+        let left = open.length;
+        if (left === 0) {
+            then();
+            return;
+        }
+        for (const instance of open) {
+            instance.addEvent("closeComplete", () => {
+                if (--left === 0)
+                    then();
+            });
+            window.qBittorrent.Client.closeWindow(instance.windowEl);
+        }
+    };
+
+    // for the selected torrents, from their menu; a window open for others goes first
+    const openTorrentSpeedLimits = () => {
+        const hashes = window.torrentsTable.selectedRowsIds();
+        if (hashes.length === 0)
+            return;
+
+        afterWindowsClose(["globalSpeedLimitsPage", "torrentSpeedLimitsPage"], () => new MochaUI.Window({
+            id: "torrentSpeedLimitsPage",
+            icon: "images/qbittorrent-tray.svg",
+            title: "QBT_TR(Speed limits)QBT_TR[CONTEXT=SpeedLimit]",
+            data: {
+                hashes: hashes
+            },
+            loadMethod: "xhr",
+            contentURL: "views/globalspeedlimits.html?v=${CACHEID}",
+            scrollbars: false,
+            resizable: false,
+            maximizable: false,
+            paddingVertical: 0,
+            paddingHorizontal: 0,
+            width: window.qBittorrent.Dialog.limitWidthToViewport(480),
+            height: 150
+        }));
     };
 
     /* Modern sort sheet */
