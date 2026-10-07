@@ -505,6 +505,8 @@ window.qBittorrent.Search ??= (() => {
                 const responseJSON = await response.json();
                 const searchId = responseJSON.id;
                 createSearchTab(searchId, pattern, category, plugins);
+                if (isModern())
+                    document.getElementById("searchPattern").value = "";
                 updateSearchButtonState();
             });
     };
@@ -559,10 +561,13 @@ window.qBittorrent.Search ??= (() => {
         return selectedTab ? getSearchIdFromTab(selectedTab) : null;
     };
 
+    // Modern clears the field once a search starts
+    const isModern = () => document.documentElement.classList.contains("modern");
+
     const canStopSearch = (searchId, searchPattern) => {
         const state = searchState.get(searchId);
         // search must be running and have input matching the current pattern
-        return state && state.running && (state.searchPattern === searchPattern);
+        return state && state.running && ((state.searchPattern === searchPattern) || (isModern() && (searchPattern === "")));
     };
 
     const updateSearchButtonState = () => {
