@@ -2504,6 +2504,47 @@
     background-color: var(--color-background-surface);
 }
 
+/* General tab: three pairs per row */
+@media (width >= 760px) {
+    :root.modern #propGeneral {
+        & table,
+        & tbody {
+            display: block;
+            width: 100% !important;
+        }
+
+        & tbody {
+            display: grid;
+            gap: 2px 12px;
+            grid-template-columns: repeat(3, 11em minmax(0, 1fr));
+        }
+
+        & tr {
+            display: contents;
+        }
+
+        & td {
+            display: block;
+            min-width: 0;
+            overflow-wrap: anywhere;
+            padding: 3px 0 !important;
+        }
+
+        & td.generalLabel {
+            white-space: normal; /* a long label wraps in its column */
+            width: auto !important; /* override style.css's 1px */
+        }
+
+        & td[colspan] {
+            grid-column: 2 / -1;
+        }
+
+        & td.generalLabel:has(+ td[colspan]) {
+            grid-column: 1;
+        }
+    }
+}
+
 :root.modern #propGeneral fieldset {
     background-color: var(--color-background-surface);
     margin-top: 32px;
