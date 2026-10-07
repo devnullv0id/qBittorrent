@@ -721,7 +721,8 @@ window.qBittorrent.Responsive ??= (() => {
             if (pageOverflow(instance, width, height).height > 0)
                 width = Math.min(fitWidth, width + sidewaysScrollbarWidth(instance, width, height));
         }
-        const fullScreen = phone && (ownHeight !== null) && ((ownHeight === 0) || (ownHeight > maxHeight));
+        // and once full screen, a window stays so while it is open: Options' shorter tabs would turn it into a card
+        const fullScreen = phone && (windowEl.classList.contains("responsiveFullScreen") || ((ownHeight !== null) && ((ownHeight === 0) || (ownHeight > maxHeight))));
         if (fullScreen) {
             width = window.innerWidth - frameWidth;
             height = window.innerHeight - frameHeight;
