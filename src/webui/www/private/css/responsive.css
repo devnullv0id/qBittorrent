@@ -618,7 +618,7 @@ body:not(:has(#desktop)) {
 }
 
 /* Options: the Save row at the window's bottom; the space a tab doesn't need goes above it, and a tab keeps the 1em the
-   row had from it */
+    row had from it */
 #preferencesPage .mochaContent {
     & > .PrefTab {
         margin-bottom: 1em;
@@ -630,7 +630,7 @@ body:not(:has(#desktop)) {
 }
 
 /* Buttons: the theme's colours rather than each browser's own, darker or lighter towards the text on hover and
-   press */
+    press */
 :is(button, input[type="button"], input[type="submit"], input[type="reset"]) {
     --button-background: var(--button-face);
 
@@ -662,7 +662,7 @@ body:not(:has(#desktop)) {
 }
 
 /* RSS Downloader's Save is a button itself and keeps a button's background; as far from the window's edge as from the
-   rule's feeds, so the page fills the window (it grows where the screen has room) and ends a row's space below Save */
+    rule's feeds, so the page fills the window (it grows where the screen has room) and ends a row's space below Save */
 #RssDownloader #saveButton {
     background-color: var(--button-background);
     bottom: var(--button-row-space);
@@ -1383,7 +1383,7 @@ body:not(:has(#desktop)) {
 }
 
 /* the buttons follow the settings, in the window's flow where the page doesn't scroll under them (below); where the
-   window has room they end it, a row's space above its edge like the file list beside them */
+    window has room they end it, a row's space above its edge like the file list beside them */
 @media (width >= 760px) and (height >= 620px) {
     #multiRenamePage_content {
         & > div {
