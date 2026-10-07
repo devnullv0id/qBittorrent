@@ -739,6 +739,12 @@ body:not(:has(#desktop)) {
     }
 }
 
+/* a modal dialog's row spans its window like the others, its buttons at the end where the dialog puts them */
+.modalDialog .mochaContent.pad > .dialogFooter {
+    align-self: stretch;
+    justify-content: flex-end;
+}
+
 /* Add Torrent: Download takes its place in the row */
 #submitbutton > div:has(> button[type="submit"]) {
     margin: 0 auto;
@@ -1182,10 +1188,6 @@ body:not(:has(#desktop)) {
     & > .primary {
         order: -1;
     }
-}
-
-:root.responsivePhone .modalDialog .mochaContent.pad > .dialogFooter {
-    align-self: stretch;
 }
 
 :root.responsivePhone
