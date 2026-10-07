@@ -2012,9 +2012,25 @@ window.qBittorrent.Responsive ??= (() => {
                     });
                     tabsObserver.observe(node, { childList: true, subtree: true });
                     resizeOptionsAtCorner(MochaUI.Windows.instances.preferencesPage);
+                    fadeOptionsAboveFooter(MochaUI.Windows.instances.preferencesPage);
                 }
             }
         }).observe(document.getElementById("desktop"), { childList: true });
+    };
+
+    // the Options page fades out above the footer while there is more below
+    const fadeOptionsAboveFooter = (instance) => {
+        const wrapper = instance.contentWrapperEl;
+        const FADE_HEIGHT = 56; // keep in sync with modern.css
+        const update = () => {
+            const left = wrapper.scrollHeight - wrapper.clientHeight - wrapper.scrollTop;
+            instance.windowEl.style.setProperty("--modern-more-below", Math.min(1, Math.max(0, left / FADE_HEIGHT)).toString());
+        };
+
+        wrapper.addEventListener("scroll", ((_event) => update()), { passive: true });
+        new ResizeObserver(update).observe(instance.contentEl);
+        new ResizeObserver(update).observe(wrapper);
+        update();
     };
 
     // the Options window resizes at its corner only, through the stylesheet's size
