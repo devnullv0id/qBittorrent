@@ -1,3 +1,28 @@
+/* The shared look, set here once */
+:root {
+    /* a line between parts: a window's button row, a drawer's edge, a list's rows */
+    --separator: 1px solid var(--color-border-default);
+    /* a drawer over the page */
+    --drawer-shadow: 0 0 12px hsl(0deg 0% 0% / 30%);
+    --drawer-width: min(320px, 86vw);
+    /* buttons */
+    --button-face: var(--color-background-default);
+    --button-text: var(--color-text-default);
+    --button-text-disabled: var(--color-text-disabled);
+    --button-border: 1px solid var(--color-border-default);
+    --button-radius: 3px;
+    --button-padding-block: 3px;
+    --button-padding-inline: 10px;
+    /* an icon button's side, a text button's height on the desktop (touch screens make both --touch-target) */
+    --button-size: 26px;
+    /* the icon on an icon button */
+    --button-icon-size: 16px;
+    /* between buttons side by side or stacked */
+    --button-gap: 8px;
+    /* a window's button row: from its line to its buttons, and from them to the window's edge */
+    --button-row-space: 6px;
+}
+
 /* override Layout.css's 400px */
 #desktop {
     min-width: 0;
@@ -60,10 +85,10 @@
 
         & #Filters {
             background-color: var(--color-background-primary);
-            border-right: 1px solid var(--color-border-default);
-            box-shadow: 0 0 12px hsl(0deg 0% 0% / 30%);
+            border-right: var(--separator);
+            box-shadow: var(--drawer-shadow);
             height: 100% !important;
-            width: min(320px, 86vw) !important;
+            width: var(--drawer-width) !important;
         }
     }
 }
@@ -107,20 +132,20 @@
 
     :root.menuDrawerOpen #desktopNavbar {
         background-color: var(--color-background-primary);
-        border-right: 1px solid var(--color-border-default);
+        border-right: var(--separator);
         bottom: 0;
-        box-shadow: 0 0 12px hsl(0deg 0% 0% / 30%);
+        box-shadow: var(--drawer-shadow);
         display: block;
         left: 0;
         overflow-y: auto;
         position: fixed;
         top: 0;
-        width: min(320px, 86vw);
+        width: var(--drawer-width);
         z-index: 1501;
 
         & #menuDrawerHead {
             align-items: center;
-            border-bottom: 1px solid var(--color-border-default);
+            border-bottom: var(--separator);
             display: flex;
             gap: 8px;
             padding: 4px 4px 4px 10px;
@@ -302,7 +327,7 @@
     /* in the column header's place, it counts the selected cards (responsive.js) */
     #torrentsSelectionBar {
         align-items: center;
-        border-bottom: 1px solid var(--color-border-default);
+        border-bottom: var(--separator);
         display: flex;
         gap: var(--button-gap);
         padding: 4px 12px;
@@ -330,7 +355,7 @@
 
         & tbody tr {
             align-content: center;
-            border-bottom: 1px solid var(--color-border-default);
+            border-bottom: var(--separator);
             box-sizing: border-box;
             display: grid;
             gap: 0 10px;
@@ -555,7 +580,7 @@ body:not(:has(#desktop)) {
         > div:not(.PrefTab):has(> input[type="button"]),
     #searchPluginsContainer > div:last-child
 ) {
-    border-top: 1px solid var(--color-border-default);
+    border-top: var(--separator);
     padding-bottom: var(--button-row-space);
     /* override the inline paddings */
     padding-top: var(--button-row-space) !important;
@@ -601,26 +626,7 @@ body:not(:has(#desktop)) {
     }
 }
 
-/* Buttons: every button's look and spacing, set here once */
-:root {
-    --button-face: var(--color-background-default);
-    --button-text: var(--color-text-default);
-    --button-text-disabled: var(--color-text-disabled);
-    --button-border: 1px solid var(--color-border-default);
-    --button-radius: 3px;
-    --button-padding-block: 3px;
-    --button-padding-inline: 10px;
-    /* an icon button's side, a text button's height on the desktop (touch screens make both --touch-target) */
-    --button-size: 26px;
-    /* the icon on an icon button */
-    --button-icon-size: 16px;
-    /* between buttons side by side or stacked */
-    --button-gap: 8px;
-    /* a window's button row: from its line to its buttons, and from them to the window's edge */
-    --button-row-space: 6px;
-}
-
-/* every button: the theme's colours rather than each browser's own, darker or lighter towards the text on hover and
+/* Buttons: the theme's colours rather than each browser's own, darker or lighter towards the text on hover and
    press */
 :is(button, input[type="button"], input[type="submit"], input[type="reset"]) {
     --button-background: var(--button-face);
@@ -1249,6 +1255,8 @@ body:not(:has(#desktop)) {
 @media (pointer: coarse) {
     :root {
         --touch-target: 36px;
+        /* a field's height */
+        --touch-field-height: 32px;
         --window-title-height: 36px; /* also read by responsive.js */
     }
 
@@ -1335,13 +1343,13 @@ body:not(:has(#desktop)) {
     input[type="password"],
     input:not([type]),
     select {
-        min-height: 32px;
+        min-height: var(--touch-field-height);
     }
 
     /* editable selects as tall as the fields, inside their border */
     .select-watched-folder-editable {
         box-sizing: content-box;
-        height: 32px;
+        height: var(--touch-field-height);
     }
 
     :is(input[type="checkbox"], input[type="radio"]) {
