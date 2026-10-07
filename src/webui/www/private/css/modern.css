@@ -2067,23 +2067,18 @@
     table-layout: fixed;
     width: 100%;
 
-    & th,
+    & thead,
+    & img[id^="addFolderImg"] {
+        display: none !important;
+    }
+
     & td {
         border: 0;
         padding: 6px 8px;
     }
 
-    & thead th {
-        background-color: var(--color-background-default);
-        color: var(--color-text-muted);
-        font-size: 11px;
-        font-weight: 600;
-        letter-spacing: 0.05em;
-        text-align: left;
-        text-transform: uppercase;
-    }
-
-    & tbody tr + tr td {
+    /* between the entries shown */
+    & tbody tr:not(.invisible) ~ tr td {
         border-top: 1px solid var(--color-border-divider);
     }
 
@@ -2092,9 +2087,7 @@
         width: 100% !important;
     }
 
-    & th:last-child,
-    & td:last-child {
-        padding-right: 40px;
+    & td:nth-child(2) {
         white-space: nowrap;
     }
 
@@ -2108,25 +2101,6 @@
             border-radius: var(--modern-radius-pill);
         }
 
-        & img {
-            border: 1px solid var(--color-border-default);
-            border-radius: 50%;
-            box-sizing: border-box;
-            cursor: pointer;
-            display: block;
-            height: 24px;
-            left: calc(100% + 8px);
-            padding: 0 !important;
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 24px !important;
-        }
-
-        & img:hover {
-            background-color: var(--color-background-hover);
-        }
-
         /* the "Other..." path field covers the select's text */
         &:has(> input:not([hidden])) select {
             color: transparent;
@@ -2137,6 +2111,55 @@
             left: 0;
             padding-left: 12px;
             z-index: 1;
+        }
+    }
+}
+
+/* phones */
+@media (width < 760px) {
+    :root.modern #watched_folders_tab td.modernWatchedFolderButton {
+        text-align: right;
+
+        & > button:not(.listEditorRemove) {
+            width: 100%;
+        }
+    }
+}
+
+/* a row like a setting's, entries sharing one grid */
+@media (width >= 760px) {
+    :root.modern #watched_folders_tab {
+        display: block;
+
+        & tbody {
+            align-items: center;
+            display: grid;
+            grid-template-columns:
+                calc(100% - var(--modern-select-width))
+                minmax(0, 1fr) auto;
+        }
+
+        & tbody tr:not(.invisible) {
+            display: contents;
+        }
+
+        & td {
+            padding: 6px 0;
+        }
+
+        & td:first-child {
+            max-width: none;
+            padding-right: 12px;
+        }
+
+        & td:nth-child(2) {
+            margin-left: -12px;
+            padding-left: 12px;
+        }
+
+        & td.modernWatchedFolderButton {
+            padding-left: 8px;
+            text-align: right;
         }
     }
 }
@@ -6422,11 +6445,6 @@
             flex-flow: column nowrap !important;
             gap: 8px;
             padding: 12px 0 !important;
-        }
-
-        /* watched folders: an entry's fields stacked, named after the column headings */
-        & #watched_folders_tab thead {
-            display: none;
         }
 
         & #watched_folders_tab td {

@@ -1880,6 +1880,52 @@ window.qBittorrent.Responsive ??= (() => {
         label();
     };
 
+    // watched folders get the list editors' buttons; removing empties and hides an entry, as preferences.html finds entries by position
+    const editWatchedFolders = (table) => {
+        const createButton = (row, last) => {
+            const cell = row.querySelector(":scope > td.modernWatchedFolderButton") ?? row.insertCell();
+            cell.className = "modernOnly modernWatchedFolderButton";
+            if (cell.firstElementChild?.dataset.last === last.toString())
+                return cell.firstElementChild;
+
+            const button = document.createElement("button");
+            button.type = "button";
+            button.dataset.last = last.toString();
+            if (last) {
+                button.textContent = "QBT_TR(Add)QBT_TR[CONTEXT=HttpServer]";
+                button.addEventListener("click", (event) => window.qBittorrent.Preferences.addWatchFolder());
+            }
+            else {
+                button.className = "listEditorRemove";
+                button.title = "QBT_TR(Remove)QBT_TR[CONTEXT=TransferListWidget]";
+                button.setAttribute("aria-label", button.title);
+                button.addEventListener("click", (event) => {
+                    const folder = row.cells[0].querySelector("input");
+                    folder.value = "";
+                    // for Apply
+                    folder.dispatchEvent(new CustomEvent("input", { bubbles: true }));
+                    row.classList.add("invisible");
+                });
+            }
+            cell.replaceChildren(button);
+            return button;
+        };
+
+        const update = () => {
+            const rows = [...table.tBodies[0].rows];
+            for (const [i, row] of rows.entries()) {
+                const last = (i === (rows.length - 1));
+                const add = createButton(row, last);
+                if (last)
+                    add.disabled = (row.cells[0].querySelector("input")?.value.trim() ?? "") === "";
+            }
+        };
+
+        new MutationObserver(update).observe(table.tBodies[0], { childList: true });
+        table.addEventListener("input", (_event) => update());
+        update();
+    };
+
     // a control too wide for the column of controls gets a row of its own
     const dropdownSelector = "select:not([multiple]):only-of-type:not(.speedUnitSelect)";
     const textFieldSelector = "input[type='text']:only-child";
@@ -2007,6 +2053,7 @@ window.qBittorrent.Responsive ??= (() => {
                         tabsObserver.disconnect();
                         setupPrefsMore(tabs);
                         labelWatchedFolders(watchedFolders);
+                        editWatchedFolders(watchedFolders);
                         splitWideSettings(node);
                         slideWithSwitches(node);
                     });
