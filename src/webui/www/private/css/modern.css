@@ -2776,6 +2776,24 @@
     --modern-icon: url("../images/edit-clear.svg");
 }
 
+/* RSS Downloader: dimmed while no rule is selected */
+:root.modern #RssDownloader:not(.rssWizard):has(#saveButton:disabled) {
+    &
+        :is(
+            #ruleSettings,
+            #rssDownloaderFeeds,
+            #rightRssDownloaderColumn,
+            #deleteRuleButton
+        ) {
+        opacity: 0.45;
+        pointer-events: none;
+    }
+
+    & #ruleSettings :disabled {
+        opacity: 1;
+    }
+}
+
 /* RSS Downloader: the page takes the window's height */
 :root.modern #rssdownloaderpage_content {
     height: 100%;
