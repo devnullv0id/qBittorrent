@@ -1668,6 +1668,42 @@
     }
 }
 
+/* the button that centers a moved window, beside its close button */
+:root.modern .modernCenterButton {
+    border-radius: var(--modern-radius-item);
+    cursor: pointer;
+    display: none;
+    float: right;
+    height: calc(var(--modern-title-height) - 10px);
+    margin-left: 5px;
+    position: relative;
+    width: calc(var(--modern-title-height) - 10px);
+
+    &::before {
+        background-color: var(--color-text-default);
+        content: "";
+        inset: 0;
+        mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Ccircle cx='7' cy='7' r='5' fill='none' stroke='black' stroke-width='1.6'/%3E%3Ccircle cx='7' cy='7' r='1.6'/%3E%3C/svg%3E")
+            center / 13px no-repeat;
+        position: absolute;
+    }
+
+    &:hover {
+        background-color: var(--color-background-row-hover);
+    }
+}
+
+:root.modern:not(.responsivePhone) .responsiveMoved {
+    & .modernCenterButton {
+        display: block;
+    }
+
+    /* Mocha sizes it for its own buttons */
+    & .mochaControls {
+        width: auto !important;
+    }
+}
+
 /* window tabs */
 :root.modern .mocha .tab-menu {
     box-sizing: border-box;

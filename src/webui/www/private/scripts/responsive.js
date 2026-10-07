@@ -632,7 +632,43 @@ window.qBittorrent.Responsive ??= (() => {
 
         instance.windowEl.style.left = `${Number(left)}px`;
         instance.windowEl.style.top = `${Number(top)}px`;
-        instance.responsiveUserMoved = true;
+        setMoved(instance, true);
+    };
+
+    // a moved window isn't centered when fitted, and gets a button to center it again
+    const setMoved = (instance, moved) => {
+        instance.responsiveUserMoved = moved;
+        instance.windowEl.classList.toggle("responsiveMoved", moved);
+    };
+
+    const addCenterButton = (instance) => {
+        if (!instance.controlsEl)
+            return;
+
+        const button = document.createElement("div");
+        button.className = "mochaWindowButton modernOnly modernCenterButton";
+        button.setAttribute("role", "button");
+        button.tabIndex = 0;
+        button.title = "QBT_TR(Center window)QBT_TR[CONTEXT=MainWindow]";
+        button.setAttribute("aria-label", button.title);
+        const center = () => {
+            localPreferences.remove(placeKey(instance, "left"));
+            localPreferences.remove(placeKey(instance, "top"));
+            setMoved(instance, false);
+            fitWindow(instance);
+        };
+
+        button.addEventListener("click", (_event) => center());
+        button.addEventListener("keydown", (event) => {
+            switch (event.key) {
+                case "Enter":
+                case " ":
+                    event.preventDefault();
+                    center();
+                    break;
+            }
+        });
+        instance.controlsEl.append(button);
     };
 
     // whether a fitted window shows all of its page at the given width; not where the page scrolls anyway or fills
@@ -834,6 +870,7 @@ window.qBittorrent.Responsive ??= (() => {
             // a window opened from the drawer would open behind it
             closeFiltersDrawer();
             restorePlace(instance);
+            addCenterButton(instance);
             fitWindow(instance);
             contentObserver.observe(instance.contentEl);
             contentChangeObserver.observe(instance.contentEl, { childList: true, subtree: true, attributes: true, attributeFilter: ["class", "hidden"] });
@@ -846,7 +883,7 @@ window.qBittorrent.Responsive ??= (() => {
             });
             for (const drag of [instance.resizable1, instance.resizable2, instance.resizable3, instance.resizable4, instance.resizable5]) {
                 drag?.addEvent("start", () => {
-                    instance.responsiveUserMoved = true;
+                    setMoved(instance, true);
                 });
                 drag?.addEvent("beforeStart", () => limitResize(instance));
             }
@@ -854,7 +891,7 @@ window.qBittorrent.Responsive ??= (() => {
             for (const drag of [instance.resizable2, instance.resizable3, instance.resizable5])
                 drag?.addEvent("drag", () => keepPageHeight(instance));
             instance.windowDrag?.addEvent("complete", () => {
-                instance.responsiveUserMoved = true;
+                setMoved(instance, true);
                 savePlace(instance);
             });
             // dialog pages
@@ -2136,7 +2173,7 @@ window.qBittorrent.Responsive ??= (() => {
             event.preventDefault();
             event.stopPropagation();
             corner.setPointerCapture(event.pointerId);
-            instance.responsiveUserMoved = true;
+            setMoved(instance, true);
             const style = getComputedStyle(windowEl);
             const minWidth = Number.parseFloat(style.minWidth) || 0;
             const minHeight = Number.parseFloat(style.minHeight) || 0;
