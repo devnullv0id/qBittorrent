@@ -2746,24 +2746,34 @@
     }
 }
 
-/* RSS Downloader: the rule buttons as round icons beside the heading */
+/* RSS Downloader: Add rule and Remove rule as labeled buttons */
 :root.modern #RssDownloader .imageButton {
-    background-color: transparent;
-    background-repeat: no-repeat;
-    background-size: 18px;
-    border-color: transparent;
-    border-radius: 50%;
-    height: var(--modern-control-height);
-    margin: 0 0 0 2px;
-    min-height: 0;
-    min-width: 0;
-    padding: 0;
-    width: var(--modern-control-height);
+    background-image: none;
+    float: none;
+    height: auto;
+    margin: 0;
+    padding-inline: 8px;
+    width: auto;
 
-    &:hover:not(:disabled) {
-        background-color: var(--color-background-fill);
-        border-color: transparent;
+    &::before {
+        background-color: currentcolor;
+        content: "";
+        height: 16px;
+        mask: var(--modern-icon) center / contain no-repeat;
+        width: 16px;
     }
+
+    &::after {
+        content: attr(aria-label);
+    }
+}
+
+:root.modern #RssDownloader #newRuleButton {
+    --modern-icon: url("../images/list-add.svg");
+}
+
+:root.modern #RssDownloader #deleteRuleButton {
+    --modern-icon: url("../images/edit-clear.svg");
 }
 
 /* RSS Downloader: the page takes the window's height */
@@ -2782,9 +2792,13 @@
 }
 
 :root.modern #RssDownloader #topMenuBar {
+    display: grid;
+    gap: 6px;
+    grid-template-columns: 1fr 1fr;
     margin-bottom: 6px;
 
     & #rulesTableDesc {
+        grid-column: 1 / -1;
         line-height: var(--modern-control-height);
     }
 }
@@ -2809,8 +2823,10 @@
         margin-bottom: 6px;
     }
 
+    /* Export and Import below the rules */
     & #rulesFileButtons {
-        margin-bottom: 8px;
+        margin-top: 8px;
+        order: 1;
     }
 
     & :is(#rulesTable, #rssDownloaderArticlesTable) {
