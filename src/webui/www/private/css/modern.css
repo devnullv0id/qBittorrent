@@ -5108,18 +5108,21 @@
     text-transform: inherit;
 }
 
-/* Options window size (also in responsive.js) */
+/* Options window size (also in responsive.js), within the screen and its 8px margins */
 @media (width >= 760px) {
     :root.modern #preferencesPage {
-        height: var(
-            --modern-options-height,
-            min(calc(100dvh - 16px), 840px)
+        height: min(
+            var(--modern-options-height, 840px),
+            calc(100dvh - 16px)
         ) !important;
-        min-height: 420px;
+        min-height: min(420px, calc(100dvh - 16px));
         min-width: 640px;
 
         &.modernResized {
-            width: var(--modern-options-width) !important;
+            width: min(
+                var(--modern-options-width),
+                calc(100vw - 16px)
+            ) !important;
         }
 
         & [id^="preferencesPage_resizeHandle"]:not([id$="_se"]),
