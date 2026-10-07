@@ -611,6 +611,22 @@ body:not(:has(#desktop)) {
     & #searchPluginsContainer > div:last-child > button {
         line-height: inherit !important; /* override the inline line height */
     }
+
+    /* the API key's buttons 8px apart, with the table's 2px spacing and its cells' 1px padding */
+    & :is(#webUIAPIKeyRotateButton, #webUIAPIKeyDeleteButton) {
+        margin-left: 4px;
+    }
+}
+
+/* buttons side by side 8px apart, rather than a space character */
+.dialogFooter:has(> :is(button, input) + :is(button, input)) {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+
+    &[style*="text-align: right"] {
+        justify-content: flex-end;
+    }
 }
 
 /* Add Torrent: Download takes its place in the row */
@@ -699,6 +715,11 @@ body:not(:has(#desktop)) {
             box-sizing: border-box;
             max-width: 100%;
         }
+
+        /* the API key's buttons 8px apart, with the row's 4px gap and their cells' 1px padding */
+        & :is(#webUIAPIKeyRotateButton, #webUIAPIKeyDeleteButton) {
+            margin-left: 2px;
+        }
     }
 }
 
@@ -775,7 +796,7 @@ body:not(:has(#desktop)) {
     }
 }
 
-/* Search plugins: the list takes the height left, the buttons wrap */
+/* Search plugins: the list takes the height left */
 :root.responsiveRelayout .mocha #searchPluginsContainer {
     display: flex;
     flex-direction: column;
@@ -789,16 +810,17 @@ body:not(:has(#desktop)) {
         height: auto;
         min-height: 120px;
     }
+}
 
-    & > div:last-child {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 6px;
+/* Search plugins: its buttons share their row 8px apart and wrap */
+.mocha #searchPluginsContainer > div:last-child {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
 
-        & > button {
-            flex: 1 1 auto;
-            width: auto !important;
-        }
+    & > button {
+        flex: 1 1 auto;
+        width: auto !important; /* override the inline widths */
     }
 }
 
@@ -858,6 +880,18 @@ body:not(:has(#desktop)) {
     display: none;
 }
 
+/* RSS: its buttons 8px apart, the filter at the bar's end */
+#rssView #rssButtonBar {
+    align-items: flex-start;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+
+    & #rssFilterToolbar {
+        margin-left: auto;
+    }
+}
+
 /* RSS: the button bar grows */
 :root.responsiveRelayout #rssView #rssButtonBar {
     height: auto;
@@ -873,7 +907,7 @@ body:not(:has(#desktop)) {
         & #rssButtonBar {
             box-sizing: border-box;
             display: grid;
-            gap: 6px;
+            gap: 8px;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             height: auto;
             width: 100%;
@@ -944,6 +978,16 @@ body:not(:has(#desktop)) {
     & #topMenuBar {
         display: flow-root;
         height: auto;
+    }
+
+    /* the rule buttons, and Export and Import below them, 8px apart */
+    & .imageButton {
+        margin: 0 0 0 8px;
+    }
+
+    & #rulesFileButtons {
+        gap: 8px;
+        margin-top: 8px;
     }
 
     & #rulesTable,
