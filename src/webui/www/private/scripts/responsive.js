@@ -43,6 +43,7 @@ window.qBittorrent.Responsive ??= (() => {
     const smallQuery = window.matchMedia("(width < 760px), (height < 620px)");
 
     const root = document.documentElement;
+    const localPreferences = new window.qBittorrent.LocalPreferences.LocalPreferences();
 
     const addScrim = (onClick) => {
         const scrim = document.createElement("div");
@@ -650,6 +651,21 @@ window.qBittorrent.Responsive ??= (() => {
         instance.drawWindow();
     };
 
+    // a size stored by an earlier resize (saveWindowSize), from before windows kept a minimum, can be too small to show
+    // the window: it opens at least MIN_WINDOW_WIDTH wide and MIN_WINDOW_HEIGHT high, as the screen allows
+    const raiseStoredSize = (instance) => {
+        const id = instance.options.id;
+        if ((localPreferences.get(`window_${id}_width`) === null) && (localPreferences.get(`window_${id}_height`) === null))
+            return;
+
+        const wrapper = instance.contentWrapperEl;
+        const room = roomOnScreen(instance);
+        const width = Math.max(wrapper.offsetWidth, Math.min(room.width, MIN_WINDOW_WIDTH));
+        const height = Math.max(wrapper.offsetHeight, Math.min(room.height, MIN_WINDOW_HEIGHT));
+        if ((width !== wrapper.offsetWidth) || (height !== wrapper.offsetHeight))
+            setContentSize(instance, `${width}px`, `${height}px`);
+    };
+
     // sizes a window to its page and keeps it on the screen
     const fitWindow = (instance) => {
         const windowEl = instance.windowEl;
@@ -783,6 +799,7 @@ window.qBittorrent.Responsive ??= (() => {
 
             // a window opened from the drawer would open behind it
             closeFiltersDrawer();
+            raiseStoredSize(instance);
             fitWindow(instance);
             contentObserver.observe(instance.contentEl);
             contentChangeObserver.observe(instance.contentEl, { childList: true, subtree: true, attributes: true, attributeFilter: ["class", "hidden"] });
