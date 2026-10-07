@@ -70,11 +70,13 @@ window.qBittorrent.Dialog ??= (() => {
         deepFreezeSafe(obj);
     };
 
+    // a window keeps the size it asks for: responsive.js fits it to the screen as it opens and whenever the screen
+    // changes, and a size cut to the screen it opened on would stay cut after a phone turns or the browser grows
     const limitWidthToViewport = (width) => {
-        return Math.min(width, window.innerWidth - 20);
+        return width;
     };
     const limitHeightToViewport = (height) => {
-        return Math.min(height, window.innerHeight - 75);
+        return height;
     };
 
     const baseModalOptions = Object.assign(Object.create(null), {
