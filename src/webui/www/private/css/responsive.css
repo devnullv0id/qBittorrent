@@ -560,10 +560,37 @@ body:not(:has(#desktop)) {
     padding-top: 6px !important; /* override the inline paddings */
 }
 
-/* RSS Downloader's Save is a button itself and keeps a button's background, but disabled, whose background is
-   see-through, the window's over the page scrolling under it */
-#RssDownloader #saveButton:not(:disabled) {
-    background-color: revert;
+/* Buttons: the theme's colours rather than each browser's own, darker or lighter towards the text on hover and press */
+:is(button, input[type="button"], input[type="submit"], input[type="reset"]) {
+    --button-background: var(--color-background-default);
+
+    background-color: var(--button-background);
+    color: var(--color-text-default);
+
+    &:hover:not(:disabled) {
+        --button-background: color-mix(
+            in srgb,
+            var(--color-background-default),
+            var(--color-text-default) 10%
+        );
+    }
+
+    &:active:not(:disabled) {
+        --button-background: color-mix(
+            in srgb,
+            var(--color-background-default),
+            var(--color-text-default) 20%
+        );
+    }
+
+    &:disabled {
+        color: var(--color-text-disabled);
+    }
+}
+
+/* RSS Downloader's Save is a button itself and keeps a button's background */
+#RssDownloader #saveButton {
+    background-color: var(--button-background);
 }
 
 /* Buttons: one look, style.css's, where a page sets its own padding */
@@ -586,7 +613,7 @@ body:not(:has(#desktop)) {
             #rememberBtn
         ) {
         align-items: center;
-        background-color: revert;
+        background-color: var(--button-background);
         border: 1px solid var(--color-border-default);
         border-radius: 3px;
         box-sizing: border-box;
