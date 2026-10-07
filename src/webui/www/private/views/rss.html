@@ -137,6 +137,9 @@
             <button type="button" id="newSubscriptionButton" onclick="qBittorrent.Rss.addRSSFeed()">
                 <img alt="QBT_TR(New subscription)QBT_TR[CONTEXT=RSSWidget]" src="images/list-add.svg" width="16" height="16">QBT_TR(New subscription)QBT_TR[CONTEXT=RSSWidget]
             </button>
+            <button type="button" id="rssWizardButton" class="modernOnly" onclick="qBittorrent.Rss.openRssDownloader(true)">
+                <img alt="" src="images/list-add.svg" width="16" height="16">QBT_TR(New rule (guided))QBT_TR[CONTEXT=AutomatedRssDownloader]
+            </button>
             <button type="button" id="markReadButton" onclick="qBittorrent.Rss.markSelectedAsRead()">
                 <img alt="QBT_TR(Mark items read)QBT_TR[CONTEXT=RSSWidget]" src="images/task-complete.svg" width="16" height="16">QBT_TR(Mark items read)QBT_TR[CONTEXT=RSSWidget]
             </button>
@@ -1042,8 +1045,23 @@
                 markItemAsRead(path);
         };
 
-        const openRssDownloader = () => {
+        // guided: start the step-by-step new rule once the window loads
+        const openRssDownloader = (guided = false) => {
             const id = "rssdownloaderpage";
+            if (guided) {
+                const start = performance.now();
+                const startWizard = () => {
+                    if (document.getElementById("rssWizardHeader") && window.qBittorrent.RssDownloader?.startWizard)
+                        window.qBittorrent.RssDownloader.startWizard();
+                    else if ((performance.now() - start) < 5000)
+                        requestAnimationFrame(startWizard);
+                };
+                // already open: start it there
+                if (document.getElementById(id) === null)
+                    requestAnimationFrame(startWizard);
+                else
+                    startWizard();
+            }
             new MochaUI.Window({
                 id: id,
                 icon: "images/qbittorrent-tray.svg",

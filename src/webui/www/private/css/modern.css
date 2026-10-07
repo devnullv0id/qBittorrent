@@ -2622,19 +2622,192 @@
             grid-row: articles;
         }
 
-        /* Save at the end, as in the dialogs */
-        & #saveButton {
+        /* Cancel and Save as a footer */
+        & :is(#saveButton, #rssDownloaderCancel) {
             grid-area: footer;
-            justify-self: end;
             margin-top: 12px;
             min-width: 120px;
+            place-self: start end;
             width: auto;
+        }
+
+        /* in view like Save */
+        & #rssDownloaderCancel {
+            bottom: 12px;
+            justify-self: start;
+            position: sticky;
         }
     }
 
     /* a window the screen holds shorter than the page asks for: the lists give way before the page scrolls */
     :root.modern #rssdownloaderpage.responsiveShort #RssDownloader {
         grid-template-rows: auto auto minmax(min-content, 1fr) auto;
+    }
+}
+
+/* New rule, step by step */
+:root.modern
+    #RssDownloader:not(.rssWizard)
+    :is(
+        #rssWizardHeader,
+        #rssWizardName,
+        #rssWizardRules,
+        #rssWizardFeeds,
+        #rssWizardFooter
+    ) {
+    display: none;
+}
+
+:root.modern #RssDownloader.rssWizard {
+    display: flex !important;
+    flex-direction: column;
+    gap: 12px;
+    min-height: 460px; /* one size for all steps */
+
+    & > :is(#leftRssDownloaderColumn, #rightRssDownloaderColumn),
+    & #saveButton,
+    & :is(#ruleSettings, #rssDownloaderFeeds) > legend {
+        display: none !important;
+    }
+
+    & > #centerRssDownloaderColumn {
+        display: contents;
+    }
+
+    & #rssWizardHeader {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    & #rssWizardProgress {
+        color: var(--color-text-muted);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+    }
+
+    & #rssWizardTitle {
+        font-size: 16px;
+    }
+
+    & #rssWizardHint {
+        color: var(--color-text-muted);
+    }
+
+    & #rssWizardName {
+        align-items: center;
+        display: flex;
+        gap: 12px;
+
+        & > input {
+            box-sizing: border-box;
+            flex: 1 1 auto;
+        }
+    }
+
+    & :is(#ruleSettings, #rssDownloaderFeeds) {
+        align-self: stretch;
+        display: block;
+        margin: 0;
+    }
+
+    /* no going back once the rule is created */
+    &:is([data-step="1"], [data-step="2"]) #rssWizardBack {
+        display: none;
+    }
+
+    & #rssDownloaderCancel {
+        display: none;
+    }
+
+    /* the feeds step */
+    & #rssWizardFeeds {
+        flex: none;
+
+        & .listEditorItems {
+            max-height: 300px;
+        }
+
+        & li > label {
+            flex: 1 1 auto;
+            min-width: 0;
+            overflow-wrap: anywhere;
+        }
+    }
+
+    & #rssDownloaderFeeds {
+        display: none !important;
+    }
+
+    &:not([data-step="3"]) #rssWizardFeeds {
+        display: none;
+    }
+
+    /* the existing rules below the name */
+    & #rssWizardRules {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+
+        & > b {
+            color: var(--color-text-muted);
+            font-size: 11px;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        &.empty {
+            display: none;
+        }
+    }
+
+    &:not([data-step="1"]) #rssWizardRules {
+        display: none;
+    }
+
+    & #rssWizardFooter {
+        margin-top: auto;
+    }
+
+    /* each step shows its own part only */
+    &:not([data-step="1"]) #rssWizardName,
+    &:is([data-step="1"], [data-step="3"]) #ruleSettings {
+        display: none !important;
+    }
+
+    &[data-step="2"] #ruleSettings {
+        & > div.formRow:has(#savetoDifferentDir),
+        & > #lastMatchDiv,
+        &
+            tr:has(
+                :is(
+                    #assignCategoryCombobox,
+                    #ruleAddTags,
+                    #saveToText,
+                    #ignoreDaysValue,
+                    #addStoppedCombobox,
+                    #contentLayoutCombobox
+                )
+            ) {
+            display: none;
+        }
+    }
+
+    &[data-step="4"] #ruleSettings {
+        & > div.formRow:has(:is(#useRegEx, #useSmartFilter)),
+        & > #lastMatchDiv,
+        &
+            tr:has(
+                :is(#mustContainText, #mustNotContainText, #episodeFilterText)
+            ) {
+            display: none;
+        }
+
+        & tr:has(#assignCategoryCombobox) {
+            border-top: 0;
+        }
     }
 }
 

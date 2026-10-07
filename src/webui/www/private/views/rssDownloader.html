@@ -142,6 +142,28 @@
         QBT_TR(Auto downloading of RSS torrents is disabled now! You can enable it in application settings.)QBT_TR[CONTEXT=AutomatedRssDownloader]
         <button type="button" id="rssDownloaderOptionsButton" class="modernOnly">QBT_TR(Options...)QBT_TR[CONTEXT=MainWindow]</button>
     </div>
+    <div id="rssWizardHeader" class="modernOnly">
+        <span id="rssWizardProgress"></span>
+        <b id="rssWizardTitle"></b>
+        <span id="rssWizardHint"></span>
+    </div>
+    <div id="rssWizardName" class="modernOnly formRow">
+        <label for="rssWizardNameInput">QBT_TR(Rule name:)QBT_TR[CONTEXT=AutomatedRssDownloader]</label>
+        <input type="text" id="rssWizardNameInput" autocorrect="off" autocapitalize="none">
+    </div>
+    <div id="rssWizardRules" class="modernOnly">
+        <b>QBT_TR(Existing rules)QBT_TR[CONTEXT=AutomatedRssDownloader]</b>
+        <div class="listEditor">
+            <ul id="rssWizardRulesList" class="listEditorItems"></ul>
+        </div>
+    </div>
+    <div id="rssWizardFeeds" class="modernOnly listEditor">
+        <ul id="rssWizardFeedsList" class="listEditorItems"></ul>
+        <div class="listEditorAdd">
+            <input type="text" id="rssWizardFeedUrl" placeholder="QBT_TR(Feed URL)QBT_TR[CONTEXT=AutomatedRssDownloader]" aria-label="QBT_TR(Feed URL)QBT_TR[CONTEXT=AutomatedRssDownloader]" autocorrect="off" autocapitalize="none" spellcheck="false">
+            <button type="button" id="rssWizardFeedAdd">QBT_TR(Add)QBT_TR[CONTEXT=HttpServer]</button>
+        </div>
+    </div>
     <div id="leftRssDownloaderColumn">
         <div id="topMenuBar">
             <b id="rulesTableDesc">QBT_TR(Download Rules)QBT_TR[CONTEXT=AutomatedRssDownloader]</b>
@@ -314,9 +336,15 @@ Supports the formats: S01E01, 1x1, 2017.12.31 and 31.12.2017 (Date formats also 
                 </div>
             </div>
         </fieldset>
-        <button disabled type="button" id="saveButton" onclick="qBittorrent.RssDownloader.saveSettings()">
+        <button type="button" id="rssDownloaderCancel" class="modernOnly" onclick="window.qBittorrent.Client.closeWindow(document.getElementById('rssdownloaderpage'));">QBT_TR(Cancel)QBT_TR[CONTEXT=MainWindow]</button>
+        <button disabled type="button" id="saveButton" onclick="qBittorrent.RssDownloader.saveSettings(true)">
             QBT_TR(Save)QBT_TR[CONTEXT=HttpServer]
         </button>
+    </div>
+    <div id="rssWizardFooter" class="modernOnly dialogFooter">
+        <button type="button" id="rssWizardCancel" class="dialogCancel">QBT_TR(Cancel)QBT_TR[CONTEXT=MainWindow]</button>
+        <button type="button" id="rssWizardBack">QBT_TR(Back)QBT_TR[CONTEXT=AutomatedRssDownloader]</button>
+        <button type="button" id="rssWizardNext" class="primary">QBT_TR(Next)QBT_TR[CONTEXT=AutomatedRssDownloader]</button>
     </div>
     <div id="rightRssDownloaderColumn">
         <b id="articleTableDesc">QBT_TR(Matching RSS Articles)QBT_TR[CONTEXT=AutomatedRssDownloader]</b>
@@ -363,6 +391,7 @@ Supports the formats: S01E01, 1x1, 2017.12.31 and 31.12.2017 (Date formats also 
                 rssDownloaderFeedSelectionTable: rssDownloaderFeedSelectionTable,
                 setElementTitles: setElementTitles,
                 addRule: addRule,
+                startWizard: startWizard,
                 removeSelectedRule: removeSelectedRule,
                 exportRules: exportRules,
                 importRules: importRules
@@ -494,32 +523,8 @@ Supports the formats: S01E01, 1x1, 2017.12.31 and 31.12.2017 (Date formats also 
                         combobox.add(option);
                     }
                 });
-            // get all rss feed
-            const url = new URL("api/v2/rss/items", window.location);
-            url.search = new URLSearchParams({
-                withData: false
-            });
-            fetch(url, {
-                    method: "GET",
-                    cache: "no-store"
-                })
-                .then(async (response) => {
-                    if (!response.ok)
-                        return;
-
-                    const responseJSON = await response.json();
-
-                    feedList = [];
-                    const flatten = (root) => {
-                        for (const child in root) {
-                            if (root[child].uid !== undefined)
-                                feedList.push({ name: child, url: root[child].url });
-                            else
-                                flatten(root[child]);
-                        }
-                    };
-                    flatten(responseJSON);
-                });
+            loadFeeds();
+            setupWizard();
             // Modern: opens Options at its RSS page
             document.getElementById("rssDownloaderOptionsButton").addEventListener("click", (event) => {
                 window.qBittorrent.Responsive.openOptionsPage("PrefRSSLink", "RSSTab", ["enable_fetching_rss_feeds_checkbox", "enable_auto_downloading_rss_torrents_checkbox"]);
@@ -530,9 +535,39 @@ Supports the formats: S01E01, 1x1, 2017.12.31 and 31.12.2017 (Date formats also 
             updateRulesList();
         };
 
+        // get all rss feeds
+        const loadFeeds = () => {
+            const url = new URL("api/v2/rss/items", window.location);
+            url.search = new URLSearchParams({
+                withData: false
+            });
+            return fetch(url, {
+                    method: "GET",
+                    cache: "no-store"
+                })
+                .then(async (response) => {
+                    if (!response.ok)
+                        return;
+
+                    const responseJSON = await response.json();
+
+                    feedList = [];
+                    const flatten = (root, parentPath) => {
+                        for (const [child, item] of Object.entries(root)) {
+                            const path = (parentPath === "") ? child : `${parentPath}\\${child}`;
+                            if (item.uid !== undefined)
+                                feedList.push({ name: child, url: item.url, path: path });
+                            else
+                                flatten(item, path);
+                        }
+                    };
+                    flatten(responseJSON, "");
+                });
+        };
+
         const updateRulesList = () => {
             // get all rules
-            fetch("api/v2/rss/rules", {
+            return fetch("api/v2/rss/rules", {
                     method: "GET",
                     cache: "no-store"
                 })
@@ -555,6 +590,7 @@ Supports the formats: S01E01, 1x1, 2017.12.31 and 31.12.2017 (Date formats also 
                     }
                     rssDownloaderRulesTable.updateTable(false);
                     rulesList = responseJSON;
+                    renderWizardRules();
                 });
         };
 
@@ -662,7 +698,7 @@ Supports the formats: S01E01, 1x1, 2017.12.31 and 31.12.2017 (Date formats also 
             });
         };
 
-        const saveSettings = () => {
+        const saveSettings = (closeWindow = false) => {
             const lastSelectedRow = rssDownloaderRulesTable.selectedRows.at(-1);
             const rule = rssDownloaderRulesTable.getRow(lastSelectedRow).full_data.name;
 
@@ -720,11 +756,18 @@ Supports the formats: S01E01, 1x1, 2017.12.31 and 31.12.2017 (Date formats also 
                         ruleDef: JSON.stringify(rulesList[rule])
                     })
                 })
-                .then((response) => {
-                    if (!response.ok)
+                .then(async (response) => {
+                    if (!response.ok) {
+                        // Modern says so rather than doing nothing
+                        if (document.documentElement.classList.contains("modern"))
+                            alert(`QBT_TR(Error:)QBT_TR[CONTEXT=HttpServer] ${await response.text()}`);
                         return;
+                    }
 
                     updateMatchingArticles(rule);
+                    // Modern: Save closes the window, except in the guided new rule
+                    if (closeWindow && document.documentElement.classList.contains("modern"))
+                        window.qBittorrent.Client.closeWindow(document.getElementById("rssdownloaderpage"));
                 });
         };
 
@@ -763,6 +806,260 @@ Supports the formats: S01E01, 1x1, 2017.12.31 and 31.12.2017 (Date formats also 
                     }
                     rssDownloaderArticlesTable.updateTable(false);
                 });
+        };
+
+        // Modern's step-by-step new rule, on the page's own fields
+        const wizardSteps = [
+            ["QBT_TR(Name the rule)QBT_TR[CONTEXT=AutomatedRssDownloader]", "QBT_TR(A name to recognize it by in the list of rules.)QBT_TR[CONTEXT=AutomatedRssDownloader]"],
+            ["QBT_TR(What to match)QBT_TR[CONTEXT=AutomatedRssDownloader]", "QBT_TR(Articles whose title contains these words are downloaded. Leave the other fields empty unless you need them.)QBT_TR[CONTEXT=AutomatedRssDownloader]"],
+            ["QBT_TR(Which feeds)QBT_TR[CONTEXT=AutomatedRssDownloader]", "QBT_TR(Tick the feeds this rule watches.)QBT_TR[CONTEXT=AutomatedRssDownloader]"],
+            ["QBT_TR(What to do with matches)QBT_TR[CONTEXT=AutomatedRssDownloader]", "QBT_TR(Optional: the defaults are fine to start with.)QBT_TR[CONTEXT=AutomatedRssDownloader]"]
+        ];
+        let wizardStep = 0;
+        let wizardRule = null;
+
+        const showWizardStep = (step) => {
+            wizardStep = step;
+            const page = document.getElementById("RssDownloader");
+            page.dataset.step = (step + 1).toString();
+            document.getElementById("rssWizardProgress").textContent = "QBT_TR(Step %1 of %2)QBT_TR[CONTEXT=AutomatedRssDownloader]".replace("%1", step + 1).replace("%2", wizardSteps.length);
+            document.getElementById("rssWizardTitle").textContent = wizardSteps[step][0];
+            document.getElementById("rssWizardHint").textContent = wizardSteps[step][1];
+            document.getElementById("rssWizardNext").textContent = (step === (wizardSteps.length - 1)) ? "QBT_TR(Create rule)QBT_TR[CONTEXT=AutomatedRssDownloader]" : "QBT_TR(Next)QBT_TR[CONTEXT=AutomatedRssDownloader]";
+            if (step === 0)
+                document.getElementById("rssWizardNameInput").focus();
+            if (step === 2)
+                renderWizardFeeds();
+        };
+
+        const startWizard = () => {
+            // one left half made goes, as with Cancel
+            cancelWizard();
+            document.getElementById("rssWizardNameInput").value = "";
+            renderWizardRules();
+            document.getElementById("RssDownloader").classList.add("rssWizard");
+            showWizardStep(0);
+        };
+
+        const endWizard = () => {
+            const page = document.getElementById("RssDownloader");
+            page.classList.remove("rssWizard");
+            delete page.dataset.step;
+            wizardRule = null;
+        };
+
+        const createWizardRule = () => {
+            const name = document.getElementById("rssWizardNameInput").value.trim();
+            if (name === "") {
+                alert("QBT_TR(Name cannot be empty)QBT_TR[CONTEXT=HttpServer]");
+                return;
+            }
+            if (Object.hasOwn(rulesList, name)) {
+                alert("QBT_TR(A rule with this name already exists.)QBT_TR[CONTEXT=AutomatedRssDownloader]");
+                return;
+            }
+            fetch("api/v2/rss/setRule", {
+                    method: "POST",
+                    body: new URLSearchParams({
+                        ruleName: name,
+                        ruleDef: "{}"
+                    })
+                })
+                .then(async (response) => {
+                    if (!response.ok)
+                        return;
+                    wizardRule = name;
+                    await updateRulesList();
+                    // select it, which shows it on the page's fields
+                    const row = [...rssDownloaderRulesTable.getRowValues()].find((r) => r.full_data.name === name);
+                    rssDownloaderRulesTable.deselectAll();
+                    rssDownloaderRulesTable.selectRow(row.rowId);
+                    showWizardStep(1);
+                });
+        };
+
+        const nextWizardStep = () => {
+            if (wizardStep === 0) {
+                createWizardRule();
+                return;
+            }
+            if (wizardStep < (wizardSteps.length - 1)) {
+                showWizardStep(wizardStep + 1);
+                return;
+            }
+            saveSettings();
+            endWizard();
+        };
+
+        // read the feeds again, keeping the ticks and ticking new ones
+        const refreshWizardFeeds = () => {
+            const ticked = new Set([...rssDownloaderFeedSelectionTable.getRowValues()]
+                .filter((row) => row.full_data.checked)
+                .map((row) => row.full_data.url));
+            const known = new Set(feedList.map((feed) => feed.url));
+            loadFeeds().then(() => {
+                rssDownloaderFeedSelectionTable.clear();
+                let rowID = -1;
+                for (const feed of feedList) {
+                    rssDownloaderFeedSelectionTable.updateRowData({
+                        rowId: ++rowID,
+                        checked: ticked.has(feed.url) || !known.has(feed.url),
+                        name: feed.name,
+                        url: feed.url
+                    });
+                }
+                rssDownloaderFeedSelectionTable.updateTable(false);
+                renderWizardFeeds();
+            });
+        };
+
+        const createRemoveButton = (label, onClick) => {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "listEditorRemove";
+            button.title = "QBT_TR(Remove)QBT_TR[CONTEXT=TransferListWidget]";
+            button.setAttribute("aria-label", `${button.title} ${label}`);
+            button.addEventListener("click", (event) => onClick(event));
+            return button;
+        };
+
+        // the feeds step as a list editor, ticking the page's own feed table
+        const renderWizardFeeds = () => {
+            const items = [...rssDownloaderFeedSelectionTable.getRowValues()].map((row) => {
+                const item = document.createElement("li");
+                const checkbox = document.createElement("input");
+                checkbox.type = "checkbox";
+                checkbox.id = `rssWizardFeed${row.rowId}`;
+                checkbox.checked = row.full_data.checked;
+                checkbox.addEventListener("change", (event) => {
+                    rssDownloaderFeedSelectionTable.updateRowData({
+                        rowId: row.rowId,
+                        checked: checkbox.checked
+                    });
+                });
+                const label = document.createElement("label");
+                label.htmlFor = checkbox.id;
+                label.textContent = row.full_data.name;
+                label.title = row.full_data.url;
+                item.append(checkbox, label, createRemoveButton(row.full_data.name, (event) => removeFeed(row.full_data.url)));
+                return item;
+            });
+            const list = document.getElementById("rssWizardFeedsList");
+            list.replaceChildren(...items);
+            list.classList.toggle("empty", (items.length === 0));
+        };
+
+        const addWizardFeed = () => {
+            const input = document.getElementById("rssWizardFeedUrl");
+            const url = input.value.trim();
+            if (url === "")
+                return;
+            fetch("api/v2/rss/addFeed", {
+                    method: "POST",
+                    body: new URLSearchParams({
+                        url: url,
+                        path: ""
+                    })
+                })
+                .then(async (response) => {
+                    if (!response.ok) {
+                        if (response.status === 409)
+                            alert(await response.text());
+                        return;
+                    }
+                    input.value = "";
+                    window.qBittorrent.Rss?.updateRssFeedList();
+                    refreshWizardFeeds();
+                });
+        };
+
+        // removing a feed: the RSS tab's confirmation
+        const removeFeed = (url) => {
+            const feed = feedList.find((f) => f.url === url);
+            if (feed === undefined)
+                return;
+            new MochaUI.Window({
+                id: "confirmFeedDeletionPage",
+                icon: "images/qbittorrent-tray.svg",
+                title: "QBT_TR(Deletion confirmation)QBT_TR[CONTEXT=RSSWidget]",
+                loadMethod: "iframe",
+                contentURL: `confirmfeeddeletion.html?v=${CACHEID}&paths=${encodeURIComponent(encodeURIComponent(feed.path))}`,
+                scrollbars: false,
+                resizable: false,
+                maximizable: false,
+                width: window.qBittorrent.Dialog.limitWidthToViewport(350),
+                height: 70,
+                onCloseComplete: refreshWizardFeeds
+            });
+        };
+
+        // the existing rules in the name step, each removable
+        const renderWizardRules = () => {
+            const list = document.getElementById("rssWizardRulesList");
+            if (list === null)
+                return;
+            const items = Object.keys(rulesList).map((name) => {
+                const item = document.createElement("li");
+                const text = document.createElement("span");
+                text.textContent = name;
+                item.append(text, createRemoveButton(name, (event) => removeRules([name])));
+                return item;
+            });
+            list.replaceChildren(...items);
+            document.getElementById("rssWizardRules").classList.toggle("empty", (items.length === 0));
+        };
+
+        const cancelWizard = () => {
+            const rule = wizardRule;
+            endWizard();
+            if (rule === null)
+                return;
+            fetch("api/v2/rss/removeRule", {
+                    method: "POST",
+                    body: new URLSearchParams({
+                        ruleName: rule
+                    })
+                })
+                .then(() => {
+                    showRule("");
+                    updateRulesList();
+                });
+        };
+
+        // on each opening of the window (this module outlives it)
+        const setupWizard = () => {
+            // the window closed in the middle drops the guided rule, as Cancel does
+            MochaUI.Windows.instances.rssdownloaderpage?.addEvent("close", () => {
+                if ((wizardRule !== null) && document.getElementById("RssDownloader").classList.contains("rssWizard")) {
+                    fetch("api/v2/rss/removeRule", {
+                        method: "POST",
+                        body: new URLSearchParams({
+                            ruleName: wizardRule
+                        })
+                    });
+                }
+                wizardRule = null;
+            });
+            document.getElementById("rssWizardNext").addEventListener("click", (_event) => nextWizardStep());
+            document.getElementById("rssWizardBack").addEventListener("click", (event) => showWizardStep(wizardStep - 1));
+            document.getElementById("rssWizardCancel").addEventListener("click", (_event) => cancelWizard());
+            document.getElementById("rssWizardFeedAdd").addEventListener("click", (_event) => addWizardFeed());
+            document.getElementById("rssWizardFeedUrl").addEventListener("keydown", (event) => {
+                switch (event.key) {
+                    case "Enter":
+                        event.preventDefault();
+                        addWizardFeed();
+                        break;
+                }
+            });
+            document.getElementById("rssWizardNameInput").addEventListener("keydown", (event) => {
+                switch (event.key) {
+                    case "Enter":
+                        event.preventDefault();
+                        nextWizardStep();
+                        break;
+                }
+            });
         };
 
         const showRule = (ruleName) => {
