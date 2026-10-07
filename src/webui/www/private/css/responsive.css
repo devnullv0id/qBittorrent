@@ -23,9 +23,7 @@
 
     #filtersButton {
         align-items: center;
-        background-color: var(--color-background-default);
         border: 1px solid var(--color-border-default);
-        border-radius: 4px;
         color: var(--color-text-default);
         cursor: pointer;
         display: inline-flex;
@@ -33,7 +31,7 @@
         gap: 4px;
         height: 26px;
         margin-right: 4px;
-        padding: 0 6px;
+        padding: 0 10px;
         vertical-align: middle;
     }
 
@@ -560,6 +558,59 @@ body:not(:has(#desktop)) {
 ) {
     border-top: 1px solid var(--color-border-default);
     padding-top: 6px !important; /* override the inline paddings */
+}
+
+/* RSS Downloader's Save is a button itself and keeps a button's background, but disabled, whose background is
+   see-through, the window's over the page scrolling under it */
+#RssDownloader #saveButton:not(:disabled) {
+    background-color: revert;
+}
+
+/* Buttons: one look, style.css's, where a page sets its own padding */
+:root {
+    & #rssButtonBar button,
+    & :is(#manageSearchPlugins, #startSearchButton, #addTaskButton),
+    & #searchPluginsContainer button,
+    & #installSearchPluginContainer button,
+    & #logFilterBar > button {
+        padding: 3px 10px;
+    }
+
+    /* icon buttons: squares as high as the others, with their border and background */
+    &
+        :is(
+            #webUIAPIKeyCopyButton,
+            #webUIAPIKeyRotateButton,
+            #webUIAPIKeyDeleteButton,
+            #RssDownloader .imageButton,
+            #rememberBtn
+        ) {
+        align-items: center;
+        background-color: revert;
+        border: 1px solid var(--color-border-default);
+        border-radius: 3px;
+        box-sizing: border-box;
+        display: inline-flex;
+        height: 26px;
+        justify-content: center;
+        padding: 0;
+        vertical-align: middle;
+        width: 26px;
+
+        & img {
+            margin: 0 !important; /* override the inline offsets */
+            position: static !important;
+        }
+    }
+
+    & #rememberBtn {
+        background-size: 16px;
+    }
+
+    /* Search plugins' buttons as high as the others */
+    & #searchPluginsContainer > div:last-child > button {
+        line-height: inherit !important; /* override the inline line height */
+    }
 }
 
 /* Add Torrent: Download takes its place in the row */
