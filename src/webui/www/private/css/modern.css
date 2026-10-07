@@ -2356,6 +2356,89 @@
     width: var(--modern-control-height);
 }
 
+/* Search on phones */
+@media (width < 760px) {
+    :root.modern #searchResultsHeaderContainer {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+
+        & > * {
+            box-sizing: border-box;
+            margin: 0;
+            min-width: 0;
+        }
+
+        /* at least half the row, pushing the dropdowns below */
+        & > #searchPattern {
+            flex: 1 1 50%;
+            order: 1;
+            width: auto;
+        }
+
+        & > #startSearchButton {
+            flex: none;
+            order: 2;
+        }
+
+        & > #searchPluginsBarButton {
+            flex: none;
+            order: 3;
+        }
+
+        & > :is(#categorySelect, #pluginsSelect) {
+            flex: 1 1 calc(50% - 4px);
+            order: 4;
+            width: auto;
+        }
+    }
+
+    :root.modern #searchResultsFilters:not(.invisible) {
+        align-items: center;
+        display: grid;
+        gap: 4px 8px;
+        grid-template-columns: minmax(0, 1fr) auto;
+
+        & > #searchInNameFilter {
+            box-sizing: border-box;
+            grid-column: 1;
+            grid-row: 1;
+            margin: 0;
+            min-width: 0;
+            width: 100%;
+        }
+
+        /* the dropdown keeps its accessible name */
+        & label[for="searchInTorrentName"] {
+            clip-path: inset(50%);
+            height: 1px;
+            overflow: hidden;
+            position: absolute;
+            white-space: nowrap;
+            width: 1px;
+        }
+
+        & #searchInTorrentName {
+            margin: 0;
+        }
+
+        & > span {
+            color: var(--color-text-muted);
+            font-size: 12px;
+            grid-column: 1 / -1;
+            grid-row: 2;
+        }
+
+        &
+            :is(
+                #searchResultsGranularFiltersWarning,
+                #searchResultsGranularFilters
+            ) {
+            display: none !important;
+        }
+    }
+}
+
 :root.modern :is(#rssTopBar, #logTopBar, #torrentCreatorTopBar) {
     align-items: center;
     background-color: var(--color-background-default);
