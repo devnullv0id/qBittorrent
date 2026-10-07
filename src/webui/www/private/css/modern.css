@@ -2340,8 +2340,20 @@
 
 :root.modern
     #searchResults:has(#searchResultsNoPlugins:not(.invisible))
-    :is(#searchResultsHeader, div:has(> #manageSearchPlugins)) {
+    #searchResultsHeader {
     display: none;
+}
+
+/* the plugins button ends the search bar */
+:root.modern #searchResults > div:has(> #manageSearchPlugins) {
+    display: none;
+}
+
+:root.modern #searchPluginsBarButton {
+    flex: none;
+    justify-content: center;
+    padding: 0;
+    width: var(--modern-control-height);
 }
 
 :root.modern :is(#rssTopBar, #logTopBar, #torrentCreatorTopBar) {
