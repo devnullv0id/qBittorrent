@@ -33,7 +33,8 @@ window.qBittorrent ??= {};
 window.qBittorrent.Responsive ??= (() => {
     const exports = () => {
         return {
-            init: init
+            init: init,
+            openOptionsPage: openOptionsPage
         };
     };
 
@@ -731,11 +732,16 @@ window.qBittorrent.Responsive ??= (() => {
         // null while unknown: a window the user sized, or a page still loading, isn't taken full screen
         let ownHeight = null;
         if (!instance.responsiveUserResized && root.classList.contains("responsiveRelayout")) {
+            // measured as the page asks, not as it gives way in a short window
+            windowEl.classList.remove("responsiveShort");
             const fitWidth = Math.min(maxWidth, MAX_WINDOW_WIDTH);
             const fitHeight = Math.min(maxHeight, MAX_WINDOW_HEIGHT);
             width = phone ? maxWidth : Math.min(fitWidth, Math.max(width, MIN_WINDOW_WIDTH, pageOverflow(instance, width, wantedHeight).width));
             ownHeight = pageHeight(instance, width, maxHeight);
-            height = Math.min(fitHeight, (ownHeight > 0) ? ownHeight : Math.max(wantedHeight, pageOverflow(instance, width, wantedHeight).height));
+            const askedHeight = (ownHeight > 0) ? ownHeight : Math.max(wantedHeight, pageOverflow(instance, width, wantedHeight).height);
+            height = Math.min(fitHeight, askedHeight);
+            // shorter than its page asks for: the page may give way before it scrolls (Modern's RSS Downloader)
+            windowEl.classList.toggle("responsiveShort", askedHeight > fitHeight);
             // a page that scrolls keeps its width beside the scrollbar
             if (pageOverflow(instance, width, height).height > 0)
                 width = Math.min(fitWidth, width + sidewaysScrollbarWidth(instance, width, height));
@@ -2025,6 +2031,50 @@ window.qBittorrent.Responsive ??= (() => {
                     trimButtonLabel(button);
             }
         }).observe(document.body, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ["value"] });
+    };
+
+    /**
+     * Opens Options at a page and highlights settings on it
+     *
+     * @param {string} linkId the page's link
+     * @param {string} pageId the page
+     * @param {string[]} [settingIds] the settings to highlight
+     */
+    const openOptionsPage = (linkId, pageId, settingIds = []) => {
+        document.getElementById("preferencesLink").click();
+        const start = performance.now();
+        const showPage = () => {
+            const link = document.getElementById(linkId);
+            if ((link === null) || (document.getElementById(pageId) === null)) {
+                if ((performance.now() - start) < 5000)
+                    requestAnimationFrame(showPage);
+                return;
+            }
+            link.click();
+            const sections = settingIds.map((id) => {
+                const row = document.getElementById(id)?.closest(".formRow, tr");
+                const fieldset = row?.closest("fieldset");
+                return ((fieldset !== undefined) && (fieldset.querySelectorAll(".formRow, tr").length === 1)) ? fieldset : row;
+            }).filter(Boolean);
+            sections[0]?.scrollIntoView({ block: "center" });
+            // a row's ring spans its card
+            for (const row of sections.filter((section) => section.tagName !== "FIELDSET")) {
+                const card = row.closest("fieldset").getBoundingClientRect();
+                const rect = row.getBoundingClientRect();
+                const first = (rect.top - card.top) < 12;
+                row.style.setProperty("--modern-highlight-left", `${card.left - rect.left}px`);
+                row.style.setProperty("--modern-highlight-right", `${rect.right - card.right}px`);
+                row.style.setProperty("--modern-highlight-top", `${first ? (card.top - rect.top) : 0}px`);
+            }
+            for (const section of sections) {
+                section.classList.remove("modernHighlight");
+                void section.offsetWidth; // restart the animation
+                section.classList.add("modernHighlight");
+                section.addEventListener("animationend", (event) => section.classList.remove("modernHighlight"), { once: true });
+            }
+        };
+
+        showPage();
     };
 
     // called by client.js once the main window is built

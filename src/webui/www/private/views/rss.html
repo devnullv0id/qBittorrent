@@ -247,17 +247,7 @@
 
             // Modern: opens Options at its RSS page
             document.getElementById("rssFetchingOptionsButton").addEventListener("click", (event) => {
-                document.getElementById("preferencesLink").click();
-                const start = performance.now();
-                // a click before the pages have loaded shows nothing
-                const showRssPage = () => {
-                    const link = document.getElementById("PrefRSSLink");
-                    if ((link !== null) && (document.getElementById("RSSTab") !== null))
-                        link.click();
-                    else if ((performance.now() - start) < 5000)
-                        requestAnimationFrame(showRssPage);
-                };
-                showRssPage();
+                window.qBittorrent.Responsive.openOptionsPage("PrefRSSLink", "RSSTab", ["enable_fetching_rss_feeds_checkbox", "enable_auto_downloading_rss_torrents_checkbox"]);
             });
 
             const rssFeedContextMenu = new window.qBittorrent.ContextMenu.RssFeedContextMenu({

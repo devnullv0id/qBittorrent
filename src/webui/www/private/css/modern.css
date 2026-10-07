@@ -2382,7 +2382,7 @@
 }
 
 /* the fetching disabled notice */
-:root.modern #rssFetchingDisabled {
+:root.modern :is(#rssFetchingDisabled, #RssDownloader #rssDownloaderDisabled) {
     align-items: center;
     background-color: color-mix(in srgb, var(--color-text-red) 8%, transparent);
     border: 1px solid color-mix(in srgb, var(--color-text-red) 35%, transparent);
@@ -2447,6 +2447,220 @@
 
     & #rulesTableDesc {
         line-height: var(--modern-control-height);
+    }
+}
+
+/* RSS Downloader */
+:root.modern #RssDownloader {
+    & #rssDownloaderDisabled {
+        margin-bottom: 12px;
+    }
+
+    & :is(#rulesTableDesc, #articleTableDesc) {
+        color: var(--color-text-muted);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+    }
+
+    & #articleTableDesc {
+        display: block;
+        line-height: var(--modern-control-height);
+        margin-bottom: 6px;
+    }
+
+    & #rulesFileButtons {
+        margin-bottom: 8px;
+    }
+
+    & :is(#rulesTable, #rssDownloaderArticlesTable) {
+        background-color: var(--color-background-card);
+        border: 1px solid var(--color-border-default);
+        border-radius: var(--modern-radius-card);
+        box-sizing: border-box;
+    }
+
+    /* the rule like an Options card */
+    & #ruleSettings {
+        padding: 0 16px;
+
+        & > hr {
+            display: none;
+        }
+
+        & table,
+        & tbody {
+            display: contents;
+        }
+
+        & tr,
+        & > div.formRow {
+            align-items: center;
+            border-top: 1px solid var(--color-border-divider);
+            display: flex;
+            gap: 12px;
+            margin: 0;
+            padding: 4px 0;
+        }
+
+        & > legend + div.formRow {
+            border-top: 0;
+        }
+
+        & td {
+            padding: 0;
+            width: auto;
+        }
+
+        & td:first-child {
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+
+        & td:first-child label {
+            white-space: normal;
+        }
+
+        & td:last-child:not(:first-child) {
+            flex: none;
+            width: var(--modern-select-width);
+        }
+
+        & td:last-child:not(:first-child) > :is(input, select) {
+            box-sizing: border-box;
+            width: 100%;
+        }
+
+        /* switches at the row's end */
+        & > div.formRow > label {
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+
+        & > div.formRow > input[type="checkbox"] {
+            flex: none;
+            margin: 0 0 0 auto;
+            order: 2;
+        }
+
+        /* the days field, the last match below it */
+        & td:has(> #ignoreDaysValue) {
+            white-space: nowrap;
+        }
+
+        & td:has(> #ignoreDaysValue) > #ignoreDaysValue {
+            margin-right: 6px;
+            width: 6em;
+        }
+
+        & #lastMatchDiv {
+            color: var(--color-text-muted);
+            float: none;
+            font-size: 12px;
+            padding: 0 0 8px;
+            text-align: right;
+        }
+    }
+
+    & #saveButton:not(:disabled) {
+        background-color: var(--color-background-blue);
+        border-color: var(--color-background-blue);
+        color: var(--color-text-white);
+        font-weight: 600;
+    }
+
+    /* opaque, the page scrolls under it */
+    & #saveButton:disabled {
+        background-color: var(--color-background-default);
+        color: var(--color-text-muted);
+        opacity: 1;
+    }
+}
+
+/* RSS Downloader in wide windows */
+@container rss-downloader (width >= 700px) {
+    :root.modern #RssDownloader {
+        gap: 0 20px;
+        grid-template:
+            "notice notice notice" auto
+            "rules rule rule" auto
+            "rules feeds articles" minmax(220px, 1fr)
+            "footer footer footer" auto
+            / minmax(200px, 240px) minmax(0, 1fr) minmax(0, 1fr);
+
+        & > #rssDownloaderDisabled {
+            grid-area: notice;
+        }
+
+        & > #leftRssDownloaderColumn {
+            grid-area: rules;
+            grid-row: rules;
+        }
+
+        & > #centerRssDownloaderColumn {
+            display: contents;
+        }
+
+        & #ruleSettings {
+            align-self: start;
+            grid-area: rule;
+            margin-top: 26px;
+
+            & td:has(> #ignoreDaysValue) {
+                width: auto;
+            }
+        }
+
+        & #rssDownloaderFeeds {
+            grid-area: feeds;
+            margin: 26px 0 0;
+        }
+
+        & > #rightRssDownloaderColumn {
+            grid-area: articles;
+            grid-row: articles;
+        }
+
+        /* Save at the end, as in the dialogs */
+        & #saveButton {
+            grid-area: footer;
+            justify-self: end;
+            margin-top: 12px;
+            min-width: 120px;
+            width: auto;
+        }
+    }
+
+    /* a window the screen holds shorter than the page asks for: the lists give way before the page scrolls */
+    :root.modern #rssdownloaderpage.responsiveShort #RssDownloader {
+        grid-template-rows: auto auto minmax(min-content, 1fr) auto;
+    }
+}
+
+/* wide enough: the rule in two columns */
+@container rss-downloader (width >= 950px) {
+    :root.modern #RssDownloader #ruleSettings {
+        column-gap: 32px;
+        display: grid;
+        grid-auto-flow: column;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        grid-template-rows: repeat(7, auto);
+
+        & > div.formRow:first-of-type,
+        & > div.formRow:has(#savetoDifferentDir) {
+            border-top: 0;
+        }
+    }
+}
+
+@media (width >= 1100px) {
+    @container rss-downloader (width >= 700px) {
+        /* on the padded box, so the window fits the padding */
+        :root.modern .mochaContent:has(> #RssDownloader) {
+            box-sizing: border-box;
+            min-width: 1000px;
+        }
     }
 }
 
@@ -2571,6 +2785,41 @@
 }
 
 /* Motion */
+
+/* a setting pointed out: a ring that fades out */
+@keyframes modern-highlight {
+    0%,
+    60% {
+        outline-color: var(--color-accent-blue);
+    }
+
+    100% {
+        outline-color: transparent;
+    }
+}
+
+:root.modern fieldset.modernHighlight {
+    animation: modern-highlight 2.4s ease-out;
+    outline: 4px solid transparent;
+    outline-offset: -4px; /* on the card's edge */
+}
+
+/* a row's ring spans its card */
+:root.modern .modernHighlight:not(fieldset) {
+    position: relative;
+
+    &::after {
+        animation: modern-highlight 2.4s ease-out;
+        border-radius: var(--modern-radius-card);
+        content: "";
+        inset: var(--modern-highlight-top, 0) var(--modern-highlight-right, 0) 0
+            var(--modern-highlight-left, 0);
+        outline: 4px solid transparent;
+        outline-offset: -4px;
+        pointer-events: none;
+        position: absolute;
+    }
+}
 
 @keyframes modern-pop {
     from {

@@ -140,6 +140,7 @@
 <div id="RssDownloader" class="RssDownloader">
     <div id="rssDownloaderDisabled" class="invisible">
         QBT_TR(Auto downloading of RSS torrents is disabled now! You can enable it in application settings.)QBT_TR[CONTEXT=AutomatedRssDownloader]
+        <button type="button" id="rssDownloaderOptionsButton" class="modernOnly">QBT_TR(Options...)QBT_TR[CONTEXT=MainWindow]</button>
     </div>
     <div id="leftRssDownloaderColumn">
         <div id="topMenuBar">
@@ -519,6 +520,10 @@ Supports the formats: S01E01, 1x1, 2017.12.31 and 31.12.2017 (Date formats also 
                     };
                     flatten(responseJSON);
                 });
+            // Modern: opens Options at its RSS page
+            document.getElementById("rssDownloaderOptionsButton").addEventListener("click", (event) => {
+                window.qBittorrent.Responsive.openOptionsPage("PrefRSSLink", "RSSTab", ["enable_fetching_rss_feeds_checkbox", "enable_auto_downloading_rss_torrents_checkbox"]);
+            });
             document.getElementById("savetoDifferentDir").addEventListener("click", (event) => {
                 document.getElementById("saveToText").disabled = !event.target.checked;
             });
