@@ -701,6 +701,7 @@
     align-items: center;
     border-radius: var(--modern-radius-pill);
     gap: 6px;
+    padding-inline: 6px;
 }
 
 /* Tabs */
@@ -2655,6 +2656,9 @@
 
     & > div:last-child {
         border-top: 1px solid var(--color-border-divider);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
         margin-top: 12px !important;
         padding-top: 12px;
 
@@ -2662,6 +2666,7 @@
             flex: none;
             min-width: 96px;
             padding: 3px 14px;
+            width: auto !important; /* override the inline widths */
         }
 
         & > button:first-child {
@@ -2695,9 +2700,13 @@
 
 /* phones: one button per row */
 @media (width < 760px) {
-    :root.modern .mocha #searchPluginsContainer > div:last-child > button {
-        flex: 1 1 100%;
-        margin-left: 0;
+    :root.modern .mocha #searchPluginsContainer > div:last-child {
+        gap: 8px;
+
+        & > button {
+            flex: 1 1 100%;
+            margin: 0;
+        }
     }
 }
 

@@ -746,11 +746,16 @@ window.qBittorrent.Responsive ??= (() => {
         instance.drawWindow();
     };
 
-    // a size stored by an earlier resize (saveWindowSize), from before windows kept a minimum, can be too small to show
-    // the window: it opens at least MIN_WINDOW_WIDTH wide and MIN_WINDOW_HEIGHT high, as the screen allows
-    const raiseStoredSize = (instance) => {
+    // a size stored by an earlier resize (saveWindowSize)
+    const hasStoredSize = (instance) => {
         const id = instance.options.id;
-        if ((localPreferences.get(`window_${id}_width`) === null) && (localPreferences.get(`window_${id}_height`) === null))
+        return (localPreferences.get(`window_${id}_width`) !== null) || (localPreferences.get(`window_${id}_height`) !== null);
+    };
+
+    // a stored size from before windows kept a minimum can be too small to show the window: it opens at least
+    // MIN_WINDOW_WIDTH wide and MIN_WINDOW_HEIGHT high, as the screen allows
+    const raiseStoredSize = (instance) => {
+        if (!hasStoredSize(instance))
             return;
 
         const wrapper = instance.contentWrapperEl;
@@ -844,6 +849,15 @@ window.qBittorrent.Responsive ??= (() => {
             // a page that scrolls keeps its width beside the scrollbar
             if (pageOverflow(instance, width, height).height > 0)
                 width = Math.min(fitWidth, width + sidewaysScrollbarWidth(instance, width, height));
+        }
+        // the desktop layout keeps a window's size, but a dialog (a frame, a window that can't be resized, or one ending
+        // with a dialog's buttons whose size the user didn't store) takes its page's height where the screen has room:
+        // its button row then ends the window, as far from its edge as from the page, and doesn't cover the page's end
+        else if (!instance.responsiveUserResized && (instance.iframeEl || !instance.options.resizable
+                || ((instance.contentEl.querySelector(".dialogFooter") !== null) && !hasStoredSize(instance)))) {
+            const pageNeeds = pageHeight(instance, width, maxHeight);
+            if ((pageNeeds > 0) && (pageNeeds <= Math.min(maxHeight, MAX_WINDOW_HEIGHT)))
+                height = pageNeeds;
         }
         // and once full screen, a window stays so while it is open: Options' shorter tabs would turn it into a card
         const fullScreen = phone && (windowEl.classList.contains("responsiveFullScreen") || ((ownHeight !== null) && ((ownHeight === 0) || (ownHeight > maxHeight))));

@@ -1,5 +1,30 @@
 /* breakpoints, also in responsive.js: 1100px filters drawer, 760px phones, 620px short screens */
 
+/* The shared look, set here once */
+:root {
+    /* a line between parts: a window's button row, a drawer's edge, a list's rows */
+    --separator: 1px solid var(--color-border-default);
+    /* a drawer over the page */
+    --drawer-shadow: 0 0 12px hsl(0deg 0% 0% / 30%);
+    --drawer-width: min(320px, 86vw);
+    /* buttons */
+    --button-face: var(--color-background-default);
+    --button-text: var(--color-text-default);
+    --button-text-disabled: var(--color-text-disabled);
+    --button-border: 1px solid var(--color-border-default);
+    --button-radius: 3px;
+    --button-padding-block: 3px;
+    --button-padding-inline: 10px;
+    /* an icon button's side, a text button's height on the desktop (touch screens make both --touch-target) */
+    --button-size: 26px;
+    /* the icon on an icon button */
+    --button-icon-size: 16px;
+    /* between buttons side by side or stacked */
+    --button-gap: 8px;
+    /* a window's button row: from its line to its buttons, and from them to the window's edge */
+    --button-row-space: 6px;
+}
+
 /* override Layout.css's 400px */
 #desktop {
     min-width: 0;
@@ -25,17 +50,13 @@
 
     #filtersButton {
         align-items: center;
-        background-color: var(--color-background-default);
-        border: 1px solid var(--color-border-default);
-        border-radius: 4px;
-        color: var(--color-text-default);
         cursor: pointer;
         display: inline-flex;
         font: inherit;
         gap: 4px;
-        height: 26px;
+        height: var(--button-size);
         margin-right: 4px;
-        padding: 0 6px;
+        padding: 0 var(--button-padding-inline);
         vertical-align: middle;
     }
 
@@ -66,10 +87,10 @@
 
         & #Filters {
             background-color: var(--color-background-primary);
-            border-right: 1px solid var(--color-border-default);
-            box-shadow: 0 0 12px hsl(0deg 0% 0% / 30%);
+            border-right: var(--separator);
+            box-shadow: var(--drawer-shadow);
             height: 100% !important;
-            width: min(320px, 86vw) !important;
+            width: var(--drawer-width) !important;
         }
     }
 }
@@ -113,20 +134,20 @@
 
     :root.menuDrawerOpen #desktopNavbar {
         background-color: var(--color-background-primary);
-        border-right: 1px solid var(--color-border-default);
+        border-right: var(--separator);
         bottom: 0;
-        box-shadow: 0 0 12px hsl(0deg 0% 0% / 30%);
+        box-shadow: var(--drawer-shadow);
         display: block;
         left: 0;
         overflow-y: auto;
         position: fixed;
         top: 0;
-        width: min(320px, 86vw);
+        width: var(--drawer-width);
         z-index: 1501;
 
         & #menuDrawerHead {
             align-items: center;
-            border-bottom: 1px solid var(--color-border-default);
+            border-bottom: var(--separator);
             display: flex;
             gap: 8px;
             padding: 4px 4px 4px 10px;
@@ -308,9 +329,9 @@
     /* in the column header's place, it counts the selected cards (responsive.js) */
     :root:not(.modern) #torrentsSelectionBar {
         align-items: center;
-        border-bottom: 1px solid var(--color-border-default);
+        border-bottom: var(--separator);
         display: flex;
-        gap: 8px;
+        gap: var(--button-gap);
         padding: 4px 12px;
     }
 
@@ -336,7 +357,7 @@
 
         & tbody tr {
             align-content: center;
-            border-bottom: 1px solid var(--color-border-default);
+            border-bottom: var(--separator);
             box-sizing: border-box;
             display: grid;
             gap: 0 10px;
@@ -552,16 +573,199 @@ body:not(:has(#desktop)) {
     z-index: 1;
 }
 
+/* a line above them, and as much space below them as between them and the line, so they stay off the window's edge */
 :root:not(.modern)
     :is(
         .dialogFooter,
         #submitbutton,
         #preferencesPage
             .mochaContent
-            > div:not(.PrefTab):has(> input[type="button"])
+            > div:not(.PrefTab):has(> input[type="button"]),
+        #searchPluginsContainer > div:last-child
     ) {
-    border-top: 1px solid var(--color-border-default);
-    padding-top: 6px !important; /* override the inline paddings */
+    border-top: var(--separator);
+    padding-bottom: var(--button-row-space);
+    /* override the inline paddings */
+    padding-top: var(--button-row-space) !important;
+
+    /* the row's space is the buttons' only one */
+    & :is(button, input) {
+        margin-block: 0;
+    }
+}
+
+/* Classic's buttons and rows, from here to the modal dialogs' row: Modern draws its own, so each rule leaves it out,
+    through :where() to keep the rule's specificity; Renaming, which Modern doesn't lay out, keeps Classic's */
+
+/* windows that end with their button row: its space is the window's last */
+:where(:root:not(.modern))
+    :is(
+        .modalDialog,
+        #globalSpeedLimitsPage,
+        #installSearchPlugin,
+        #cookiesPage,
+        #searchPlugins,
+        #preferencesPage
+    )
+    .mochaContent,
+#multiRenamePage .mochaContent {
+    padding-bottom: 0 !important; /* override Mocha's padding */
+
+    & :is(#installSearchPluginContainer, #manageCookiesContainer) {
+        margin-bottom: 0;
+    }
+}
+
+/* pages that can be shorter than their window: a column at least as tall as it, so their buttons can end it */
+:where(:root:not(.modern))
+    :is(#preferencesPage, #rssdownloaderpage)
+    .mochaContent,
+#multiRenamePage .mochaContent {
+    box-sizing: border-box;
+    display: flex !important; /* override Mocha's inline display */
+    flex-direction: column;
+    min-height: 100%;
+}
+
+/* Options: the Save row at the window's bottom; the space a tab doesn't need goes above it, and a tab keeps the 1em the
+    row had from it */
+:where(:root:not(.modern)) #preferencesPage .mochaContent {
+    & > .PrefTab {
+        margin-bottom: 1em;
+    }
+
+    & > div:not(.PrefTab):has(> input[type="button"]) {
+        margin-top: auto !important; /* override the inline margin */
+    }
+}
+
+/* Buttons: the theme's colours rather than each browser's own, darker or lighter towards the text on hover and
+    press */
+:where(:root:not(.modern))
+    :is(
+        button,
+        input[type="button"],
+        input[type="submit"],
+        input[type="reset"]
+    ) {
+    --button-background: var(--button-face);
+
+    background-color: var(--button-background);
+    border: var(--button-border);
+    border-radius: var(--button-radius);
+    color: var(--button-text);
+    padding: var(--button-padding-block) var(--button-padding-inline);
+
+    &:hover:not(:disabled) {
+        --button-background: color-mix(
+            in srgb,
+            var(--button-face),
+            var(--button-text) 10%
+        );
+    }
+
+    &:active:not(:disabled) {
+        --button-background: color-mix(
+            in srgb,
+            var(--button-face),
+            var(--button-text) 20%
+        );
+    }
+
+    &:disabled {
+        color: var(--button-text-disabled);
+    }
+}
+
+/* RSS Downloader's Save is a button itself and keeps a button's background; as far from the window's edge as from the
+    rule's feeds, so the page fills the window (it grows where the screen has room) and ends a row's space below Save */
+:where(:root:not(.modern)) #RssDownloader #saveButton {
+    background-color: var(--button-background);
+    bottom: var(--button-row-space);
+    margin-top: var(--button-row-space);
+}
+
+:where(:root:not(.modern)) #rssdownloaderpage #rssdownloaderpage_content {
+    height: auto;
+    /* override Mocha's padding */
+    padding-bottom: var(--button-row-space) !important;
+
+    & #RssDownloader {
+        flex: 1 0 auto;
+        height: auto;
+    }
+}
+
+/* the buttons' look also where a page sets its own */
+:root:where(:not(.modern))
+    :is(
+        #rssButtonBar button,
+        #manageSearchPlugins,
+        #startSearchButton,
+        #addTaskButton,
+        #searchPluginsContainer button,
+        #installSearchPluginContainer button,
+        #logFilterBar > button
+    ) {
+    padding: var(--button-padding-block) var(--button-padding-inline);
+}
+
+/* icon buttons: squares as high as the others, with their background and their icon once, all at one size */
+:root:where(:not(.modern))
+    :is(
+        #webUIAPIKeyCopyButton,
+        #webUIAPIKeyRotateButton,
+        #webUIAPIKeyDeleteButton,
+        #RssDownloader .imageButton,
+        #rememberBtn
+    ) {
+    align-items: center;
+    background-color: var(--button-background);
+    background-repeat: no-repeat;
+    background-size: var(--button-icon-size);
+    box-sizing: border-box;
+    display: inline-flex;
+    height: var(--button-size);
+    justify-content: center;
+    padding: 0;
+    vertical-align: middle;
+    width: var(--button-size);
+
+    & img {
+        height: var(--button-icon-size);
+        margin: 0 !important; /* override the inline offsets */
+        position: static !important;
+        width: var(--button-icon-size);
+    }
+}
+
+/* Search plugins' buttons as high as the others */
+:root:where(:not(.modern)) #searchPluginsContainer > div:last-child > button {
+    line-height: inherit !important; /* override the inline line height */
+}
+
+/* the API key's buttons a gap apart, with the table's 2px spacing and its cells' 1px padding */
+:root:where(:not(.modern))
+    :is(#webUIAPIKeyRotateButton, #webUIAPIKeyDeleteButton) {
+    margin-left: calc(var(--button-gap) - 4px);
+}
+
+/* buttons side by side a gap apart, rather than a space character */
+:where(:root:not(.modern))
+    .dialogFooter:has(> :is(button, input) + :is(button, input)) {
+    display: flex;
+    gap: var(--button-gap);
+    justify-content: center;
+
+    &[style*="text-align: right"] {
+        justify-content: flex-end;
+    }
+}
+
+/* a modal dialog's row spans its window like the others, its buttons at the end where the dialog puts them */
+:where(:root:not(.modern)) .modalDialog .mochaContent.pad > .dialogFooter {
+    align-self: stretch;
+    justify-content: flex-end;
 }
 
 /* Add Torrent: Download takes its place in the row */
@@ -575,7 +779,7 @@ body:not(:has(#desktop)) {
 :root.responsivePhone {
     & #submitbutton {
         flex-wrap: wrap;
-        gap: 8px;
+        gap: var(--button-gap);
 
         & > div:has(> button[type="submit"]),
         & > #saveTorrent:not(.invisible) {
@@ -649,6 +853,13 @@ body:not(:has(#desktop)) {
         & :is(input:not([type="checkbox"], [type="radio"]), select, textarea) {
             box-sizing: border-box;
             max-width: 100%;
+        }
+
+        /* the API key's buttons a gap apart, with the row's 4px gap and their cells' 1px padding */
+        :where(:root:not(.modern))
+            &
+            :is(#webUIAPIKeyRotateButton, #webUIAPIKeyDeleteButton) {
+            margin-left: calc(var(--button-gap) - 6px);
         }
     }
 }
@@ -726,10 +937,16 @@ body:not(:has(#desktop)) {
     }
 }
 
-/* Search plugins: the list takes the height left, the buttons wrap */
-:root.responsiveRelayout .mocha #searchPluginsContainer {
+/* Search plugins: the list takes the height left */
+.mocha #searchPluginsContainer {
     display: flex;
     flex-direction: column;
+
+    /* the button row ends the window */
+    :where(:root:not(.modern)) & {
+        height: calc(100% - 10px); /* its top margin */
+        margin-bottom: 0;
+    }
 
     & > * {
         flex: none;
@@ -740,16 +957,17 @@ body:not(:has(#desktop)) {
         height: auto;
         min-height: 120px;
     }
+}
 
-    & > div:last-child {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 6px;
+/* Search plugins: its buttons share their row a gap apart and wrap */
+:where(:root:not(.modern)) .mocha #searchPluginsContainer > div:last-child {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--button-gap);
 
-        & > button {
-            flex: 1 1 auto;
-            width: auto !important;
-        }
+    & > button {
+        flex: 1 1 auto;
+        width: auto !important; /* override the inline widths */
     }
 }
 
@@ -809,6 +1027,18 @@ body:not(:has(#desktop)) {
     display: none;
 }
 
+/* RSS: its buttons a gap apart, the filter at the bar's end */
+:where(:root:not(.modern)) #rssView #rssButtonBar {
+    align-items: flex-start;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--button-gap);
+
+    & #rssFilterToolbar {
+        margin-left: auto;
+    }
+}
+
 /* RSS: the button bar grows */
 :root.responsiveRelayout #rssView #rssButtonBar {
     height: auto;
@@ -825,9 +1055,7 @@ body:not(:has(#desktop)) {
             box-sizing: border-box;
             display: grid;
             flex: 1 1 100%;
-            gap: 6px;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            height: auto;
             width: 100%;
 
             & button {
@@ -866,11 +1094,16 @@ body:not(:has(#desktop)) {
     }
 }
 
-/* RSS Downloader: a grid of its three columns */
+/* RSS Downloader: a grid of its three columns, no shorter than the rule's settings and Save need */
 #RssDownloader {
     display: grid;
     grid-template-columns: 25% 50% 25%;
     grid-template-rows: auto minmax(0, 1fr);
+
+    /* no shorter than the rule's settings and Save need */
+    :where(:root:not(.modern)) & {
+        grid-template-rows: auto minmax(min-content, 1fr);
+    }
 
     & > #rssDownloaderDisabled {
         grid-column: 1 / -1;
@@ -896,6 +1129,16 @@ body:not(:has(#desktop)) {
     & #topMenuBar {
         display: flow-root;
         height: auto;
+    }
+
+    /* the rule buttons, and Export and Import below them, a gap apart */
+    :where(:root:not(.modern)) & .imageButton {
+        margin: 0 0 0 var(--button-gap);
+    }
+
+    :where(:root:not(.modern)) & #rulesFileButtons {
+        gap: var(--button-gap);
+        margin-top: var(--button-gap);
     }
 
     & #rulesTable,
@@ -944,10 +1187,6 @@ body:not(:has(#desktop)) {
             height: 180px !important;
         }
 
-        & #rssDownloaderFeeds {
-            height: auto !important;
-        }
-
         & #rssDownloaderFeedsTable {
             height: 160px !important;
         }
@@ -955,14 +1194,27 @@ body:not(:has(#desktop)) {
         & #rssDownloaderArticlesTable {
             height: 240px !important;
         }
+
+        /* Save, kept in view over the page scrolling under it, with a row's space of the window's background around it */
+        :where(:root:not(.modern)) & #saveButton {
+            box-shadow: 0 0 0 var(--button-row-space)
+                var(--color-background-popup);
+        }
     }
 }
 
-/* dialog buttons stack on phones, the main action first */
-:root.responsivePhone .dialogFooter {
+/* window buttons stack on phones, full width, the main action first */
+:root.responsivePhone
+    :is(
+        .dialogFooter,
+        #preferencesPage
+            .mochaContent
+            > div:not(.PrefTab):has(> input[type="button"]),
+        :where(:root:not(.modern)) #searchPluginsContainer > div:last-child
+    ) {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: var(--button-gap);
 
     & > :is(button, input) {
         margin: 0;
@@ -971,31 +1223,6 @@ body:not(:has(#desktop)) {
 
     & > .primary {
         order: -1;
-    }
-}
-
-:root.responsivePhone .modalDialog .mochaContent.pad > .dialogFooter {
-    align-self: stretch;
-}
-
-:root.responsivePhone
-    #preferencesPage
-    .mochaContent
-    > div:not(.PrefTab):has(> input[type="button"])
-    > input {
-    width: 100%;
-}
-
-/* Search Plugins' buttons, a row of their own, stack as well */
-:root.responsivePhone .mocha #searchPluginsContainer > div:last-child {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-
-    & > button {
-        flex: 1 1 100%;
-        margin: 0;
-        width: auto !important; /* override the inline widths */
     }
 }
 
@@ -1037,6 +1264,8 @@ body:not(:has(#desktop)) {
 @media (pointer: coarse) {
     :root {
         --touch-target: 36px;
+        /* a field's height */
+        --touch-field-height: 32px;
         --window-title-height: 36px; /* also read by responsive.js */
     }
 
@@ -1049,21 +1278,23 @@ body:not(:has(#desktop)) {
         max-height: calc(100dvh - var(--touch-target) - 4px);
     }
 
+    /* menu entries, tabs and filters at least a touch target high */
+    #desktopNavbar li ul li :is(a, div.anchor),
+    .contextMenu li a,
+    .tab-menu li a,
+    ul.filterList span.link {
+        box-sizing: border-box;
+        min-height: var(--touch-target);
+    }
+
     #desktopNavbar li ul li :is(a, div.anchor) {
         align-items: center;
-        box-sizing: border-box;
         display: flex;
-        min-height: var(--touch-target);
     }
 
     #desktopNavbar .MyMenuIcon {
         margin-bottom: 0;
         margin-top: 0;
-    }
-
-    .contextMenu li a {
-        box-sizing: border-box;
-        min-height: var(--touch-target);
     }
 
     #mochaToolbar .mochaToolButton {
@@ -1079,18 +1310,8 @@ body:not(:has(#desktop)) {
         padding-top: 0;
     }
 
-    .tab-menu li a {
-        box-sizing: border-box;
-        min-height: var(--touch-target);
-    }
-
     #propertiesPanel_header {
         height: auto;
-    }
-
-    ul.filterList span.link {
-        box-sizing: border-box;
-        min-height: var(--touch-target);
     }
 
     #filtersButton,
@@ -1098,12 +1319,6 @@ body:not(:has(#desktop)) {
     #torrentsFilterSelect {
         box-sizing: border-box;
         height: var(--touch-target);
-    }
-
-    /* the icon once, at its size */
-    #RssDownloader .imageButton {
-        background-repeat: no-repeat;
-        background-size: 18px;
     }
 
     /* as tall as the field and level with it */
@@ -1129,13 +1344,13 @@ body:not(:has(#desktop)) {
     input[type="password"],
     input:not([type]),
     select {
-        min-height: 32px;
+        min-height: var(--touch-field-height);
     }
 
     /* editable selects as tall as the fields, inside their border */
     .select-watched-folder-editable {
         box-sizing: content-box;
-        height: 32px;
+        height: var(--touch-field-height);
     }
 
     :is(input[type="checkbox"], input[type="radio"]) {
@@ -1186,11 +1401,36 @@ body:not(:has(#desktop)) {
     }
 }
 
-/* Renaming: the buttons follow the settings */
-:root.responsiveRelayout #multiRenamePage_content #operation_btns {
-    clear: left;
-    margin-bottom: 12px !important;
-    position: static !important;
+/* Renaming: its buttons a row's space below the page's line, like the other rows */
+#multiRenamePage_content #operation_btns > hr {
+    margin-bottom: var(--button-row-space);
+}
+
+/* the page in a column */
+#multiRenamePage_content > div {
+    display: flex;
+    flex-direction: column;
+}
+
+/* the buttons follow the settings, in the window's flow where the page doesn't scroll under them (below); where the
+    window has room they end it, a row's space above its edge like the file list beside them */
+@media (width >= 760px) and (height >= 620px) {
+    #multiRenamePage_content {
+        & > div {
+            flex: 1 0 auto;
+        }
+
+        & #operation_btns {
+            margin: auto 0 0 !important; /* override the inline margins */
+            padding-bottom: var(--button-row-space);
+            position: static !important; /* override the inline position */
+        }
+
+        & #torrentFiles {
+            /* override the inline margin */
+            margin-bottom: var(--button-row-space) !important;
+        }
+    }
 }
 
 /* Renaming on phones and short screens: everything stacks and the window scrolls */
@@ -1200,9 +1440,6 @@ body:not(:has(#desktop)) {
     }
 
     #multiRenamePage_content > div {
-        display: flex;
-        flex-direction: column;
-
         & > div:has(> .formRow > #multirename_rememberprefs_checkbox) {
             float: none !important;
             height: auto !important;
@@ -1222,7 +1459,7 @@ body:not(:has(#desktop)) {
             display: flow-root;
             margin: 0 !important;
             order: 2;
-            padding-bottom: 12px;
+            padding-bottom: var(--button-row-space);
             position: sticky !important;
             width: auto !important;
             z-index: 1;
