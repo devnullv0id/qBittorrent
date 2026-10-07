@@ -4861,6 +4861,23 @@
         display: none;
     }
 
+    /* lets a pull reload the page: override Mocha's inline overflow */
+    :root.modern,
+    :root.modern body {
+        overflow: visible !important;
+    }
+
+    :root.modern.navDrawerOpen #desktopNavbar,
+    :root.modern.filtersDrawerOpen #Filters,
+    :root.modern #propertiesPanel_wrapper.modernSheet {
+        overscroll-behavior: contain;
+    }
+
+    /* not while a window is open: it would reload away what the window holds */
+    :root.modern:has(.mocha) {
+        overscroll-behavior-y: contain;
+    }
+
     /* don't clip the overflow menu */
     :root.modern #mochaToolbar {
         align-items: center;
