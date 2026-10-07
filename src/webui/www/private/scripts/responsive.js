@@ -190,6 +190,27 @@ window.qBittorrent.Responsive ??= (() => {
         return true;
     };
 
+    // a collapsed properties panel opens to a usable height, as client.js stores 0 for it on resize
+    const initPropertiesPanelHeight = async () => {
+        await whenElement("propertiesPanel");
+        const panel = MochaUI.Panels.instances.propertiesPanel;
+        const storeHeight = () => localPreferences.set("properties_height_rel", panel.oldHeight / window.innerHeight);
+        const keepUsable = () => {
+            if (panel.oldHeight >= MIN_PROPERTIES_HEIGHT)
+                return;
+
+            panel.oldHeight = Math.round(document.getElementById("mainColumn").offsetHeight / 2);
+            storeHeight();
+        };
+
+        panel.addEvent("collapse", keepUsable);
+        // after client.js's own, which waits as long
+        window.addEventListener("resize", window.qBittorrent.Misc.createDebounceHandler(500, () => {
+            if (panel.isCollapsed)
+                storeHeight();
+        }));
+    };
+
     // rows are touch-sized while the pointer is coarse (dynamicTable.js), which can change
     const initRowHeights = () => {
         window.matchMedia("(pointer: coarse)").addEventListener("change", (event) => window.torrentsTable.rerender());
@@ -2517,6 +2538,7 @@ window.qBittorrent.Responsive ??= (() => {
         initPhoneToolbar();
         initTorrentCards();
         initPropertyCards();
+        initPropertiesPanelHeight();
         initStatusBar();
         initPhoneSort();
         initSelectionCheckboxes();
