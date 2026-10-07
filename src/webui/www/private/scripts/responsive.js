@@ -1898,8 +1898,25 @@ window.qBittorrent.Responsive ??= (() => {
         };
 
         const tabs = [...page.querySelectorAll(".PrefTab")];
+        // the column's width in px, measured in the tab shown (all tabs are as wide), as it grows with the window;
+        // 0 on phones, which give each control a row of its own already
+        const columnWidth = () => {
+            const tab = tabs.find((tab) => tab.getClientRects().length > 0);
+            if (phoneQuery.matches || (tab === undefined))
+                return 0;
+
+            const probe = document.createElement("div");
+            probe.style.width = "var(--modern-select-width)";
+            tab.append(probe);
+            const width = probe.getBoundingClientRect().width;
+            probe.remove();
+            // the probe is no change to split again for
+            observer.takeRecords();
+            return width;
+        };
 
         const split = () => {
+            const column = columnWidth();
             const controls = page.querySelectorAll([dropdownSelector, textFieldSelector].flatMap((control) => [
                 `.PrefTab tr > td:last-child:not(:first-child) > ${control}`,
                 `.PrefTab tr.modernSettingValue > td > ${control}`
@@ -1908,11 +1925,9 @@ window.qBittorrent.Responsive ??= (() => {
                 const cell = control.parentElement;
                 const row = cell.parentElement;
                 const labelRow = row.classList.contains("modernSettingValue") ? row.previousElementSibling : row;
-                // phones already do: their column isn't in px
-                const column = getComputedStyle(control.closest(".PrefTab")).getPropertyValue("--modern-select-width").trim();
                 // a setting the page hides keeps its control
                 const shown = !labelRow.hidden && (labelRow.style.display !== "none");
-                const wide = shown && column.endsWith("px") && (neededWidth(control) > Number.parseFloat(column));
+                const wide = shown && (column > 0) && (neededWidth(control) > column);
                 if (wide && !row.classList.contains("modernSettingValue")) {
                     const valueRow = document.createElement("tr");
                     valueRow.className = "modernSettingValue";
@@ -1934,9 +1949,16 @@ window.qBittorrent.Responsive ??= (() => {
         const observer = new MutationObserver(split);
         for (const tab of tabs)
             observer.observe(tab, { childList: true, subtree: true, attributes: true, attributeFilter: ["style", "hidden"] });
+        // the column follows the window's width
+        const resizeObserver = new ResizeObserver(window.qBittorrent.Misc.createDebounceHandler(50, split));
+        for (const tab of tabs)
+            resizeObserver.observe(tab);
         const listening = new AbortController();
         phoneQuery.addEventListener("change", ((_event) => split()), { signal: listening.signal });
-        MochaUI.Windows.instances[page.id].addEvent("close", () => listening.abort());
+        MochaUI.Windows.instances[page.id].addEvent("close", () => {
+            listening.abort();
+            resizeObserver.disconnect();
+        });
         split();
     };
 
@@ -1989,9 +2011,62 @@ window.qBittorrent.Responsive ??= (() => {
                         slideWithSwitches(node);
                     });
                     tabsObserver.observe(node, { childList: true, subtree: true });
+                    resizeOptionsAtCorner(MochaUI.Windows.instances.preferencesPage);
                 }
             }
         }).observe(document.getElementById("desktop"), { childList: true });
+    };
+
+    // the Options window resizes at its corner only, through the stylesheet's size
+    const resizeOptionsAtCorner = (instance) => {
+        const windowEl = instance.windowEl;
+        const content = instance.contentWrapperEl;
+        const corner = instance.se;
+        if (!corner)
+            return;
+
+        // the frame is known before Mocha draws the window
+        const savedHeight = Number(localPreferences.get("window_preferencesPage_height"));
+        if (savedHeight > 0)
+            windowEl.style.setProperty("--modern-options-height", `${savedHeight + windowEl.offsetHeight - content.offsetHeight}px`);
+        const savedWidth = Number(localPreferences.get("window_preferencesPage_width"));
+        if (savedWidth > 0) {
+            const style = getComputedStyle(windowEl);
+            const frameWidth = instance.contentBorderEl.offsetLeft + Number.parseFloat(style.borderLeftWidth) + Number.parseFloat(style.borderRightWidth);
+            windowEl.style.setProperty("--modern-options-width", `${savedWidth + frameWidth}px`);
+            windowEl.classList.add("modernResized");
+        }
+
+        instance.resizable3?.detach();
+        corner.addEventListener("pointerdown", (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            corner.setPointerCapture(event.pointerId);
+            instance.responsiveUserMoved = true;
+            const style = getComputedStyle(windowEl);
+            const minWidth = Number.parseFloat(style.minWidth) || 0;
+            const minHeight = Number.parseFloat(style.minHeight) || 0;
+            const start = { x: event.clientX, y: event.clientY, width: windowEl.offsetWidth, height: windowEl.offsetHeight };
+            const move = (moveEvent) => {
+                const maxWidth = window.innerWidth - windowEl.offsetLeft - WINDOW_MARGIN;
+                const maxHeight = window.innerHeight - windowEl.offsetTop - WINDOW_MARGIN;
+                const width = Math.max(minWidth, Math.min(maxWidth, start.width + moveEvent.clientX - start.x));
+                const height = Math.max(minHeight, Math.min(maxHeight, start.height + moveEvent.clientY - start.y));
+                windowEl.style.setProperty("--modern-options-width", `${width}px`);
+                windowEl.style.setProperty("--modern-options-height", `${height}px`);
+                windowEl.classList.add("modernResized");
+            };
+
+            const listening = new AbortController();
+            const end = () => {
+                listening.abort();
+                localPreferences.set("window_preferencesPage_width", content.offsetWidth);
+                localPreferences.set("window_preferencesPage_height", content.offsetHeight);
+            };
+
+            corner.addEventListener("pointermove", ((moveEvent) => move(moveEvent)), { signal: listening.signal });
+            corner.addEventListener("lostpointercapture", ((_event) => end()), { once: true });
+        });
     };
 
     // Modern's buttons drop a trailing ellipsis from their labels on screen

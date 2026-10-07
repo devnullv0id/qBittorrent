@@ -3496,16 +3496,16 @@
     }
 }
 
+/* fields grow with the window: 200px, plus 70% of the extra width */
 :root.modern .PrefTab {
+    --modern-select-width: max(200px, calc(200px + (100cqi - 420px) * 0.7));
     --modern-unit-slot: 96px; /* room for a unit beside its field */
     --modern-field-width: calc(
         var(--modern-select-width) - var(--modern-unit-slot)
     );
 
-    margin: 0 auto;
-    max-width: 780px;
+    container-type: inline-size;
     padding: 4px 18px 8px;
-    width: 100%; /* auto margins would shrink it to its content */
 
     & > fieldset:first-child {
         margin-top: 30px;
@@ -4699,12 +4699,21 @@
     text-transform: inherit;
 }
 
-/* Options window: a fixed size, as tall as the screen allows */
+/* Options window size (also in responsive.js) */
 @media (width >= 760px) {
     :root.modern #preferencesPage {
-        height: min(calc(100dvh - 16px), 840px) !important;
+        height: var(
+            --modern-options-height,
+            min(calc(100dvh - 16px), 840px)
+        ) !important;
+        min-height: 420px;
+        min-width: 640px;
 
-        & [id^="preferencesPage_resizeHandle"],
+        &.modernResized {
+            width: var(--modern-options-width) !important;
+        }
+
+        & [id^="preferencesPage_resizeHandle"]:not([id$="_se"]),
         & .mochaMaximizeButton {
             display: none;
         }
