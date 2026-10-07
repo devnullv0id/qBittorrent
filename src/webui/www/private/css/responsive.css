@@ -23,15 +23,13 @@
 
     #filtersButton {
         align-items: center;
-        border: 1px solid var(--color-border-default);
-        color: var(--color-text-default);
         cursor: pointer;
         display: inline-flex;
         font: inherit;
         gap: 4px;
-        height: 26px;
+        height: var(--button-size);
         margin-right: 4px;
-        padding: 0 10px;
+        padding: 0 var(--button-padding-inline);
         vertical-align: middle;
     }
 
@@ -306,7 +304,7 @@
         align-items: center;
         border-bottom: 1px solid var(--color-border-default);
         display: flex;
-        gap: 8px;
+        gap: var(--button-gap);
         padding: 4px 12px;
     }
 
@@ -557,8 +555,9 @@ body:not(:has(#desktop)) {
         > div:not(.PrefTab):has(> input[type="button"])
 ) {
     border-top: 1px solid var(--color-border-default);
-    padding-bottom: 6px;
-    padding-top: 6px !important; /* override the inline paddings */
+    padding-bottom: var(--button-row-space);
+    /* override the inline paddings */
+    padding-top: var(--button-row-space) !important;
 
     /* the row's space is the buttons' only one */
     & :is(button, input) {
@@ -594,40 +593,61 @@ body:not(:has(#desktop)) {
     }
 }
 
-/* Buttons: the theme's colours rather than each browser's own, darker or lighter towards the text on hover and press */
+/* Buttons: every button's look and spacing, set here once */
+:root {
+    --button-face: var(--color-background-default);
+    --button-text: var(--color-text-default);
+    --button-text-disabled: var(--color-text-disabled);
+    --button-border: 1px solid var(--color-border-default);
+    --button-radius: 3px;
+    --button-padding-block: 3px;
+    --button-padding-inline: 10px;
+    /* an icon button's side, a text button's height on the desktop (touch screens make both --touch-target) */
+    --button-size: 26px;
+    /* between buttons side by side or stacked */
+    --button-gap: 8px;
+    /* a window's button row: from its line to its buttons, and from them to the window's edge */
+    --button-row-space: 6px;
+}
+
+/* every button: the theme's colours rather than each browser's own, darker or lighter towards the text on hover and
+   press */
 :is(button, input[type="button"], input[type="submit"], input[type="reset"]) {
-    --button-background: var(--color-background-default);
+    --button-background: var(--button-face);
 
     background-color: var(--button-background);
-    color: var(--color-text-default);
+    border: var(--button-border);
+    border-radius: var(--button-radius);
+    color: var(--button-text);
+    padding: var(--button-padding-block) var(--button-padding-inline);
 
     &:hover:not(:disabled) {
         --button-background: color-mix(
             in srgb,
-            var(--color-background-default),
-            var(--color-text-default) 10%
+            var(--button-face),
+            var(--button-text) 10%
         );
     }
 
     &:active:not(:disabled) {
         --button-background: color-mix(
             in srgb,
-            var(--color-background-default),
-            var(--color-text-default) 20%
+            var(--button-face),
+            var(--button-text) 20%
         );
     }
 
     &:disabled {
-        color: var(--color-text-disabled);
+        color: var(--button-text-disabled);
     }
 }
 
 /* RSS Downloader's Save is a button itself and keeps a button's background; as far from the window's edge as from the
-   rule's feeds, so the page fills the window (it grows where the screen has room) and ends 6px below Save */
+   rule's feeds, so the page fills the window (it grows where the screen has room) and ends a row's space below Save */
 #RssDownloader #saveButton {
     background-color: var(--button-background);
-    bottom: 6px;
-    margin-top: 6px;
+    bottom: var(--button-row-space);
+    margin-top: var(--button-row-space);
 }
 
 #rssdownloaderpage #rssdownloaderpage_content {
@@ -636,7 +656,8 @@ body:not(:has(#desktop)) {
     flex-direction: column;
     height: auto;
     min-height: 100%;
-    padding-bottom: 6px !important; /* override Mocha's padding */
+    /* override Mocha's padding */
+    padding-bottom: var(--button-row-space) !important;
 
     & #RssDownloader {
         flex: 1 0 auto;
@@ -644,62 +665,63 @@ body:not(:has(#desktop)) {
     }
 }
 
-/* Buttons: one look, style.css's, where a page sets its own padding */
-:root {
-    & #rssButtonBar button,
-    & :is(#manageSearchPlugins, #startSearchButton, #addTaskButton),
-    & #searchPluginsContainer button,
-    & #installSearchPluginContainer button,
-    & #logFilterBar > button {
-        padding: 3px 10px;
-    }
+/* the buttons' look also where a page sets its own */
+:root
+    :is(
+        #rssButtonBar button,
+        #manageSearchPlugins,
+        #startSearchButton,
+        #addTaskButton,
+        #searchPluginsContainer button,
+        #installSearchPluginContainer button,
+        #logFilterBar > button
+    ) {
+    padding: var(--button-padding-block) var(--button-padding-inline);
+}
 
-    /* icon buttons: squares as high as the others, with their border and background */
-    &
-        :is(
-            #webUIAPIKeyCopyButton,
-            #webUIAPIKeyRotateButton,
-            #webUIAPIKeyDeleteButton,
-            #RssDownloader .imageButton,
-            #rememberBtn
-        ) {
-        align-items: center;
-        background-color: var(--button-background);
-        border: 1px solid var(--color-border-default);
-        border-radius: 3px;
-        box-sizing: border-box;
-        display: inline-flex;
-        height: 26px;
-        justify-content: center;
-        padding: 0;
-        vertical-align: middle;
-        width: 26px;
+/* icon buttons: squares as high as the others, with their background */
+:root
+    :is(
+        #webUIAPIKeyCopyButton,
+        #webUIAPIKeyRotateButton,
+        #webUIAPIKeyDeleteButton,
+        #RssDownloader .imageButton,
+        #rememberBtn
+    ) {
+    align-items: center;
+    background-color: var(--button-background);
+    box-sizing: border-box;
+    display: inline-flex;
+    height: var(--button-size);
+    justify-content: center;
+    padding: 0;
+    vertical-align: middle;
+    width: var(--button-size);
 
-        & img {
-            margin: 0 !important; /* override the inline offsets */
-            position: static !important;
-        }
-    }
-
-    & #rememberBtn {
-        background-size: 16px;
-    }
-
-    /* Search plugins' buttons as high as the others */
-    & #searchPluginsContainer > div:last-child > button {
-        line-height: inherit !important; /* override the inline line height */
-    }
-
-    /* the API key's buttons 8px apart, with the table's 2px spacing and its cells' 1px padding */
-    & :is(#webUIAPIKeyRotateButton, #webUIAPIKeyDeleteButton) {
-        margin-left: 4px;
+    & img {
+        margin: 0 !important; /* override the inline offsets */
+        position: static !important;
     }
 }
 
-/* buttons side by side 8px apart, rather than a space character */
+:root #rememberBtn {
+    background-size: 16px;
+}
+
+/* Search plugins' buttons as high as the others */
+:root #searchPluginsContainer > div:last-child > button {
+    line-height: inherit !important; /* override the inline line height */
+}
+
+/* the API key's buttons a gap apart, with the table's 2px spacing and its cells' 1px padding */
+:root :is(#webUIAPIKeyRotateButton, #webUIAPIKeyDeleteButton) {
+    margin-left: calc(var(--button-gap) - 4px);
+}
+
+/* buttons side by side a gap apart, rather than a space character */
 .dialogFooter:has(> :is(button, input) + :is(button, input)) {
     display: flex;
-    gap: 8px;
+    gap: var(--button-gap);
     justify-content: center;
 
     &[style*="text-align: right"] {
@@ -718,7 +740,7 @@ body:not(:has(#desktop)) {
 :root.responsivePhone {
     & #submitbutton {
         flex-wrap: wrap;
-        gap: 8px;
+        gap: var(--button-gap);
 
         & > div:has(> button[type="submit"]),
         & > #saveTorrent:not(.invisible) {
@@ -794,9 +816,9 @@ body:not(:has(#desktop)) {
             max-width: 100%;
         }
 
-        /* the API key's buttons 8px apart, with the row's 4px gap and their cells' 1px padding */
+        /* the API key's buttons a gap apart, with the row's 4px gap and their cells' 1px padding */
         & :is(#webUIAPIKeyRotateButton, #webUIAPIKeyDeleteButton) {
-            margin-left: 2px;
+            margin-left: calc(var(--button-gap) - 6px);
         }
     }
 }
@@ -890,11 +912,11 @@ body:not(:has(#desktop)) {
     }
 }
 
-/* Search plugins: its buttons share their row 8px apart and wrap */
+/* Search plugins: its buttons share their row a gap apart and wrap */
 .mocha #searchPluginsContainer > div:last-child {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: var(--button-gap);
 
     & > button {
         flex: 1 1 auto;
@@ -958,12 +980,12 @@ body:not(:has(#desktop)) {
     display: none;
 }
 
-/* RSS: its buttons 8px apart, the filter at the bar's end */
+/* RSS: its buttons a gap apart, the filter at the bar's end */
 #rssView #rssButtonBar {
     align-items: flex-start;
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: var(--button-gap);
 
     & #rssFilterToolbar {
         margin-left: auto;
@@ -985,7 +1007,7 @@ body:not(:has(#desktop)) {
         & #rssButtonBar {
             box-sizing: border-box;
             display: grid;
-            gap: 8px;
+            gap: var(--button-gap);
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             height: auto;
             width: 100%;
@@ -1058,14 +1080,14 @@ body:not(:has(#desktop)) {
         height: auto;
     }
 
-    /* the rule buttons, and Export and Import below them, 8px apart */
+    /* the rule buttons, and Export and Import below them, a gap apart */
     & .imageButton {
-        margin: 0 0 0 8px;
+        margin: 0 0 0 var(--button-gap);
     }
 
     & #rulesFileButtons {
-        gap: 8px;
-        margin-top: 8px;
+        gap: var(--button-gap);
+        margin-top: var(--button-gap);
     }
 
     & #rulesTable,
@@ -1126,9 +1148,10 @@ body:not(:has(#desktop)) {
             height: 240px !important;
         }
 
-        /* Save, kept in view over the page scrolling under it, with 6px of the window's background around it */
+        /* Save, kept in view over the page scrolling under it, with a row's space of the window's background around it */
         & #saveButton {
-            box-shadow: 0 0 0 6px var(--color-background-popup);
+            box-shadow: 0 0 0 var(--button-row-space)
+                var(--color-background-popup);
         }
     }
 }
@@ -1137,7 +1160,7 @@ body:not(:has(#desktop)) {
 :root.responsivePhone .dialogFooter {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: var(--button-gap);
 
     & > :is(button, input) {
         margin: 0;
@@ -1165,7 +1188,7 @@ body:not(:has(#desktop)) {
 :root.responsivePhone .mocha #searchPluginsContainer > div:last-child {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: var(--button-gap);
 
     & > button {
         flex: 1 1 100%;
@@ -1403,7 +1426,7 @@ body:not(:has(#desktop)) {
             display: flow-root;
             margin: 0 !important;
             order: 2;
-            padding-bottom: 6px;
+            padding-bottom: var(--button-row-space);
             position: sticky !important;
             width: auto !important;
             z-index: 1;
