@@ -610,6 +610,31 @@ window.qBittorrent.Responsive ??= (() => {
         };
     };
 
+    // in Modern a moved or resized window opens where it was left (add-torrent windows, named by their source, share
+    // one place)
+    const placeKey = (instance, side) => `window_${instance.options.id.split("-")[0]}_${side}`;
+    const savePlace = (instance) => {
+        if (!isModern())
+            return;
+
+        localPreferences.set(placeKey(instance, "left"), instance.windowEl.offsetLeft);
+        localPreferences.set(placeKey(instance, "top"), instance.windowEl.offsetTop);
+    };
+
+    const restorePlace = (instance) => {
+        if (!isModern())
+            return;
+
+        const left = localPreferences.get(placeKey(instance, "left"));
+        const top = localPreferences.get(placeKey(instance, "top"));
+        if ((left === null) || (top === null))
+            return;
+
+        instance.windowEl.style.left = `${Number(left)}px`;
+        instance.windowEl.style.top = `${Number(top)}px`;
+        instance.responsiveUserMoved = true;
+    };
+
     // whether a fitted window shows all of its page at the given width; not where the page scrolls anyway or fills
     // whatever height it is given
     const pageFits = (instance, width) => {
@@ -808,6 +833,7 @@ window.qBittorrent.Responsive ??= (() => {
 
             // a window opened from the drawer would open behind it
             closeFiltersDrawer();
+            restorePlace(instance);
             fitWindow(instance);
             contentObserver.observe(instance.contentEl);
             contentChangeObserver.observe(instance.contentEl, { childList: true, subtree: true, attributes: true, attributeFilter: ["class", "hidden"] });
@@ -816,6 +842,7 @@ window.qBittorrent.Responsive ??= (() => {
             // a size or place the user chose is kept, from the start of the drag
             instance.addEvent("resize", () => {
                 instance.responsiveUserResized = true;
+                savePlace(instance);
             });
             for (const drag of [instance.resizable1, instance.resizable2, instance.resizable3, instance.resizable4, instance.resizable5]) {
                 drag?.addEvent("start", () => {
@@ -828,6 +855,7 @@ window.qBittorrent.Responsive ??= (() => {
                 drag?.addEvent("drag", () => keepPageHeight(instance));
             instance.windowDrag?.addEvent("complete", () => {
                 instance.responsiveUserMoved = true;
+                savePlace(instance);
             });
             // dialog pages
             const iframe = instance.iframeEl;
@@ -2099,6 +2127,9 @@ window.qBittorrent.Responsive ??= (() => {
             windowEl.style.setProperty("--modern-options-width", `${savedWidth + frameWidth}px`);
             windowEl.classList.add("modernResized");
         }
+        // place it again at its real size before it's shown
+        restorePlace(instance);
+        fitWindow(instance);
 
         instance.resizable3?.detach();
         corner.addEventListener("pointerdown", (event) => {
