@@ -612,6 +612,8 @@ body:not(:has(#desktop)) {
     --button-padding-inline: 10px;
     /* an icon button's side, a text button's height on the desktop (touch screens make both --touch-target) */
     --button-size: 26px;
+    /* the icon on an icon button */
+    --button-icon-size: 16px;
     /* between buttons side by side or stacked */
     --button-gap: 8px;
     /* a window's button row: from its line to its buttons, and from them to the window's edge */
@@ -687,7 +689,7 @@ body:not(:has(#desktop)) {
     padding: var(--button-padding-block) var(--button-padding-inline);
 }
 
-/* icon buttons: squares as high as the others, with their background */
+/* icon buttons: squares as high as the others, with their background and their icon once, all at one size */
 :root
     :is(
         #webUIAPIKeyCopyButton,
@@ -698,6 +700,8 @@ body:not(:has(#desktop)) {
     ) {
     align-items: center;
     background-color: var(--button-background);
+    background-repeat: no-repeat;
+    background-size: var(--button-icon-size);
     box-sizing: border-box;
     display: inline-flex;
     height: var(--button-size);
@@ -707,13 +711,11 @@ body:not(:has(#desktop)) {
     width: var(--button-size);
 
     & img {
+        height: var(--button-icon-size);
         margin: 0 !important; /* override the inline offsets */
         position: static !important;
+        width: var(--button-icon-size);
     }
-}
-
-:root #rememberBtn {
-    background-size: 16px;
 }
 
 /* Search plugins' buttons as high as the others */
@@ -1306,12 +1308,6 @@ body:not(:has(#desktop)) {
     #torrentsFilterSelect {
         box-sizing: border-box;
         height: var(--touch-target);
-    }
-
-    /* the icon once, at its size */
-    #RssDownloader .imageButton {
-        background-repeat: no-repeat;
-        background-size: 18px;
     }
 
     /* as tall as the field and level with it */
