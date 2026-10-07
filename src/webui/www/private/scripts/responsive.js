@@ -1988,6 +1988,45 @@ window.qBittorrent.Responsive ??= (() => {
         }).observe(document.getElementById("desktop"), { childList: true });
     };
 
+    // Modern's buttons drop a trailing ellipsis from their labels on screen
+    const trailingEllipsis = /\s*(\.{2,}|\u2026)\s*$/;
+    const trimButtonLabel = (button) => {
+        if (button instanceof HTMLInputElement) {
+            if (trailingEllipsis.test(button.value))
+                button.value = button.value.replace(trailingEllipsis, "");
+            return;
+        }
+        const texts = [...button.childNodes].filter((node) => (node.nodeType === Node.TEXT_NODE) && (node.textContent.trim() !== ""));
+        const last = texts.at(-1);
+        if ((last !== undefined) && trailingEllipsis.test(last.textContent))
+            last.textContent = last.textContent.replace(trailingEllipsis, "");
+    };
+
+    const initButtonLabels = () => {
+        const buttonSelector = "button, input:is([type='button'], [type='submit'])";
+        const trimIn = (node) => {
+            if (!(node instanceof Element))
+                return;
+
+            if (node.matches(buttonSelector))
+                trimButtonLabel(node);
+            for (const button of node.querySelectorAll(buttonSelector))
+                trimButtonLabel(button);
+        };
+
+        trimIn(document.body);
+        new MutationObserver((mutations) => {
+            for (const mutation of mutations) {
+                for (const node of mutation.addedNodes)
+                    trimIn(node);
+                // a label set again by script: new text, changed text or a new value
+                const button = ((mutation.target instanceof Element) ? mutation.target : mutation.target.parentElement)?.closest(buttonSelector);
+                if (button)
+                    trimButtonLabel(button);
+            }
+        }).observe(document.body, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ["value"] });
+    };
+
     // called by client.js once the main window is built
     const init = () => {
         initLayout();
@@ -2013,6 +2052,7 @@ window.qBittorrent.Responsive ??= (() => {
         initPhoneSort();
         initSelectionCheckboxes();
         initPreferences();
+        initButtonLabels();
     };
 
     return exports();
