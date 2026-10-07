@@ -591,24 +591,6 @@ body:not(:has(#desktop)) {
     }
 }
 
-/* Options: the Save row at the window's bottom, its space the window's last; the space a tab doesn't need goes above
-   it, and a tab keeps the 1em the row had from it */
-#preferencesPage .mochaContent {
-    box-sizing: border-box;
-    display: flex !important; /* override Mocha's inline display */
-    flex-direction: column;
-    min-height: 100%;
-    padding-bottom: 0 !important; /* override Mocha's padding */
-
-    & > .PrefTab {
-        margin-bottom: 1em;
-    }
-
-    & > div:not(.PrefTab):has(> input[type="button"]) {
-        margin-top: auto !important; /* override the inline margin */
-    }
-}
-
 /* windows that end with their button row: its space is the window's last */
 :is(
         .modalDialog,
@@ -616,13 +598,34 @@ body:not(:has(#desktop)) {
         #installSearchPlugin,
         #cookiesPage,
         #searchPlugins,
-        #multiRenamePage
+        #multiRenamePage,
+        #preferencesPage
     )
     .mochaContent {
     padding-bottom: 0 !important; /* override Mocha's padding */
 
     & :is(#installSearchPluginContainer, #manageCookiesContainer) {
         margin-bottom: 0;
+    }
+}
+
+/* pages that can be shorter than their window: a column at least as tall as it, so their buttons can end it */
+:is(#preferencesPage, #rssdownloaderpage, #multiRenamePage) .mochaContent {
+    box-sizing: border-box;
+    display: flex !important; /* override Mocha's inline display */
+    flex-direction: column;
+    min-height: 100%;
+}
+
+/* Options: the Save row at the window's bottom; the space a tab doesn't need goes above it, and a tab keeps the 1em the
+   row had from it */
+#preferencesPage .mochaContent {
+    & > .PrefTab {
+        margin-bottom: 1em;
+    }
+
+    & > div:not(.PrefTab):has(> input[type="button"]) {
+        margin-top: auto !important; /* override the inline margin */
     }
 }
 
@@ -667,11 +670,7 @@ body:not(:has(#desktop)) {
 }
 
 #rssdownloaderpage #rssdownloaderpage_content {
-    box-sizing: border-box;
-    display: flex !important; /* override Mocha's inline display */
-    flex-direction: column;
     height: auto;
-    min-height: 100%;
     /* override Mocha's padding */
     padding-bottom: var(--button-row-space) !important;
 
@@ -1031,9 +1030,7 @@ body:not(:has(#desktop)) {
         & #rssButtonBar {
             box-sizing: border-box;
             display: grid;
-            gap: var(--button-gap);
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            height: auto;
             width: 100%;
 
             & button {
@@ -1160,10 +1157,6 @@ body:not(:has(#desktop)) {
             height: 180px !important;
         }
 
-        & #rssDownloaderFeeds {
-            height: auto !important;
-        }
-
         & #rssDownloaderFeedsTable {
             height: 160px !important;
         }
@@ -1180,8 +1173,15 @@ body:not(:has(#desktop)) {
     }
 }
 
-/* dialog buttons stack on phones, the main action first */
-:root.responsivePhone .dialogFooter {
+/* window buttons stack on phones, full width, the main action first */
+:root.responsivePhone
+    :is(
+        .dialogFooter,
+        #preferencesPage
+            .mochaContent
+            > div:not(.PrefTab):has(> input[type="button"]),
+        #searchPluginsContainer > div:last-child
+    ) {
     display: flex;
     flex-direction: column;
     gap: var(--button-gap);
@@ -1193,27 +1193,6 @@ body:not(:has(#desktop)) {
 
     & > .primary {
         order: -1;
-    }
-}
-
-:root.responsivePhone
-    #preferencesPage
-    .mochaContent
-    > div:not(.PrefTab):has(> input[type="button"])
-    > input {
-    width: 100%;
-}
-
-/* Search Plugins' buttons, a row of their own, stack as well */
-:root.responsivePhone .mocha #searchPluginsContainer > div:last-child {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--button-gap);
-
-    & > button {
-        flex: 1 1 100%;
-        margin: 0;
-        width: auto !important; /* override the inline widths */
     }
 }
 
@@ -1269,21 +1248,23 @@ body:not(:has(#desktop)) {
         max-height: calc(100dvh - var(--touch-target) - 4px);
     }
 
+    /* menu entries, tabs and filters at least a touch target high */
+    #desktopNavbar li ul li :is(a, div.anchor),
+    .contextMenu li a,
+    .tab-menu li a,
+    ul.filterList span.link {
+        box-sizing: border-box;
+        min-height: var(--touch-target);
+    }
+
     #desktopNavbar li ul li :is(a, div.anchor) {
         align-items: center;
-        box-sizing: border-box;
         display: flex;
-        min-height: var(--touch-target);
     }
 
     #desktopNavbar .MyMenuIcon {
         margin-bottom: 0;
         margin-top: 0;
-    }
-
-    .contextMenu li a {
-        box-sizing: border-box;
-        min-height: var(--touch-target);
     }
 
     #mochaToolbar .mochaToolButton {
@@ -1299,18 +1280,8 @@ body:not(:has(#desktop)) {
         padding-top: 0;
     }
 
-    .tab-menu li a {
-        box-sizing: border-box;
-        min-height: var(--touch-target);
-    }
-
     #propertiesPanel_header {
         height: auto;
-    }
-
-    ul.filterList span.link {
-        box-sizing: border-box;
-        min-height: var(--touch-target);
     }
 
     #filtersButton,
@@ -1405,19 +1376,18 @@ body:not(:has(#desktop)) {
     margin-bottom: var(--button-row-space);
 }
 
+/* the page in a column */
+#multiRenamePage_content > div {
+    display: flex;
+    flex-direction: column;
+}
+
 /* the buttons follow the settings, in the window's flow where the page doesn't scroll under them (below); where the
    window has room they end it, a row's space above its edge like the file list beside them */
 @media (width >= 760px) and (height >= 620px) {
     #multiRenamePage_content {
-        box-sizing: border-box;
-        display: flex !important; /* override Mocha's inline display */
-        flex-direction: column;
-        min-height: 100%;
-
         & > div {
-            display: flex;
             flex: 1 0 auto;
-            flex-direction: column;
         }
 
         & #operation_btns {
@@ -1440,9 +1410,6 @@ body:not(:has(#desktop)) {
     }
 
     #multiRenamePage_content > div {
-        display: flex;
-        flex-direction: column;
-
         & > div:has(> .formRow > #multirename_rememberprefs_checkbox) {
             float: none !important;
             height: auto !important;
