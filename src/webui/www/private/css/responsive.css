@@ -1187,7 +1187,13 @@ body:not(:has(#desktop)) {
 :root.responsiveRelayout #multiRenamePage_content #operation_btns {
     clear: left;
     margin-bottom: 12px !important;
-    position: static !important;
+}
+
+/* in the window's flow, where the page doesn't scroll under them (below) */
+@media (width >= 760px) and (height >= 620px) {
+    :root.responsiveRelayout #multiRenamePage_content #operation_btns {
+        position: static !important; /* override the inline position */
+    }
 }
 
 /* Renaming on phones and short screens: everything stacks and the window scrolls */
