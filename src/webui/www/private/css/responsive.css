@@ -548,7 +548,7 @@ body:not(:has(#desktop)) {
     z-index: 1;
 }
 
-/* a line above them */
+/* a line above them, and as much space below them as between them and the line, so they stay off the window's edge */
 :is(
     .dialogFooter,
     #submitbutton,
@@ -557,7 +557,41 @@ body:not(:has(#desktop)) {
         > div:not(.PrefTab):has(> input[type="button"])
 ) {
     border-top: 1px solid var(--color-border-default);
+    padding-bottom: 6px;
     padding-top: 6px !important; /* override the inline paddings */
+
+    /* the row's space is the buttons' only one */
+    & :is(button, input) {
+        margin-block: 0;
+    }
+}
+
+/* Options: the Save row at the window's bottom, its space the window's last; the space a tab doesn't need goes above
+   it, and a tab keeps the 1em the row had from it */
+#preferencesPage .mochaContent {
+    box-sizing: border-box;
+    display: flex !important; /* override Mocha's inline display */
+    flex-direction: column;
+    min-height: 100%;
+    padding-bottom: 0 !important; /* override Mocha's padding */
+
+    & > .PrefTab {
+        margin-bottom: 1em;
+    }
+
+    & > div:not(.PrefTab):has(> input[type="button"]) {
+        margin-top: auto !important; /* override the inline margin */
+    }
+}
+
+/* windows that end with their button row: its space is the window's last */
+:is(.modalDialog, #globalSpeedLimitsPage, #installSearchPlugin, #cookiesPage)
+    .mochaContent {
+    padding-bottom: 0 !important; /* override Mocha's padding */
+
+    & :is(#installSearchPluginContainer, #manageCookiesContainer) {
+        margin-bottom: 0;
+    }
 }
 
 /* Buttons: the theme's colours rather than each browser's own, darker or lighter towards the text on hover and press */
@@ -588,9 +622,26 @@ body:not(:has(#desktop)) {
     }
 }
 
-/* RSS Downloader's Save is a button itself and keeps a button's background */
+/* RSS Downloader's Save is a button itself and keeps a button's background; as far from the window's edge as from the
+   rule's feeds, so the page fills the window (it grows where the screen has room) and ends 6px below Save */
 #RssDownloader #saveButton {
     background-color: var(--button-background);
+    bottom: 6px;
+    margin-top: 6px;
+}
+
+#rssdownloaderpage #rssdownloaderpage_content {
+    box-sizing: border-box;
+    display: flex !important; /* override Mocha's inline display */
+    flex-direction: column;
+    height: auto;
+    min-height: 100%;
+    padding-bottom: 6px !important; /* override Mocha's padding */
+
+    & #RssDownloader {
+        flex: 1 0 auto;
+        height: auto;
+    }
 }
 
 /* Buttons: one look, style.css's, where a page sets its own padding */
@@ -975,11 +1026,11 @@ body:not(:has(#desktop)) {
     }
 }
 
-/* RSS Downloader: a grid of its three columns */
+/* RSS Downloader: a grid of its three columns, no shorter than the rule's settings and Save need */
 #RssDownloader {
     display: grid;
     grid-template-columns: 25% 50% 25%;
-    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-rows: auto minmax(min-content, 1fr);
 
     & > #rssDownloaderDisabled {
         grid-column: 1 / -1;
@@ -1073,6 +1124,11 @@ body:not(:has(#desktop)) {
 
         & #rssDownloaderArticlesTable {
             height: 240px !important;
+        }
+
+        /* Save, kept in view over the page scrolling under it, with 6px of the window's background around it */
+        & #saveButton {
+            box-shadow: 0 0 0 6px var(--color-background-popup);
         }
     }
 }
@@ -1347,7 +1403,7 @@ body:not(:has(#desktop)) {
             display: flow-root;
             margin: 0 !important;
             order: 2;
-            padding-bottom: 12px;
+            padding-bottom: 6px;
             position: sticky !important;
             width: auto !important;
             z-index: 1;
