@@ -128,6 +128,10 @@
 </style>
 
 <div id="rssView">
+    <div id="rssPhoneBar" class="modernOnly">
+        <button type="button" id="rssPhoneBack" class="modernSheetBack" aria-label="QBT_TR(Back)QBT_TR[CONTEXT=MainWindow]" title="QBT_TR(Back)QBT_TR[CONTEXT=MainWindow]"></button>
+        <span id="rssPhoneTitle"></span>
+    </div>
     <div id="rssTopBar">
         <div id="rssFetchingDisabled" class="invisible">
             QBT_TR(Fetching of RSS feeds is disabled now! You can enable it in application settings.)QBT_TR[CONTEXT=RSSWidget]
@@ -253,6 +257,9 @@
             document.getElementById("rssFetchingOptionsButton").addEventListener("click", (event) => {
                 window.qBittorrent.Responsive.openOptionsPage("PrefRSSLink", "RSSTab", ["enable_fetching_rss_feeds_checkbox", "enable_auto_downloading_rss_torrents_checkbox"]);
             });
+
+            if (document.documentElement.classList.contains("modern"))
+                setupPhoneSteps();
 
             const rssFeedContextMenu = new window.qBittorrent.ContextMenu.RssFeedContextMenu({
                 targets: "#rssFeedTableDiv tbody tr",
@@ -504,6 +511,27 @@
 
             clearDetails();
             rssArticleTable.updateTable(false);
+        };
+
+        // Modern on phones: one card at a time, a bar back to the one before
+        const setupPhoneSteps = () => {
+            const view = document.getElementById("rssView");
+            view.dataset.phoneStep = "feeds";
+            // before the tables' own handlers
+            document.getElementById("rssFeedTableDiv").addEventListener("click", (event) => {
+                const tr = event.target.closest("tbody tr");
+                if (tr === null)
+                    return;
+                document.getElementById("rssPhoneTitle").textContent = rssFeedTable.getRow(tr.rowId).full_data.name;
+                view.dataset.phoneStep = "articles";
+            }, true);
+            document.getElementById("rssArticleTableDiv").addEventListener("click", (event) => {
+                if (event.target.closest("tbody tr") !== null)
+                    view.dataset.phoneStep = "details";
+            }, true);
+            document.getElementById("rssPhoneBack").addEventListener("click", (event) => {
+                view.dataset.phoneStep = (view.dataset.phoneStep === "details") ? "articles" : "feeds";
+            });
         };
 
         const clearDetails = () => {
