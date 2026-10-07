@@ -1750,6 +1750,69 @@
     bottom: var(--modern-footer-height);
 }
 
+/* Global speed limits popup */
+:root.modern #modernSpeedLimits {
+    background-color: var(--color-background-popup);
+    border-radius: var(--modern-radius-menu);
+    bottom: calc(var(--modern-footer-height) + 6px);
+    box-shadow: var(--modern-shadow);
+    box-sizing: border-box;
+    max-height: calc(100dvh - var(--modern-footer-height) - 12px);
+    overflow: auto;
+    padding: 12px 16px;
+    position: fixed;
+    right: 6px;
+    width: min(480px, calc(100vw - 12px));
+    z-index: 8000;
+
+    /* open in a window */
+    & > .modernDetachButton {
+        appearance: none;
+        background-color: transparent;
+        border: 0;
+        border-radius: var(--modern-radius-item);
+        cursor: pointer;
+        height: 28px;
+        min-height: 0;
+        padding: 0;
+        position: absolute;
+        right: 10px;
+        top: 8px;
+        width: 28px;
+
+        &::before {
+            background-color: var(--color-text-muted);
+            content: "";
+            inset: 0;
+            mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 2.5H3.5a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V8M8.5 2.5h3v3M11.5 2.5 6.5 7.5'/%3E%3C/svg%3E")
+                center / 14px no-repeat;
+            position: absolute;
+        }
+
+        &:hover {
+            background-color: var(--color-background-row-hover);
+        }
+
+        &:hover::before {
+            background-color: var(--color-text-default);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--color-accent-blue);
+            outline-offset: -2px;
+        }
+    }
+}
+
+@media (pointer: coarse) {
+    :root.modern #modernSpeedLimits > .modernDetachButton {
+        height: var(--touch-target);
+        right: 2px;
+        top: 0;
+        width: var(--touch-target);
+    }
+}
+
 /* Context menus */
 
 /* one Speed limits item replaces these */
@@ -1881,8 +1944,8 @@
     }
 }
 
-/* the button that centers a moved window, beside its close button */
-:root.modern .modernCenterButton {
+/* buttons beside the close button */
+:root.modern :is(.modernCenterButton, .modernAttachButton) {
     border-radius: var(--modern-radius-item);
     cursor: pointer;
     display: none;
@@ -1904,6 +1967,19 @@
     &:hover {
         background-color: var(--color-background-row-hover);
     }
+}
+
+/* attach to the status bar */
+:root.modern .modernAttachButton {
+    display: block;
+
+    &::before {
+        mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 2.5H3.5a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V8M11.5 2.5 7 7M7 4v3h3'/%3E%3C/svg%3E");
+    }
+}
+
+:root.modern .mochaControls:has(.modernAttachButton) {
+    width: auto !important; /* override Mocha's width */
 }
 
 :root.modern:not(.responsivePhone) .responsiveMoved {

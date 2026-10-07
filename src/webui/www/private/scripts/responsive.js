@@ -1540,8 +1540,115 @@ window.qBittorrent.Responsive ??= (() => {
         bar.append(badge, details, altSpeed, download.cell, upload.cell);
         footer.append(bar);
 
-        for (const { cell } of [download, upload])
-            cell.addEventListener("click", (event) => afterWindowsClose(["torrentSpeedLimitsPage"], globalLimitFN));
+        // the global speed limits as a popup above the speeds, unless detached into their window: the page's markup, then its scripts
+        const speedLimits = document.createElement("div");
+        speedLimits.id = "modernSpeedLimits";
+        speedLimits.className = "invisible";
+        speedLimits.setAttribute("role", "dialog");
+        speedLimits.setAttribute("aria-label", "QBT_TR(Global Speed Limits)QBT_TR[CONTEXT=MainWindow]");
+        const speedLimitsPage = document.createElement("div");
+        const detach = document.createElement("button");
+        detach.type = "button";
+        detach.className = "modernDetachButton";
+        detach.title = "QBT_TR(Open in a window)QBT_TR[CONTEXT=MainWindow]";
+        detach.setAttribute("aria-label", detach.title);
+        speedLimits.append(speedLimitsPage, detach);
+        // outside the bar, whose icon size would apply
+        document.body.append(speedLimits);
+        let releaseSpeedLimitsFocus = null;
+        const setSpeedLimitsExpanded = (expanded) => {
+            for (const { cell } of [download, upload])
+                cell.setAttribute("aria-expanded", expanded.toString());
+        };
+
+        const closeSpeedLimits = () => {
+            if (speedLimits.classList.contains("invisible"))
+                return;
+
+            speedLimits.classList.add("invisible");
+            speedLimitsPage.replaceChildren();
+            setSpeedLimitsExpanded(false);
+            releaseSpeedLimitsFocus?.();
+            releaseSpeedLimitsFocus = null;
+        };
+
+        closeSpeedLimitsPopup = closeSpeedLimits;
+
+        const openSpeedLimits = async () => {
+            const response = await fetch("views/globalspeedlimits.html?v=${CACHEID}", {
+                method: "GET"
+            });
+            if (!response.ok)
+                return;
+
+            const page = await response.text();
+            // opened meanwhile, by another click
+            if (!speedLimits.classList.contains("invisible"))
+                return;
+
+            speedLimitsPage.innerHTML = page;
+            speedLimits.classList.remove("invisible");
+            for (const script of speedLimitsPage.querySelectorAll("script")) {
+                const run = document.createElement("script");
+                run.textContent = script.textContent;
+                script.replaceWith(run);
+            }
+            // the popup closes as the limits are applied
+            speedLimitsPage.querySelector("#applyButton").addEventListener("click", (_event) => closeSpeedLimits());
+            setSpeedLimitsExpanded(true);
+            releaseSpeedLimitsFocus = trapFocus(speedLimits);
+        };
+
+        // detached (stored per browser), the speeds open the window, whose button attaches it back; the page's ids allow one at a time
+        const isDetached = () => (localPreferences.get("speed_limits_detached") === "true") || (document.getElementById("globalSpeedLimitsPage") !== null);
+        const openSpeedLimitsWindow = () => {
+            globalLimitFN();
+            const instance = MochaUI.Windows.instances.globalSpeedLimitsPage;
+            // brought up again, it has the button
+            if ((instance?.controlsEl === undefined) || (instance.controlsEl.querySelector(".modernAttachButton") !== null))
+                return;
+
+            const attach = document.createElement("div");
+            attach.className = "mochaWindowButton modernAttachButton";
+            attach.setAttribute("role", "button");
+            attach.tabIndex = 0;
+            attach.title = "QBT_TR(Attach to the status bar)QBT_TR[CONTEXT=MainWindow]";
+            attach.setAttribute("aria-label", attach.title);
+            const toPopup = () => {
+                localPreferences.set("speed_limits_detached", "false");
+                instance.addEvent("closeComplete", () => openSpeedLimits());
+                window.qBittorrent.Client.closeWindow(instance.windowEl);
+            };
+
+            attach.addEventListener("click", (_event) => toPopup());
+            attach.addEventListener("keydown", (event) => {
+                switch (event.key) {
+                    case "Enter":
+                    case " ":
+                        event.preventDefault();
+                        toPopup();
+                        break;
+                }
+            });
+            instance.controlsEl.append(attach);
+        };
+
+        detach.addEventListener("click", (event) => {
+            localPreferences.set("speed_limits_detached", "true");
+            closeSpeedLimits();
+            openSpeedLimitsWindow();
+        });
+        for (const { cell } of [download, upload]) {
+            cell.setAttribute("aria-haspopup", "dialog");
+            cell.setAttribute("aria-controls", speedLimits.id);
+            cell.setAttribute("aria-expanded", "false");
+            cell.addEventListener("click", (event) => {
+                if (!speedLimits.classList.contains("invisible"))
+                    closeSpeedLimits();
+                else
+                    afterWindowsClose(["torrentSpeedLimitsPage"], isDetached() ? openSpeedLimitsWindow : openSpeedLimits);
+            });
+        }
 
         let inlineOpen = localPreferences.get("status_bar_details_open") === "true";
         let popupOpen = false;
@@ -1645,11 +1752,14 @@ window.qBittorrent.Responsive ??= (() => {
         document.addEventListener("pointerdown", (event) => {
             if (popupOpen && !details.contains(event.target) && !badge.contains(event.target))
                 setPopupOpen(false);
+            if (!speedLimits.contains(event.target) && !download.cell.contains(event.target) && !upload.cell.contains(event.target))
+                closeSpeedLimits();
         });
         document.addEventListener("keydown", (event) => {
             switch (event.key) {
                 case "Escape":
                     setPopupOpen(false);
+                    closeSpeedLimits();
                     break;
             }
         });
@@ -1658,6 +1768,9 @@ window.qBittorrent.Responsive ??= (() => {
     };
 
     /* Modern torrent speed limits */
+
+    // set by the status bar, whose popup holds the same page
+    let closeSpeedLimitsPopup = () => {};
 
     // the speed limits' page has fixed ids, so it shows once at a time: these windows close first
     const afterWindowsClose = (ids, then) => {
@@ -1682,6 +1795,7 @@ window.qBittorrent.Responsive ??= (() => {
         if (hashes.length === 0)
             return;
 
+        closeSpeedLimitsPopup();
         afterWindowsClose(["globalSpeedLimitsPage", "torrentSpeedLimitsPage"], () => new MochaUI.Window({
             id: "torrentSpeedLimitsPage",
             icon: "images/qbittorrent-tray.svg",

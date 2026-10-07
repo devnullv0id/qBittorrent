@@ -69,13 +69,15 @@
             if (hashes !== undefined)
                 altUploadValue.closest("fieldset").classList.add("invisible");
 
-            // close the page's window once the limits are set
+            // close the page's window, if it is in one (not Modern's popup)
             const applied = (ok) => {
                 if (!ok)
                     alert("QBT_TR(Failed to set speed limits)QBT_TR[CONTEXT=SpeedLimit]");
 
                 window.parent.updateMainData();
-                window.parent.qBittorrent.Client.closeWindow(applyButton.closest(".mocha"));
+                const pageWindow = applyButton.closest(".mocha");
+                if (pageWindow !== null)
+                    window.parent.qBittorrent.Client.closeWindow(pageWindow);
             };
 
             applyButton.addEventListener("click", (_event) => {
