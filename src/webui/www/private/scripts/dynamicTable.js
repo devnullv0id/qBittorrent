@@ -3312,7 +3312,21 @@ window.qBittorrent.DynamicTable ??= (() => {
                     span = document.createElement("span");
                     td.append(span);
                 }
-                span.textContent = value;
+                if (!isModern()) {
+                    span.textContent = value;
+                    return;
+                }
+
+                // Modern: the unread count as a badge
+                span.textContent = name;
+                let badge = td.children[2];
+                if (badge === undefined) {
+                    badge = document.createElement("span");
+                    badge.className = "rssUnreadCount";
+                    td.append(badge);
+                }
+                badge.textContent = data.unread;
+                badge.classList.toggle("invisible", (data.unread === 0));
             };
         }
         setupHeaderMenu() {}
@@ -3346,14 +3360,20 @@ window.qBittorrent.DynamicTable ??= (() => {
 
     class RssArticleTable extends DynamicTable {
         initColumns() {
-            this.newColumn("name", "", "QBT_TR(Torrents: (double-click to download))QBT_TR[CONTEXT=RSSWidget]", -1, true);
+            // Modern says how to download in the tooltip
+            const caption = isModern()
+                ? "QBT_TR(Articles)QBT_TR[CONTEXT=RSSWidget]"
+                : "QBT_TR(Torrents: (double-click to download))QBT_TR[CONTEXT=RSSWidget]";
+            this.newColumn("name", "", caption, -1, true);
 
             this.columns["name"].updateTd = (td, row) => {
                 td.style.display = "block";
 
                 const data = row.full_data;
                 td.textContent = data.name;
-                td.title = data.name;
+                td.title = isModern()
+                    ? `${data.name}\nQBT_TR(Double-click to download)QBT_TR[CONTEXT=RSSWidget]`
+                    : data.name;
 
                 const tr = td.parentElement;
                 tr.classList.toggle("unreadArticle", !data.isRead);

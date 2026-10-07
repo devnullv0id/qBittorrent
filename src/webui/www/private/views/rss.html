@@ -184,6 +184,7 @@
             </div>
         </div>
         <div id="rightRssColumn">
+            <div id="rssDetailsHint" class="modernOnly">QBT_TR(Select an article to see its details.)QBT_TR[CONTEXT=RSSWidget]</div>
             <div id="rssDetailsView"></div>
         </div>
     </div>
@@ -582,12 +583,17 @@
             const articleDescription = article.description;
             if (articleDescription !== undefined) {
                 const rootColor = document.documentElement.classList.contains("dark") ? "class='dark'" : "";
+                // Modern's look for the description
+                const modern = document.documentElement.classList.contains("modern");
+                const rootClass = modern ? `class='${document.documentElement.classList.contains("dark") ? "dark " : ""}modern'` : rootColor;
+                const modernStylesheet = modern ? `<link rel="stylesheet" type="text/css" href="css/modern.css?v=${CACHEID}">` : "";
+                const bodyId = modern ? " id='rssDescriptionBody'" : "";
 
                 // Place in iframe with sandbox attribute to prevent js execution
                 const iframeElement = document.createElement("iframe");
                 iframeElement.id = "rssDescription";
                 iframeElement.sandbox = "allow-same-origin"; // allowed to get parent css
-                iframeElement.srcdoc = `<html ${rootColor}><head><meta charset="utf-8"><meta name="referrer" content="same-origin"><link rel="stylesheet" type="text/css" href="css/style.css?v=${CACHEID}"></head><body>${articleDescription}</body></html>`;
+                iframeElement.srcdoc = `<html ${rootClass}><head><meta charset="utf-8"><meta name="referrer" content="same-origin"><link rel="stylesheet" type="text/css" href="css/style.css?v=${CACHEID}">${modernStylesheet}</head><body${bodyId}>${articleDescription}</body></html>`;
 
                 detailsView.append(iframeElement);
             }
