@@ -34,7 +34,8 @@ window.qBittorrent.Responsive ??= (() => {
     const exports = () => {
         return {
             init: init,
-            openOptionsPage: openOptionsPage
+            openOptionsPage: openOptionsPage,
+            updateStatusBar: updateStatusBar
         };
     };
 
@@ -125,7 +126,7 @@ window.qBittorrent.Responsive ??= (() => {
 
     // filters and menu items reachable and activated from the keyboard (the menubar only in Modern)
     const keyboardItems = "ul.filterList span.link";
-    const modernKeyboardItems = "#desktopNavbar a, #toolbarOverflowMenu a, #modernStatusMenu a, #modernSortMenu a";
+    const modernKeyboardItems = "#desktopNavbar a, #toolbarOverflowMenu a, #modernSortMenu a";
 
     const initKeyboardItems = () => {
         const selector = isModern() ? `${keyboardItems}, ${modernKeyboardItems}` : keyboardItems;
@@ -1422,184 +1423,237 @@ window.qBittorrent.Responsive ??= (() => {
         }, true);
     };
 
-    /* Modern's status bar on phones: the speeds, the rest in a sheet */
+    /* Modern status bar */
 
-    // the speeds as one button, opening a menu of the other items (moved there, so client.js keeps updating them)
+    let renderStatusBar = () => {};
+    /**
+     * Shows a server state in Modern's status bar, after each update
+     *
+     * @param {Record<string, any>} serverState the state client.js received
+     */
+    const updateStatusBar = (serverState) => {
+        renderStatusBar(serverState);
+    };
+
+    // the connection status shows the details on the bar's line, or above it where they don't fit
     const initStatusBar = () => {
         const footer = document.getElementById("desktopFooter");
-        const row = footer.querySelector("tr");
-        const speedButton = row.closest("table");
-        const narrowQuery = window.matchMedia("(width < 520px)");
-        const isCollapsed = () => narrowQuery.matches;
-        const update = () => root.classList.toggle("modernFooterCollapsed", isCollapsed());
+        const bar = document.createElement("div");
+        bar.id = "modernStatusBar";
+        bar.className = "modernOnly";
 
-        const menu = document.createElement("ul");
-        menu.id = "modernStatusMenu";
-        menu.className = "contextMenu";
-        menu.setAttribute("role", "menu");
-        menu.setAttribute("aria-label", "QBT_TR(Status bar)QBT_TR[CONTEXT=OptionsDialog]");
-        const limitsItem = document.createElement("li");
-        limitsItem.setAttribute("role", "none");
-        const limitsLink = document.createElement("a");
-        limitsLink.setAttribute("role", "menuitem");
-        limitsLink.tabIndex = 0;
-        const limitsIcon = document.createElement("img");
-        limitsIcon.src = "images/slow.svg";
-        limitsIcon.alt = "";
-        limitsLink.append(limitsIcon, "QBT_TR(Global Speed Limits)QBT_TR[CONTEXT=MainWindow]");
-        limitsItem.append(limitsLink);
-        menu.append(limitsItem);
-        // the footer clips what overflows it
-        document.body.append(menu);
-
-        let moved = [];
-        let releaseFocus = null;
-        const isOpen = () => moved.length > 0;
-        const open = () => {
-            if (isOpen())
-                return;
-
-            // alternative speed limits first
-            const cells = [...row.children].filter((td) => !td.classList.contains("speedLabel") && !td.classList.contains("statusBarSeparator"));
-            cells.sort((a, b) => Number(b.querySelector("#alternativeSpeedLimits") !== null) - Number(a.querySelector("#alternativeSpeedLimits") !== null));
-            for (const td of cells) {
-                // its separator goes along: client.js shows and hides the two together
-                const separator = td.previousElementSibling?.classList.contains("statusBarSeparator") ? td.previousElementSibling : null;
-                moved.push({ td: td, separator: separator, next: td.nextSibling });
-                // icon-only items get their title as caption
-                const img = td.querySelector("img[id]");
-                if ((img !== null) && (td.textContent.trim() === "")) {
-                    const caption = document.createElement("span");
-                    caption.className = "modernStatusCaption";
-                    caption.textContent = img.title;
-                    td.append(caption);
-                }
-                const li = document.createElement("li");
-                li.setAttribute("role", "none");
-                li.className = "modernStatusItem";
-                const a = document.createElement("a");
-                a.setAttribute("role", "menuitem");
-                a.tabIndex = 0;
-                if (separator !== null)
-                    a.append(separator);
-                a.append(td);
-                // the whole row toggles them (client.js listens on the icon)
-                const alt = td.querySelector("#alternativeSpeedLimits");
-                if (alt !== null) {
-                    a.addEventListener("click", (event) => {
-                        if (event.target !== alt)
-                            alt.click();
-                        // the caption follows the new state
-                        setTimeout(() => {
-                            td.querySelector(".modernStatusCaption").textContent = alt.title;
-                        }, 0);
-                    });
-                }
-                li.append(a);
-                menu.append(li);
-            }
-            menu.classList.add("visible");
-            speedButton.setAttribute("aria-expanded", "true");
-            releaseFocus = trapFocus(menu);
+        // client.js keeps updating the moved icons
+        const connectionIcon = document.getElementById("connectionStatus");
+        const badge = document.createElement("button");
+        badge.type = "button";
+        badge.className = "modernStatusBadge";
+        const pill = document.createElement("span");
+        pill.className = "modernStatusPill";
+        // the state in a word; the icon's text names it in full
+        const stateLabel = document.createElement("span");
+        stateLabel.className = "modernStatusState";
+        stateLabel.setAttribute("aria-hidden", "true");
+        const stateLabels = {
+            connected: "QBT_TR(Connected)QBT_TR[CONTEXT=MainWindow]",
+            firewalled: "QBT_TR(Firewalled)QBT_TR[CONTEXT=MainWindow]",
+            disconnected: "QBT_TR(Disconnected)QBT_TR[CONTEXT=MainWindow]"
         };
 
-        const close = () => {
-            if (!isOpen())
-                return;
+        const chevron = document.createElement("span");
+        chevron.className = "modernStatusChevron";
+        pill.append(connectionIcon, stateLabel, chevron);
+        badge.append(pill);
 
-            for (const { td, separator, next } of moved.reverse()) {
-                td.querySelector(".modernStatusCaption")?.remove();
-                if (separator !== null)
-                    row.insertBefore(separator, next);
-                row.insertBefore(td, next);
-            }
-            moved = [];
-            for (const li of menu.querySelectorAll(".modernStatusItem"))
-                li.remove();
-            menu.classList.remove("visible");
-            speedButton.setAttribute("aria-expanded", "false");
-            releaseFocus?.();
-            releaseFocus = null;
+        const details = document.createElement("div");
+        details.id = "modernStatusDetails";
+        details.className = "modernStatusDetails";
+        badge.setAttribute("aria-controls", details.id);
+        const addItem = () => {
+            const item = document.createElement("span");
+            item.className = "modernStatusItem";
+            details.append(item);
+            return item;
         };
 
-        limitsLink.addEventListener("click", (event) => {
-            close();
-            globalLimitFN();
+        // the connection status, atop the popup
+        const heading = addItem();
+        heading.classList.add("modernStatusHeading");
+        const externalIPv4 = addItem();
+        const externalIPv6 = addItem();
+        const freeSpace = addItem();
+        const dhtNodes = addItem();
+        const sessionDownloaded = addItem();
+        const sessionUploaded = addItem();
+        // a translated text with its values (%1, %2) in elements of their own
+        const setItem = (item, text, ...values) => {
+            item.replaceChildren(...text.split(/(%\d)/).filter((part) => part !== "").map((part) => {
+                const placeholder = /^%(\d)$/.exec(part);
+                if (placeholder === null)
+                    return part;
+
+                const value = document.createElement("span");
+                value.className = "modernStatusItemValue";
+                value.textContent = values[Number(placeholder[1]) - 1];
+                return value;
+            }));
+        };
+
+        const altSpeedIcon = document.getElementById("alternativeSpeedLimits");
+        const altSpeed = document.createElement("button");
+        altSpeed.type = "button";
+        altSpeed.className = "modernStatusCell modernStatusAltSpeed";
+        altSpeed.append(altSpeedIcon);
+        // client.js toggles the limits on a click on the icon
+        altSpeed.addEventListener("click", (event) => {
+            if (event.target !== altSpeedIcon)
+                altSpeedIcon.click();
         });
-        // while collapsed, the speeds open this menu instead of the speed limits window
-        footer.addEventListener("click", (event) => {
-            if (!isCollapsed() || (event.target.closest("table") !== speedButton))
+        const syncAltSpeed = () => {
+            altSpeed.title = altSpeedIcon.title;
+            altSpeed.setAttribute("aria-pressed", (altSpeedIcon.getAttribute("src") === "images/slow.svg").toString());
+        };
+
+        new MutationObserver(syncAltSpeed).observe(altSpeedIcon, { attributes: true, attributeFilter: ["src", "title"] });
+        syncAltSpeed();
+
+        // download and upload, with their limits
+        const createSpeedCell = (src, alt) => {
+            const cell = document.createElement("button");
+            cell.type = "button";
+            cell.className = "modernStatusCell modernStatusSpeed";
+            cell.title = "QBT_TR(Global Speed Limits)QBT_TR[CONTEXT=MainWindow]";
+            const icon = document.createElement("img");
+            icon.src = src;
+            icon.alt = alt;
+            const rate = document.createElement("span");
+            rate.className = "modernStatusRate";
+            const limit = document.createElement("span");
+            limit.className = "modernStatusLimit";
+            cell.append(icon, rate, limit);
+            return { cell: cell, rate: rate, limit: limit };
+        };
+
+        const download = createSpeedCell("images/downloading.svg", "QBT_TR(Download speed icon)QBT_TR[CONTEXT=MainWindow]");
+        const upload = createSpeedCell("images/upload.svg", "QBT_TR(Upload speed icon)QBT_TR[CONTEXT=MainWindow]");
+
+        bar.append(badge, details, altSpeed, download.cell, upload.cell);
+        footer.append(bar);
+
+        for (const { cell } of [download, upload])
+            cell.addEventListener("click", (event) => globalLimitFN());
+
+        let inlineOpen = localPreferences.get("status_bar_details_open") === "true";
+        let popupOpen = false;
+        let releaseFocus = null;
+        const isPopup = () => bar.classList.contains("modernStatusPopup");
+        const syncExpanded = () => {
+            badge.setAttribute("aria-expanded", (isPopup() ? popupOpen : inlineOpen).toString());
+        };
+
+        // a sheet where menus are sheets
+        let detailsScrim = null;
+        const setPopupOpen = (open) => {
+            if (open === popupOpen)
                 return;
 
-            event.stopPropagation();
-            if (isOpen())
-                close();
-            else
-                open();
-        }, true);
-        const syncButton = () => {
-            if (isCollapsed()) {
-                speedButton.setAttribute("role", "button");
-                speedButton.setAttribute("tabindex", "0");
-                speedButton.setAttribute("aria-haspopup", "menu");
-                speedButton.setAttribute("aria-expanded", isOpen().toString());
+            popupOpen = open;
+            syncExpanded();
+            const sheet = open && sheetQuery.matches;
+            details.classList.toggle("modernSheet", sheet);
+            detailsScrim?.remove();
+            detailsScrim = sheet ? addScrim(null, 9790) : null;
+            detailsScrim?.classList.add("modernStatusScrim");
+            if (open) {
+                releaseFocus = trapFocus(details);
             }
             else {
-                for (const attr of ["role", "tabindex", "aria-haspopup", "aria-expanded"])
-                    speedButton.removeAttribute(attr);
+                releaseFocus?.();
+                releaseFocus = null;
             }
         };
 
-        speedButton.addEventListener("keydown", (event) => {
-            switch (event.key) {
-                case "Enter":
-                case " ":
-                    if (!isCollapsed())
-                        break;
-
-                    event.preventDefault();
-                    if (isOpen())
-                        close();
-                    else
-                        open();
-                    break;
+        // a popup where the details don't fit on the line; switching closes it
+        const updateLayout = () => {
+            const wasPopup = isPopup();
+            bar.classList.remove("modernStatusPopup");
+            const popup = details.scrollWidth > (altSpeed.getBoundingClientRect().left - badge.getBoundingClientRect().right);
+            bar.classList.toggle("modernStatusPopup", popup);
+            if (popup) {
+                details.setAttribute("role", "dialog");
+                details.setAttribute("aria-label", "QBT_TR(Status bar)QBT_TR[CONTEXT=OptionsDialog]");
             }
+            else {
+                details.removeAttribute("role");
+                details.removeAttribute("aria-label");
+            }
+            if (popup !== wasPopup)
+                setPopupOpen(false);
+            syncExpanded();
+        };
+
+        const friendlyUnit = window.qBittorrent.Misc.friendlyUnit;
+        // both speeds keep room for a limit once any is set, so nothing moves as limits come and go
+        const showSpeed = ({ cell, rate, limit }, speed, rateLimit) => {
+            rate.textContent = friendlyUnit(speed, true);
+            limit.classList.toggle("invisible", !cell.classList.contains("modernStatusLimited"));
+            limit.textContent = (rateLimit > 0) ? `/ ${friendlyUnit(rateLimit, true)}` : "";
+        };
+
+        renderStatusBar = (serverState) => {
+            const preferences = window.qBittorrent.Cache.preferences.get();
+            badge.dataset.state = serverState.connection_status;
+            badge.title = connectionIcon.title;
+            stateLabel.textContent = stateLabels[serverState.connection_status] ?? "";
+            heading.textContent = connectionIcon.title;
+
+            // only what is known
+            const ipv4 = serverState.last_external_address_v4 ?? "";
+            const ipv6 = serverState.last_external_address_v6 ?? "";
+            const showIPs = (preferences.status_bar_external_ip === true);
+            externalIPv4.classList.toggle("invisible", !showIPs || (ipv4 === ""));
+            externalIPv6.classList.toggle("invisible", !showIPs || (ipv6 === ""));
+            setItem(externalIPv4, "QBT_TR(External IPv4: %1)QBT_TR[CONTEXT=HttpServer]", ipv4);
+            setItem(externalIPv6, "QBT_TR(External IPv6: %1)QBT_TR[CONTEXT=HttpServer]", ipv6);
+
+            freeSpace.classList.toggle("invisible", !Number.isFinite(serverState.free_space_on_disk) || (serverState.free_space_on_disk < 0));
+            setItem(freeSpace, "QBT_TR(Free space: %1)QBT_TR[CONTEXT=HttpServer]", friendlyUnit(serverState.free_space_on_disk));
+            dhtNodes.classList.toggle("invisible", !preferences.dht);
+            setItem(dhtNodes, "QBT_TR(DHT: %1 nodes)QBT_TR[CONTEXT=StatusBar]", serverState.dht_nodes);
+            setItem(sessionDownloaded, "QBT_TR(Session Downloaded)QBT_TR[CONTEXT=TransferListModel] %1", friendlyUnit(serverState.dl_info_data, false));
+            setItem(sessionUploaded, "QBT_TR(Session Uploaded)QBT_TR[CONTEXT=TransferListModel] %1", friendlyUnit(serverState.up_info_data, false));
+
+            const limits = [serverState.dl_rate_limit, serverState.up_rate_limit, preferences.dl_limit, preferences.up_limit, preferences.alt_dl_limit, preferences.alt_up_limit];
+            if (limits.some((value) => value > 0)) {
+                for (const { cell } of [download, upload])
+                    cell.classList.add("modernStatusLimited");
+            }
+            showSpeed(download, serverState.dl_info_speed, serverState.dl_rate_limit);
+            showSpeed(upload, serverState.up_info_speed, serverState.up_rate_limit);
+            updateLayout();
+        };
+
+        badge.addEventListener("click", (event) => {
+            if (isPopup()) {
+                setPopupOpen(!popupOpen);
+                return;
+            }
+            inlineOpen = !inlineOpen;
+            localPreferences.set("status_bar_details_open", inlineOpen.toString());
+            syncExpanded();
         });
         document.addEventListener("pointerdown", (event) => {
-            if (isOpen() && !menu.contains(event.target) && !speedButton.contains(event.target))
-                close();
+            if (popupOpen && !details.contains(event.target) && !badge.contains(event.target))
+                setPopupOpen(false);
         });
         document.addEventListener("keydown", (event) => {
             switch (event.key) {
                 case "Escape":
-                    close();
+                    setPopupOpen(false);
                     break;
             }
         });
-
-        // the collapsed bar leaves out the "[limit]" part of the speeds
-        for (const id of ["DlInfos", "UpInfos"]) {
-            const speed = document.getElementById(id);
-            const strip = () => {
-                if (!isCollapsed())
-                    return;
-
-                const text = speed.textContent.replace(/\s*\[[^\]]*\]/, "");
-                if (text !== speed.textContent)
-                    speed.textContent = text;
-            };
-
-            new MutationObserver(strip).observe(speed, { childList: true, characterData: true, subtree: true });
-            strip();
-        }
-
-        narrowQuery.addEventListener("change", (event) => {
-            close();
-            update();
-            syncButton();
-        });
-        update();
-        syncButton();
+        new ResizeObserver(updateLayout).observe(bar);
+        updateLayout();
     };
 
     /* Modern sort sheet */

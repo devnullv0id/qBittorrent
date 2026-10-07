@@ -1367,6 +1367,8 @@ window.addEventListener("DOMContentLoaded", async (event) => {
             updateAltSpeedIcon(alternativeSpeedLimits);
         }
 
+        window.qBittorrent.Responsive.updateStatusBar(serverState);
+
         serverSyncMainDataInterval = Math.max(serverState.refresh_interval, 500);
     };
 

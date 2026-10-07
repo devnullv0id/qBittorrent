@@ -50,7 +50,10 @@
     --modern-filter-item-padding: 7px 12px;
     --modern-cell-padding: 7px 10px;
     --modern-th-padding: 10px 10px;
-    --modern-footer-height: 38px;
+    /* status bar: a little taller than the toolbar's icons */
+    --modern-footer-height: calc(var(--modern-tool-icon) + 4px);
+    --modern-status-icon: 16px;
+    --modern-status-pill: calc(var(--modern-tool-icon) - 4px);
     --color-background-surface: var(--color-background-primary);
     --color-background-fill: color-mix(
         in srgb,
@@ -164,6 +167,15 @@
     }
 }
 
+/* phones and touch screens: a taller status bar */
+@media (width < 760px), (pointer: coarse) {
+    :root.modern {
+        --modern-footer-height: var(--modern-tool-height);
+        --modern-status-icon: var(--modern-tool-icon);
+        --modern-status-pill: calc(var(--modern-tool-icon) + 8px);
+    }
+}
+
 @media (pointer: coarse) {
     :root.modern {
         --modern-control-height: 44px;
@@ -172,6 +184,7 @@
         --modern-switch-height: 26px;
         --modern-knob: 20px;
         --modern-title-height: 48px;
+        --modern-footer-height: 48px;
         --touch-target: 44px; /* like the controls */
     }
 }
@@ -1446,102 +1459,295 @@
     background-color: var(--color-background-surface);
     border-top: 1px solid var(--color-border-default);
     height: var(--modern-footer-height);
+
+    /* alternative speed limits on */
+    &:has(.modernStatusAltSpeed[aria-pressed="true"]) {
+        border-top-color: var(--color-accent-blue);
+        box-shadow: inset 0 1px 0 var(--color-accent-blue);
+    }
 }
 
 :root.modern #desktopFooter {
     align-items: center;
     display: flex;
     font-family: inherit;
-    font-size: 12px;
+    font-size: 13px;
+    gap: 12px;
     height: 100%;
-    padding: 0 8px;
+    min-height: 0; /* override responsive.css */
+    padding: 0 0 0 4px;
 
-    & table {
-        border-collapse: separate;
-        border-spacing: 0;
-    }
-
-    & td {
-        vertical-align: middle;
-    }
-
-    & td.statusBarSeparator {
+    & > table {
         display: none;
     }
 
-    & td:not(.statusBarSeparator, .invisible) {
-        background-color: transparent;
-        border: 0;
-        border-radius: var(--modern-radius-pill);
-        height: 24px;
-        padding: 0 10px;
-        position: relative;
+    & #error_div {
+        font-weight: 600;
         white-space: nowrap;
-    }
 
-    & td:has(> img:only-child) {
-        padding: 0 6px;
-    }
-
-    & td img {
-        height: 16px !important;
-        vertical-align: middle;
-    }
-
-    /* download and upload as one button */
-    & td.speedLabel {
-        border-radius: 0;
-        cursor: pointer;
-        font-variant-numeric: tabular-nums;
-        min-width: 11em;
-    }
-
-    & td.speedLabel:hover {
-        background-color: transparent !important;
-    }
-
-    &
-        tr:has(> td.speedLabel:hover)
-        > :is(
-            td.speedLabel,
-            td.speedLabel + td.statusBarSeparator:has(+ td.speedLabel)
-        ) {
-        background-color: var(--color-background-fill) !important;
-    }
-
-    & td.speedLabel:not(td.speedLabel ~ td) {
-        border-radius: var(--modern-radius-pill) 0 0 var(--modern-radius-pill);
-    }
-
-    & td.speedLabel ~ td.speedLabel {
-        border-radius: 0 var(--modern-radius-pill) var(--modern-radius-pill) 0;
-    }
-
-    & td.speedLabel img {
-        margin: 0 6px 0 0 !important;
-    }
-
-    & td:is(.speedLabel, [style*="cursor"]):hover {
-        background-color: var(--color-background-fill);
-    }
-
-    &
-        td:not(.statusBarSeparator, .invisible)
-        ~ td:not(.statusBarSeparator, .invisible)::before {
-        background-color: var(--color-border-default);
-        content: "";
-        height: 14px;
-        left: 0;
-        position: absolute;
-        top: 5px;
-        width: 1px;
+        &:empty {
+            display: none;
+        }
     }
 }
 
-@media (width < 1280px) {
-    :root.modern #desktopFooter td.speedLabel {
-        min-width: 0;
+:root.modern #modernStatusBar {
+    align-self: stretch;
+    display: flex;
+    flex: 1 1 auto;
+    min-width: 0;
+
+    /* override the moved icons' inline size */
+    & img {
+        display: block;
+        height: var(--modern-status-icon) !important;
+        width: var(--modern-status-icon);
     }
+
+    & :is(.modernStatusBadge, .modernStatusCell) {
+        align-items: center;
+        appearance: none;
+        background-color: transparent;
+        border: 0;
+        border-radius: 0;
+        color: inherit;
+        cursor: pointer;
+        display: flex;
+        flex: none;
+        font: inherit;
+        gap: 6px;
+        height: 100%;
+        min-height: 0;
+        padding: 0 12px;
+        transition: background-color 0.12s;
+
+        &:focus-visible {
+            outline: 2px solid var(--color-accent-blue);
+            outline-offset: -2px;
+        }
+    }
+
+    /* connection status */
+    & .modernStatusBadge {
+        --color-status-tone: var(--color-text-muted);
+
+        padding: 0 6px;
+
+        &[data-state="connected"] {
+            --color-status-tone: var(--color-text-green);
+        }
+
+        &[data-state="firewalled"] {
+            --color-status-tone: var(--color-text-orange);
+        }
+
+        &[data-state="disconnected"] {
+            --color-status-tone: var(--color-text-red);
+        }
+
+        &:hover .modernStatusPill {
+            background-color: color-mix(
+                in srgb,
+                var(--color-status-tone) 28%,
+                transparent
+            );
+        }
+    }
+
+    & .modernStatusPill {
+        align-items: center;
+        background-color: color-mix(
+            in srgb,
+            var(--color-status-tone) 16%,
+            transparent
+        );
+        border-radius: var(--modern-radius-pill);
+        display: flex;
+        gap: 5px;
+        height: var(--modern-status-pill);
+        padding: 0 8px 0 6px;
+        transition: background-color 0.12s;
+    }
+
+    & .modernStatusChevron {
+        background-color: var(--color-text-muted);
+        height: 10px;
+        mask: var(--modern-chevron-right) center / 10px no-repeat;
+        transition: transform 0.15s;
+        width: 10px;
+    }
+
+    & .modernStatusBadge[aria-expanded="true"] .modernStatusChevron {
+        transform: rotate(180deg);
+    }
+
+    /* details on the bar's line */
+    & .modernStatusDetails {
+        align-items: center;
+        color: var(--color-text-muted);
+        display: flex;
+        flex: 0 1 auto;
+        gap: 14px;
+        min-width: 0;
+        opacity: 0;
+        overflow: hidden;
+        padding: 0 12px 0 8px;
+        transform: translateX(-6px);
+        transition:
+            opacity 0.2s,
+            transform 0.2s,
+            visibility 0s 0.2s;
+        visibility: hidden;
+        white-space: nowrap;
+    }
+
+    & .modernStatusBadge[aria-expanded="true"] + .modernStatusDetails {
+        opacity: 1;
+        transform: none;
+        transition-delay: 0s;
+        visibility: visible;
+    }
+
+    & .modernStatusItem {
+        flex: none;
+    }
+
+    & .modernStatusItemValue {
+        color: var(--color-text-default);
+        font-variant-numeric: tabular-nums;
+    }
+
+    & .modernStatusHeading {
+        display: none;
+    }
+
+    & .modernStatusCell {
+        border-left: 1px solid var(--color-border-default);
+
+        &:hover {
+            background-color: var(--color-background-fill);
+        }
+    }
+
+    & .modernStatusDetails + .modernStatusCell {
+        margin-left: auto;
+    }
+
+    & .modernStatusAltSpeed[aria-pressed="true"] {
+        background-color: var(--color-accent-blue);
+
+        &:hover {
+            background-color: color-mix(
+                in srgb,
+                var(--color-accent-blue) 85%,
+                var(--color-text-default)
+            );
+        }
+
+        & img {
+            --color-gauge: var(--color-text-white);
+        }
+    }
+
+    &:has(.modernStatusAltSpeed[aria-pressed="true"]) .modernStatusLimit {
+        color: var(--color-accent-blue);
+    }
+
+    & .modernStatusSpeed {
+        font-variant-numeric: tabular-nums;
+        padding: 0 14px;
+    }
+
+    /* fits "1023.9 MiB/s", so the speed keeps its place */
+    & .modernStatusRate {
+        color: var(--color-text-default);
+        min-width: 5.8em;
+        text-align: right;
+    }
+
+    /* buttons center their text */
+    & .modernStatusLimit {
+        color: var(--color-text-muted);
+        text-align: left;
+    }
+
+    /* room for "/ 1023.9 MiB/s" wherever a limit can show */
+    & .modernStatusLimited .modernStatusLimit {
+        min-width: 6.5em;
+    }
+
+    /* details that don't fit: a popup above the bar */
+    &.modernStatusPopup {
+        & .modernStatusChevron {
+            transform: rotate(-90deg);
+        }
+
+        & .modernStatusBadge[aria-expanded="true"] .modernStatusChevron {
+            transform: rotate(90deg);
+        }
+
+        & .modernStatusDetails {
+            display: none;
+        }
+
+        & .modernStatusBadge[aria-expanded="true"] + .modernStatusDetails {
+            align-items: stretch;
+            background-color: var(--color-background-popup);
+            border-radius: var(--modern-radius-menu);
+            bottom: calc(var(--modern-footer-height) + 6px);
+            box-shadow: var(--modern-shadow);
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            left: 6px;
+            max-width: calc(100vw - 12px);
+            padding: 6px 0;
+            position: fixed;
+            white-space: normal;
+            z-index: 8000;
+        }
+
+        & .modernStatusItem {
+            overflow-wrap: anywhere;
+            padding: 8px 14px;
+        }
+
+        & .modernStatusHeading {
+            border-bottom: 1px solid var(--color-border-divider);
+            color: var(--color-text-default);
+            display: block;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        /* as a sheet where menus are sheets */
+        &
+            .modernStatusBadge[aria-expanded="true"]
+            + .modernStatusDetails.modernSheet {
+            animation: modern-sheet 0.18s ease-out;
+            border-radius: 14px 14px 0 0;
+            bottom: var(--modern-footer-height);
+            left: 0;
+            max-height: calc(82dvh - var(--modern-footer-height));
+            max-width: none;
+            overflow-y: auto;
+            padding: 4px 0 8px;
+            right: 0;
+            z-index: 9800;
+        }
+
+        &
+            .modernStatusBadge[aria-expanded="true"]
+            + .modernStatusDetails.modernSheet
+            .modernStatusItem {
+            padding: 14px 16px;
+        }
+    }
+}
+
+/* the scrim leaves the bar free */
+:root.modern .responsiveScrim.modernStatusScrim {
+    bottom: var(--modern-footer-height);
 }
 
 /* Context menus */
@@ -3310,7 +3516,6 @@
         --modern-filter-item-padding: 5px 10px;
         --modern-cell-padding: 5px 8px;
         --modern-th-padding: 8px 8px;
-        --modern-footer-height: 32px;
     }
 
     :root.modern.compact progress-bar {
@@ -5858,93 +6063,55 @@
 /* Status bar on phones */
 
 @media (width < 760px) {
-    :root.modern #desktopFooter {
-        & table {
-            margin: 0 auto !important;
+    :root.modern #modernStatusBar {
+        & .modernStatusState {
+            display: none;
         }
 
-        & td.speedLabel {
-            min-width: 0;
+        /* the limit under the speed in narrow cells */
+        & .modernStatusSpeed {
+            container: status-speed / inline-size;
+            display: grid;
+            flex: 1 1 0;
+            grid-template-columns: repeat(3, auto);
+            padding: 0 8px;
+            place-content: center;
+            row-gap: 0;
+
+            & > img {
+                align-self: center;
+                grid-row: span 2;
+                margin-right: 6px;
+            }
+        }
+
+        & .modernStatusRate {
+            grid-column: 2;
+        }
+
+        & .modernStatusLimit {
+            font-size: 12px;
+            grid-column: 2;
+            line-height: 15px;
+            text-align: right;
         }
     }
 
-    /* only the speeds stay in the bar */
-    :root.modern.modernFooterCollapsed #desktopFooter {
-        cursor: pointer;
+    /* the arrow, the speed and "/ 1023.9 MiB/s" */
+    @container status-speed (width >= 16em) {
+        :root.modern #modernStatusBar {
+            & .modernStatusSpeed > img {
+                grid-row: auto;
+            }
 
-        & td:not(.speedLabel) {
-            display: none;
-        }
-
-        /* only the divider between the speeds */
-        & td.statusBarSeparator {
-            display: none !important;
-        }
-
-        /* the divider before the download speed */
-        & td.speedLabel:not(td.speedLabel ~ td)::before {
-            display: none;
-        }
-
-        /* one button around both speeds */
-        & table {
-            border-radius: var(--modern-radius-pill);
-            margin: 4px auto !important;
-            padding: 0 6px;
-            transition: background-color 0.12s;
-        }
-
-        /* the whole button highlights */
-        & td.speedLabel:hover {
-            background-color: transparent !important;
-        }
-
-        & table:hover {
-            background-color: var(--color-background-fill);
-        }
-
-        & table:active {
-            background-color: var(--color-border-divider);
-        }
-
-        & table:focus-visible {
-            outline: 2px solid var(--color-accent-blue);
-            outline-offset: 1px;
-        }
-
-        & td.speedLabel {
-            min-height: 36px;
-        }
-    }
-
-    /* Status menu */
-    :root.modern #modernStatusMenu {
-        &:not(.visible) {
-            display: none;
-        }
-
-        &.visible {
-            display: block;
-        }
-
-        & li a {
-            align-items: center;
-            display: flex;
-            gap: 10px;
-        }
-
-        & li a > td {
-            display: contents;
-        }
-
-        & li:has(td.invisible) {
-            display: none;
-        }
-
-        & img {
-            height: 16px !important;
-            margin: 0 !important;
-            width: 16px;
+            & .modernStatusLimit {
+                font-size: inherit;
+                grid-column: 3;
+                grid-row: 1;
+                line-height: inherit;
+                margin-left: 6px;
+                text-align: left;
+            }
         }
     }
 
