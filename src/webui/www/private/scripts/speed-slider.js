@@ -50,6 +50,20 @@ window.qBittorrent.SpeedSlider ??= (() => {
 
     const toKiB = (pos) => ((pos <= 0) ? 0 : ((pos >= STEPS) ? MAX_KIB : Math.min(MAX_KIB, round(MAX_KIB ** (pos / STEPS)))));
     const toPos = (kib) => ((kib <= 0) ? 0 : Math.max(1, Math.min(STEPS, Math.round((Math.log(kib) / Math.log(MAX_KIB)) * STEPS))));
+    // the next value along the slider, up (1) or down (-1)
+    const stepKiB = (kib, direction) => {
+        let pos = toPos(kib);
+        while (((pos + direction) >= 0) && ((pos + direction) <= STEPS)) {
+            pos += direction;
+            const next = toKiB(pos);
+            if ((direction > 0) ? (next > kib) : (next < kib))
+                return next;
+        }
+        return kib;
+    };
+
+    // keys and their steps
+    const stepKeys = { ArrowUp: 1, ArrowDown: -1, PageUp: 10, PageDown: -10 };
 
     const format = (kib) => {
         const [unit, factor] = unitFor(kib);
@@ -100,6 +114,8 @@ window.qBittorrent.SpeedSlider ??= (() => {
                 }
             }
             input.dataset.shown = input.value;
+            input.setAttribute("aria-valuenow", kib);
+            input.setAttribute("aria-valuetext", (kib === 0) ? input.value : `${input.value} ${input.dataset.unit}`);
         };
 
         slider.min = 0;
@@ -118,6 +134,39 @@ window.qBittorrent.SpeedSlider ??= (() => {
             slider.value = toPos(kib);
             show();
         }, true);
+
+        // arrows and keys step along the slider
+        input.setAttribute("role", "spinbutton");
+        input.setAttribute("aria-valuemin", 0);
+        input.setAttribute("aria-valuemax", MAX_KIB);
+        const step = (direction) => {
+            kib = stepKiB(readKiB(input), direction);
+            slider.value = toPos(kib);
+            show();
+        };
+
+        input.addEventListener("keydown", (event) => {
+            const steps = stepKeys[event.key];
+            if (steps === undefined)
+                return;
+
+            event.preventDefault();
+            for (let i = 0; i < Math.abs(steps); ++i)
+                step(Math.sign(steps));
+        });
+        const stepper = document.createElement("span");
+        stepper.className = "speedStepper";
+        input.before(stepper);
+        stepper.append(input);
+        for (const direction of [1, -1]) {
+            const arrow = document.createElement("span");
+            arrow.className = (direction > 0) ? "speedStepperUp" : "speedStepperDown";
+            arrow.setAttribute("aria-hidden", "true");
+            // the focus stays in the field
+            arrow.addEventListener("mousedown", (event) => event.preventDefault());
+            arrow.addEventListener("click", (event) => step(direction));
+            stepper.append(arrow);
+        }
         show();
     };
 

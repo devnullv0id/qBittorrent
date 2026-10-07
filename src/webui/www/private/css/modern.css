@@ -2296,6 +2296,51 @@
     }
 }
 
+/* speed fields' arrows */
+:root.modern .speedStepper {
+    display: block;
+    min-width: 0;
+    position: relative;
+
+    & > input {
+        box-sizing: border-box;
+        padding-right: 26px;
+        width: 100%;
+    }
+
+    & > :is(.speedStepperUp, .speedStepperDown) {
+        cursor: pointer;
+        height: 50%;
+        position: absolute;
+        right: 8px;
+        width: 16px;
+
+        &::before {
+            background-color: var(--color-text-muted);
+            content: "";
+            inset: 0;
+            mask: var(--modern-chevron-up) center / 10px no-repeat;
+            position: absolute;
+        }
+
+        &:hover::before {
+            background-color: var(--color-text-default);
+        }
+    }
+
+    & > .speedStepperUp {
+        top: 1px;
+    }
+
+    & > .speedStepperDown {
+        bottom: 1px;
+
+        &::before {
+            mask-image: var(--modern-chevron-down);
+        }
+    }
+}
+
 /* Cookies table */
 :root.modern #manageCookiesTable {
     border-spacing: 0 4px;
