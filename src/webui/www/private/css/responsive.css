@@ -606,6 +606,7 @@ body:not(:has(#desktop)) {
         #globalSpeedLimitsPage,
         #installSearchPlugin,
         #cookiesPage,
+        #createTorrentPage,
         #searchPlugins,
         #multiRenamePage,
         #preferencesPage
