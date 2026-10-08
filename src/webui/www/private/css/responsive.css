@@ -537,6 +537,12 @@
     & td.statusBarSeparator {
         align-self: stretch;
     }
+
+    /* the speeds' fields take a click anywhere between their separators */
+    & td.speedLabel {
+        align-content: center;
+        align-self: stretch;
+    }
 }
 
 @media (width < 760px) {
