@@ -2335,9 +2335,21 @@
     }
 }
 
+/* the main action: the accent's fill, deeper on hover */
 :root.modern body .dialogFooter > .primary:is(input, button):not(:disabled),
 :root.modern
-    :is(input[type="button"], input[type="submit"], button)[id$="ApplyButton"] {
+    :is(input[type="button"], input[type="submit"], button)[id$="ApplyButton"],
+:root.modern
+    .mocha
+    #searchPluginsContainer
+    > div:last-child
+    > button:first-child,
+:root.modern #RssDownloader #saveButton:not(:disabled),
+:root.modern
+    #preferencesPage
+    .mochaContent
+    > div:not(.PrefTab):has(> input[type="button"])
+    > #preferencesOk {
     background-color: var(--color-background-blue);
     border-color: var(--color-background-blue);
     color: var(--color-text-white);
@@ -2686,13 +2698,6 @@
             min-width: 96px;
             padding: 3px 14px;
             width: auto !important; /* override the inline widths */
-        }
-
-        & > button:first-child {
-            background-color: var(--color-background-blue);
-            border-color: var(--color-background-blue);
-            color: var(--color-text-white);
-            font-weight: 600;
         }
 
         & > button:last-child {
@@ -3330,13 +3335,6 @@
             padding: 0 0 8px;
             text-align: right;
         }
-    }
-
-    & #saveButton:not(:disabled) {
-        background-color: var(--color-background-blue);
-        border-color: var(--color-background-blue);
-        color: var(--color-text-white);
-        font-weight: 600;
     }
 
     /* opaque, the page scrolls under it */
@@ -4477,18 +4475,6 @@
 
     & > #preferencesSave {
         display: none;
-    }
-
-    & > #preferencesOk {
-        background-color: var(--color-background-blue);
-        border-color: var(--color-background-blue);
-        color: var(--color-text-white);
-        font-weight: 600;
-
-        &:hover {
-            background-color: var(--color-accent-blue);
-            border-color: var(--color-accent-blue);
-        }
     }
 }
 
