@@ -289,11 +289,6 @@
 }
 
 :root.modern .vsb-menu {
-    background-color: var(--color-background-popup);
-    border-radius: var(--modern-radius-menu);
-    box-shadow: var(--modern-shadow);
-    padding: 4px;
-
     /* as tall as the check box beside it */
     & li {
         border-radius: var(--modern-radius-item);
@@ -495,12 +490,8 @@
     }
 
     & li ul {
-        background-color: var(--color-background-popup);
-        border-radius: var(--modern-radius-menu);
-        box-shadow: var(--modern-shadow);
         margin-top: 4px;
         min-width: 220px;
-        padding: 4px;
     }
 
     & li ul li a,
@@ -828,11 +819,6 @@
 /* Mocha gives an empty panel height only through its border */
 :root.modern .panel {
     border-bottom-color: transparent;
-}
-
-:root.modern .panel-header {
-    background-color: var(--color-background-default);
-    border-bottom: var(--modern-divider);
 }
 
 /* Properties tabs */
@@ -1354,6 +1340,31 @@
 
 :root.modern #propGeneral {
     padding: 8px 10px;
+
+    /* label and value cells in a grid */
+    & table,
+    & tbody {
+        display: block;
+        width: 100% !important;
+    }
+
+    & tbody {
+        display: grid;
+    }
+
+    & tr {
+        display: contents;
+    }
+
+    & td {
+        display: block;
+        min-width: 0;
+        overflow-wrap: anywhere;
+    }
+
+    & td.generalLabel {
+        width: auto !important; /* override style.css's 1px */
+    }
 }
 
 :root.modern #propBarsWrapper {
@@ -1398,6 +1409,21 @@
     padding: 2px 4px;
 }
 
+/* Section labels: small muted capitals */
+:root.modern fieldset > legend,
+:root.modern #statisticsContent h3,
+:root.modern .mocha #searchPluginsContainer > h2,
+:root.modern #rssContentView .dynamicTable th,
+:root.modern #RssDownloader :is(#rulesTableDesc, #articleTableDesc),
+:root.modern #RssDownloader.rssWizard #rssWizardProgress,
+:root.modern #modernSortMenu .modernSheetHeading {
+    color: var(--color-text-muted);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
 /* Cards */
 
 :root.modern fieldset {
@@ -1410,19 +1436,14 @@
     position: relative;
 
     & > legend {
-        color: var(--color-text-muted);
         float: left;
-        font-size: 11px;
-        font-weight: 600;
         left: 2px;
-        letter-spacing: 0.06em;
         margin: 0;
         max-width: calc(100% - 4px);
         overflow: hidden;
         padding: 0;
         position: absolute;
         text-overflow: ellipsis;
-        text-transform: uppercase;
         top: -21px;
         white-space: nowrap;
     }
@@ -1828,12 +1849,19 @@
     display: none;
 }
 
-:root.modern .contextMenu {
+/* Menus: the dropdown lists, the menubar's and the context menus share one surface */
+:root.modern .vsb-menu,
+:root.modern #desktopNavbar li ul,
+:root.modern .contextMenu,
+:root.modern .contextMenu li ul {
     background-color: var(--color-background-popup);
     border-radius: var(--modern-radius-menu);
     box-shadow: var(--modern-shadow);
-    min-width: 200px;
     padding: 4px;
+}
+
+:root.modern .contextMenu {
+    min-width: 200px;
 
     & li a {
         border-radius: var(--modern-radius-item);
@@ -1859,11 +1887,7 @@
     }
 
     & li ul {
-        background-color: var(--color-background-popup);
-        border-radius: var(--modern-radius-menu);
-        box-shadow: var(--modern-shadow);
         margin-top: -33px;
-        padding: 4px;
     }
 }
 
@@ -2361,13 +2385,8 @@
     }
 
     & h3 {
-        color: var(--color-text-muted);
-        font-size: 11px;
-        font-weight: 600;
-        letter-spacing: 0.06em;
         margin: 4px 0 6px 2px;
         padding: 0;
-        text-transform: uppercase;
     }
 }
 
@@ -2614,12 +2633,7 @@
     overflow: visible;
 
     & > h2 {
-        color: var(--color-text-muted);
-        font-size: 11px;
-        font-weight: 600;
-        letter-spacing: 0.06em;
         margin: 2px 0 8px;
-        text-transform: uppercase;
     }
 
     & > #searchPluginsActions {
@@ -2887,12 +2901,7 @@
 
     & .dynamicTable th {
         border-right: 0;
-        color: var(--color-text-muted);
-        font-size: 11px;
-        font-weight: 600;
-        letter-spacing: 0.06em;
         padding: 10px 12px 6px;
-        text-transform: uppercase;
     }
 
     & .dynamicTable td {
@@ -3129,19 +3138,6 @@
             min-height: 48px;
         }
 
-        & #rssPhoneBack {
-            background: var(--modern-chevron-down) center / 22px no-repeat
-                transparent;
-            border: 0;
-            border-radius: var(--modern-radius-pill);
-            flex: none;
-            height: 44px;
-            min-height: 44px;
-            padding: 0;
-            transform: rotate(90deg);
-            width: 44px;
-        }
-
         & #rssPhoneTitle {
             flex: 1 1 auto;
             font-size: 15px;
@@ -3233,14 +3229,6 @@
 :root.modern #RssDownloader {
     & #rssDownloaderDisabled {
         margin-bottom: 12px;
-    }
-
-    & :is(#rulesTableDesc, #articleTableDesc) {
-        color: var(--color-text-muted);
-        font-size: 11px;
-        font-weight: 600;
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
     }
 
     & #articleTableDesc {
@@ -3461,14 +3449,6 @@
         gap: 4px;
     }
 
-    & #rssWizardProgress {
-        color: var(--color-text-muted);
-        font-size: 11px;
-        font-weight: 600;
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
-    }
-
     & #rssWizardTitle {
         font-size: 16px;
     }
@@ -3686,32 +3666,17 @@
 /* General tab: three pairs per row */
 @media (width >= 760px) {
     :root.modern #propGeneral {
-        & table,
         & tbody {
-            display: block;
-            width: 100% !important;
-        }
-
-        & tbody {
-            display: grid;
             gap: 2px 12px;
             grid-template-columns: repeat(3, 11em minmax(0, 1fr));
         }
 
-        & tr {
-            display: contents;
-        }
-
         & td {
-            display: block;
-            min-width: 0;
-            overflow-wrap: anywhere;
             padding: 3px 0 !important;
         }
 
         & td.generalLabel {
             white-space: normal; /* a long label wraps in its column */
-            width: auto !important; /* override style.css's 1px */
         }
 
         & td[colspan] {
@@ -5409,6 +5374,24 @@
 
 /* Phones */
 @media (width < 760px) {
+    /* the phone bars' back buttons: the chevron turned to point back */
+    :root.modern #rssView #rssPhoneBack,
+    :root.modern
+        #propertiesPanel_wrapper.modernSheet
+        #propertiesPanel_header
+        .modernSheetBack {
+        background: var(--modern-chevron-down) center / 22px no-repeat
+            transparent;
+        border: 0;
+        border-radius: var(--modern-radius-pill);
+        flex: none;
+        height: 44px;
+        min-height: 44px;
+        padding: 0;
+        transform: rotate(90deg);
+        width: 44px;
+    }
+
     :root.modern:not(.navDrawerOpen) #desktopNavbar {
         display: none;
     }
@@ -5561,10 +5544,6 @@
         & li ul li img {
             height: 18px;
             width: 18px;
-        }
-
-        & li ul li a {
-            min-height: 44px;
         }
     }
 
@@ -5785,28 +5764,14 @@
             padding: 0 14px;
         }
 
-        & table,
-        & tbody {
-            display: block;
-            width: 100% !important;
-        }
-
         & tbody {
             column-gap: 0; /* a gap would break the divider */
-            display: grid;
             grid-template-columns: minmax(7.5em, auto) minmax(0, 1fr);
-        }
-
-        & tr {
-            display: contents;
         }
 
         & td {
             border-bottom: var(--modern-divider);
-            display: block;
             line-height: 18px;
-            min-width: 0;
-            overflow-wrap: anywhere;
             padding: 10px 0 !important;
         }
 
@@ -5824,7 +5789,6 @@
             padding-right: 0 !important;
             text-align: left;
             white-space: nowrap;
-            width: auto !important; /* override style.css's 1px */
         }
     }
 }
@@ -5861,19 +5825,6 @@
             gap: 4px;
             min-height: 52px;
             padding: 0 12px 0 4px;
-        }
-
-        & .modernSheetBack {
-            background: var(--modern-chevron-down) center / 22px no-repeat
-                transparent;
-            border: 0;
-            border-radius: var(--modern-radius-pill);
-            flex: none;
-            height: 44px;
-            min-height: 44px;
-            padding: 0;
-            transform: rotate(90deg);
-            width: 44px;
         }
 
         & .modernSheetTitle {
@@ -6469,12 +6420,7 @@
     }
 
     & .modernSheetHeading {
-        color: var(--color-text-muted);
-        font-size: 11px;
-        font-weight: 600;
-        letter-spacing: 0.06em;
         padding: 14px 12px 6px;
-        text-transform: uppercase;
     }
 
     & .modernCardToggle {
@@ -7286,26 +7232,6 @@
             width: 100% !important;
         }
     }
-
-    :root.modern #preferencesPage .PrefTab .listEditor {
-        box-sizing: border-box;
-        margin: 0 !important;
-        max-width: none;
-        width: 100% !important;
-
-        & .listEditorItems li {
-            align-items: center;
-            display: flex;
-            gap: 8px;
-            min-height: 44px;
-
-            & > span {
-                flex: 1 1 auto;
-                min-width: 0;
-                overflow-wrap: anywhere;
-            }
-        }
-    }
 }
 
 /* Proxy server */
@@ -7612,6 +7538,14 @@
 
 /* phones */
 @media (width < 760px) {
+    :root.modern #preferencesPage .PrefTab .listEditor {
+        margin: 0 !important;
+
+        & .listEditorItems li {
+            min-height: 44px;
+        }
+    }
+
     :root.modern #preferencesPage .PrefTab .listEditor .listEditorAdd {
         flex-wrap: wrap;
 
