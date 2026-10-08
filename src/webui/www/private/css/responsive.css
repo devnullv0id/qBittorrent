@@ -815,9 +815,11 @@ body:not(:has(#desktop)) {
     row-gap: 4px;
 }
 
-/* Options: the settings rows wrap in a narrow window */
+/* Options: the settings rows wrap in a narrow window, and every tab keeps a scrollbar's room, so the tabs and their
+    Save row don't shift sideways between a tab that scrolls and one that doesn't */
 #preferencesPage .mochaContentWrapper {
     container: options / inline-size;
+    scrollbar-gutter: stable;
 }
 
 @container options (width < 600px) {
