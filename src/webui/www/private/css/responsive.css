@@ -25,6 +25,15 @@
     --button-row-space: 6px;
 }
 
+/* dark: buttons a step lighter than the theme's controls, so that they stand out from the window */
+:root.dark {
+    --button-face: color-mix(
+        in srgb,
+        var(--color-background-default),
+        var(--color-text-default) 8%
+    );
+}
+
 /* override Layout.css's 400px */
 #desktop {
     min-width: 0;
