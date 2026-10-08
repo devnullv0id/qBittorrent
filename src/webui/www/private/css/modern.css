@@ -1416,7 +1416,8 @@
 :root.modern #rssContentView .dynamicTable th,
 :root.modern #RssDownloader :is(#rulesTableDesc, #articleTableDesc),
 :root.modern #RssDownloader.rssWizard #rssWizardProgress,
-:root.modern #modernSortMenu .modernSheetHeading {
+:root.modern #modernSortMenu .modernSheetHeading,
+:root.modern #manageCookiesTable thead td {
     color: var(--color-text-muted);
     font-size: 11px;
     font-weight: 600;
@@ -2451,15 +2452,6 @@
 :root.modern #manageCookiesTable {
     border-spacing: 0 4px;
     width: 100%;
-
-    & th {
-        color: var(--color-text-muted);
-        font-size: 11px;
-        font-weight: 600;
-        letter-spacing: 0.05em;
-        text-align: left;
-        text-transform: uppercase;
-    }
 
     & input {
         width: 100%;
