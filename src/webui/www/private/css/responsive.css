@@ -836,6 +836,12 @@ body:not(:has(#desktop)) {
 /* Options rows wrap in narrow windows */
 #preferencesPage .mochaContentWrapper {
     container: options / inline-size;
+
+    /* every tab keeps a scrollbar's room, so the tabs and their Save row don't shift sideways between a tab that
+        scrolls and one that doesn't */
+    :where(:root:not(.modern)) & {
+        scrollbar-gutter: stable;
+    }
 }
 
 @container options (width < 600px) {

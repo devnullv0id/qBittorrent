@@ -844,6 +844,10 @@ window.qBittorrent.Responsive ??= (() => {
             ownHeight = pageHeight(instance, width, maxHeight);
             const askedHeight = (ownHeight > 0) ? ownHeight : Math.max(wantedHeight, pageOverflow(instance, width, wantedHeight).height);
             height = Math.min(fitHeight, askedHeight);
+            // Options' tabs share one window: in Classic it keeps the room its longer tabs take, rather than changing
+            // with the tab
+            if ((windowEl.id === "preferencesPage") && !isModern())
+                height = fitHeight;
             // shorter than its page asks for: the page may give way before it scrolls (Modern's RSS Downloader)
             windowEl.classList.toggle("responsiveShort", askedHeight > fitHeight);
             // a page that scrolls keeps its width beside the scrollbar
