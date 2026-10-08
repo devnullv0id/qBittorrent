@@ -738,6 +738,9 @@ window.qBittorrent.Responsive ??= (() => {
             width = phone ? maxWidth : Math.min(fitWidth, Math.max(width, MIN_WINDOW_WIDTH, pageOverflow(instance, width, wantedHeight).width));
             ownHeight = pageHeight(instance, width, maxHeight);
             height = Math.min(fitHeight, (ownHeight > 0) ? ownHeight : Math.max(wantedHeight, pageOverflow(instance, width, wantedHeight).height));
+            // Options' tabs share one window: it keeps the room its longer tabs take, rather than changing with the tab
+            if (windowEl.id === "preferencesPage")
+                height = fitHeight;
             // a page that scrolls keeps its width beside the scrollbar
             if (pageOverflow(instance, width, height).height > 0)
                 width = Math.min(fitWidth, width + sidewaysScrollbarWidth(instance, width, height));
