@@ -1440,3 +1440,41 @@
         padding-left: 0;
     }
 }
+
+/* Toolbar on phones */
+#toolbarButtons {
+    display: contents;
+}
+
+@media (width < 760px) {
+    #mochaToolbar {
+        align-items: center;
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    #toolbarButtons {
+        display: block;
+        flex: 1 1 0;
+        min-width: 0;
+        overflow: auto hidden;
+        scrollbar-width: none;
+        white-space: nowrap;
+
+        /* the Menu button stays in view, and the buttons scroll under it */
+        & #menuDrawerButton {
+            background: var(--color-background-primary);
+            left: 0;
+            position: sticky;
+        }
+    }
+
+    #mainWindowTabs {
+        flex: none;
+        float: none;
+    }
+
+    #torrentsFilterToolbar {
+        flex: 1 1 100%;
+    }
+}
