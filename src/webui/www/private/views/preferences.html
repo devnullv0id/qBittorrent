@@ -2406,6 +2406,18 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
         };
 
         // Advanced Tab
+        // the interface list and the address list are asked for together: when both fail, alert once per window
+        const interfaceListAlerts = new WeakSet();
+        const alertInterfaceListFailure = () => {
+            // a new element in each Options window
+            const combobox = document.getElementById("networkInterface");
+            if (interfaceListAlerts.has(combobox))
+                return;
+
+            interfaceListAlerts.add(combobox);
+            alert("QBT_TR(Could not contact qBittorrent.)QBT_TR[CONTEXT=OptionsDialog]");
+        };
+
         const updateNetworkInterfaces = (default_iface, default_iface_name) => {
             const combobox = document.getElementById("networkInterface");
             for (const el of [...combobox.children])
@@ -2421,7 +2433,7 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
                         return;
 
                     if (!response.ok) {
-                        alert("QBT_TR(Could not contact qBittorrent.)QBT_TR[CONTEXT=OptionsDialog]");
+                        alertInterfaceListFailure();
                         return;
                     }
 
@@ -2443,7 +2455,7 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
                     if (!combobox.isConnected)
                         return;
 
-                    alert("QBT_TR(Could not contact qBittorrent.)QBT_TR[CONTEXT=OptionsDialog]");
+                    alertInterfaceListFailure();
                 });
         };
 
@@ -2466,7 +2478,7 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
                         return;
 
                     if (!response.ok) {
-                        alert("QBT_TR(Could not contact qBittorrent.)QBT_TR[CONTEXT=OptionsDialog]");
+                        alertInterfaceListFailure();
                         return;
                     }
 
@@ -2486,7 +2498,7 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
                     if (!combobox.isConnected)
                         return;
 
-                    alert("QBT_TR(Could not contact qBittorrent.)QBT_TR[CONTEXT=OptionsDialog]");
+                    alertInterfaceListFailure();
                 });
         };
 
