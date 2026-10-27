@@ -312,6 +312,7 @@ input[type="button"]:disabled {
             max-height: none;
             overflow: visible;
             position: static;
+            visibility: visible;
         }
 
         & li.menuDrawerExpanded > ul {
