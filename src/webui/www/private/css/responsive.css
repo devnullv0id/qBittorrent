@@ -231,6 +231,7 @@
             max-height: none;
             overflow: visible;
             position: static;
+            visibility: visible;
         }
 
         & li.menuDrawerExpanded > ul {
@@ -1879,6 +1880,8 @@
         font-size: 0;
         min-width: 0;
         overflow: auto hidden;
+        /* room for the focus ring, which the strip would clip */
+        padding-block: 3px;
         scrollbar-width: none;
         white-space: nowrap;
 
