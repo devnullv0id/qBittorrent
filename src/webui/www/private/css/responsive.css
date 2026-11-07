@@ -449,12 +449,26 @@ input[type="button"]:disabled {
     }
 }
 
+/* the menu's torrent count: phones only */
+.contextMenuHeader {
+    display: none;
+}
+
 /* Context menus on phones */
 :root.responsivePhone .contextMenu {
     max-width: 100vw;
 
     &:not(.visible) {
         overflow: clip;
+    }
+
+    /* a heading, not an entry: taps go to the menu */
+    & > .contextMenuHeader {
+        border-bottom: var(--responsive-separator);
+        display: block;
+        font-weight: bold;
+        padding: var(--space-4) var(--space-5);
+        pointer-events: none;
     }
 
     & li a {
