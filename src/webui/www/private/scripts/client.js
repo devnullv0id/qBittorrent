@@ -1270,15 +1270,17 @@ window.addEventListener("DOMContentLoaded", async (event) => {
     };
 
     const processServerState = () => {
-        let transfer_info = window.qBittorrent.Misc.friendlyUnit(serverState.dl_info_speed, true);
+        // no-break spaces, so that a speed wraps between its values
+        const statusValue = (value, isSpeed) => window.qBittorrent.Misc.friendlyUnit(value, isSpeed).replaceAll(" ", " ");
+        let transfer_info = statusValue(serverState.dl_info_speed, true);
         if (serverState.dl_rate_limit > 0)
-            transfer_info += ` [${window.qBittorrent.Misc.friendlyUnit(serverState.dl_rate_limit, true)}]`;
-        transfer_info += ` (${window.qBittorrent.Misc.friendlyUnit(serverState.dl_info_data, false)})`;
+            transfer_info += ` [${statusValue(serverState.dl_rate_limit, true)}]`;
+        transfer_info += ` (${statusValue(serverState.dl_info_data, false)})`;
         document.getElementById("DlInfos").textContent = transfer_info;
-        transfer_info = window.qBittorrent.Misc.friendlyUnit(serverState.up_info_speed, true);
+        transfer_info = statusValue(serverState.up_info_speed, true);
         if (serverState.up_rate_limit > 0)
-            transfer_info += ` [${window.qBittorrent.Misc.friendlyUnit(serverState.up_rate_limit, true)}]`;
-        transfer_info += ` (${window.qBittorrent.Misc.friendlyUnit(serverState.up_info_data, false)})`;
+            transfer_info += ` [${statusValue(serverState.up_rate_limit, true)}]`;
+        transfer_info += ` (${statusValue(serverState.up_info_data, false)})`;
         document.getElementById("UpInfos").textContent = transfer_info;
 
         let titlePrefix = "";
