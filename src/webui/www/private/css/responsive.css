@@ -9,6 +9,85 @@
     --responsive-card-menu-width: 44px; /* also used in responsive.js */
     --responsive-card-menu-height: 40px; /* also used in responsive.js */
     --responsive-card-check-width: 40px; /* also used in responsive.js */
+    --color-button-face: var(--color-background-default);
+    --color-button-border: var(--color-border-control);
+    /* hover and press move the face towards it */
+    --color-button-step: var(--color-text-default);
+
+    &.dark {
+        --color-button-face: hsl(0deg 0% 30%);
+    }
+}
+
+/* Buttons */
+input[type="button"],
+input[type="submit"],
+button {
+    background-color: var(--button-background);
+    border-color: var(--color-button-border);
+}
+
+button:disabled,
+input[type="button"]:disabled {
+    color: var(--color-text-disabled);
+    cursor: initial;
+}
+
+:where(input[type="button"], input[type="submit"], button) {
+    --button-background: var(--color-button-face);
+}
+
+@media (hover: hover) {
+    :where(input[type="button"], input[type="submit"], button):where(
+        :hover:not(:disabled)
+    ) {
+        --button-background: color-mix(
+            in srgb,
+            var(--color-button-face),
+            var(--color-button-step) 8%
+        );
+    }
+}
+
+:where(input[type="button"], input[type="submit"], button):where(
+    :active:not(:disabled)
+) {
+    --button-background: color-mix(
+        in srgb,
+        var(--color-button-face),
+        var(--color-button-step) 14%
+    );
+}
+
+:is(
+    #webUIAPIKeyCopyButton,
+    #webUIAPIKeyRotateButton,
+    #webUIAPIKeyDeleteButton,
+    #RssDownloader .imageButton,
+    #rememberBtn
+) {
+    align-items: center;
+    background-color: var(--button-background);
+    background-repeat: no-repeat;
+    background-size: 16px;
+    border-color: var(--color-button-border);
+    display: inline-flex;
+    height: 26px;
+    justify-content: center;
+    padding: 0;
+    vertical-align: middle;
+    width: 26px;
+
+    & img {
+        height: 16px;
+        margin: 0 !important;
+        position: static !important;
+        width: 16px;
+    }
+
+    &:disabled img {
+        opacity: 0.35;
+    }
 }
 
 #desktop {
@@ -70,7 +149,10 @@
 
     /* while filters are on, their count replaces the icon */
     #filtersButton.filtered {
-        background-color: var(--color-background-blue);
+        --color-button-face: var(--color-background-blue);
+        /* the count is white: step towards black */
+        --color-button-step: hsl(0deg 0% 0%);
+
         border-color: var(--color-background-blue);
         color: var(--color-text-white);
 
@@ -1712,10 +1794,6 @@
     /* not the multi-select's button; :where keeps the specificity of the rule above */
     :is(button, input[type="button"]):not(:where(.vsb-main button)) {
         min-width: var(--responsive-touch-target);
-    }
-
-    #RssDownloader .imageButton {
-        background-repeat: no-repeat;
     }
 
     #renameOptions {
