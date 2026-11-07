@@ -1783,7 +1783,9 @@ window.addEventListener("DOMContentLoaded", async (event) => {
         contentURL: "views/transferlist.html?v=${CACHEID}",
         onContentLoaded: () => {
             handleDownloadParam();
-            updateMainData();
+            // show the first torrents at once, without updateMainData()'s pause
+            torrentsTable.updateTable();
+            syncData(0);
         },
         column: "mainColumn",
         onResize: window.qBittorrent.Misc.createDebounceHandler(500, (e) => {
