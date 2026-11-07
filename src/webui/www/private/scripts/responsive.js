@@ -868,6 +868,24 @@ window.qBittorrent.Responsive ??= (() => {
         });
     };
 
+    // Mocha's close control is a div: make it a button for the keyboard and screen readers
+    const makeCloseButton = (instance) => {
+        const button = instance.closeButtonEl;
+        if (button === undefined)
+            return;
+
+        button.setAttribute("role", "button");
+        button.setAttribute("aria-label", "QBT_TR(Close)QBT_TR[CONTEXT=MainWindow]");
+        button.tabIndex = 0;
+        button.addEventListener("keydown", (event) => {
+            if ((event.key !== "Enter") && (event.key !== " "))
+                return;
+
+            event.preventDefault();
+            button.click();
+        });
+    };
+
     // on phones and touch screens, Back closes what shows on top of the page
     const backCloses = () => queries.phone.matches || queries.coarse.matches;
 
@@ -922,6 +940,7 @@ window.qBittorrent.Responsive ??= (() => {
             if (instance.windowEl.classList.contains("responsivePending"))
                 fitWindow(instance);
         }, PAGE_WAIT);
+        makeCloseButton(instance);
         holdWindowFocus(instance);
         if (backCloses())
             addWindowLayer(instance);
