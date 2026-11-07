@@ -157,6 +157,19 @@
                             <a><img alt="QBT_TR(Execution Log)QBT_TR[CONTEXT=MainWindow]" src="images/help-contents.svg" width="16" height="16">QBT_TR(Execution Log)QBT_TR[CONTEXT=MainWindow]</a>
                         </li>
                     </menu>
+                    <script>
+                        "use strict";
+
+                        // mark the last view's tab before client.js reopens it, so that a reload doesn't show Transfers first
+                        (() => {
+                            const tab = document.getElementById(`${localStorage.getItem("selected_window_tab")}TabLink`);
+                            if (tab === null)
+                                return;
+
+                            document.getElementById("transfersTabLink").classList.remove("selected");
+                            tab.classList.add("selected");
+                        })();
+                    </script>
                     <div class="clear"></div>
                 </div>
                 <div id="torrentsFilterToolbar">
