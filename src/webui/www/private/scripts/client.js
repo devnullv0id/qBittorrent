@@ -47,6 +47,7 @@ window.qBittorrent.Client ??= (() => {
             createAddTorrentWindow: createAddTorrentWindow,
             uploadTorrentFiles: uploadTorrentFiles,
             confirmAddTorrents: confirmAddTorrents,
+            takeFirstMainData: takeFirstMainData,
             categoryMap: categoryMap,
             tagMap: tagMap
         };
@@ -93,6 +94,22 @@ window.qBittorrent.Client ??= (() => {
             window.qBittorrent.Cache.qbtVersion.init(),
             clientDataPromise,
         ]);
+
+        // ask for the first torrent list early, rather than a round trip after the list has loaded
+        firstMainData = fetch(new URL("api/v2/sync/maindata?rid=0", window.location), {
+            method: "GET",
+            cache: "no-store"
+        });
+        // a failure is handled once the list takes the answer, which may come after it
+        firstMainData.catch((_error) => {});
+    };
+
+    let firstMainData = null;
+    // the answer to the first torrent list request, once
+    const takeFirstMainData = () => {
+        const answer = firstMainData;
+        firstMainData = null;
+        return answer;
     };
 
     const initializeClientData = async () => {
@@ -582,6 +599,8 @@ window.addEventListener("DOMContentLoaded", async (event) => {
         contentURL: "views/filters.html?v=${CACHEID}",
         onContentLoaded: () => {
             highlightSelectedStatus();
+            filtersLoaded = true;
+            syncData(0);
         },
         column: "filtersColumn",
         height: 300
@@ -1020,10 +1039,12 @@ window.addEventListener("DOMContentLoaded", async (event) => {
         url.search = new URLSearchParams({
             rid: syncMainDataLastResponseId
         });
-        fetch(url, {
-                method: "GET",
-                cache: "no-store"
-            })
+        // the first request went out with the page's others
+        const answer = ((syncMainDataLastResponseId === 0) ? window.qBittorrent.Client.takeFirstMainData() : null) ?? fetch(url, {
+            method: "GET",
+            cache: "no-store"
+        });
+        answer
             .then(async (response) => {
                     if (response.ok) {
                         document.getElementById("error_div").textContent = "";
@@ -1229,8 +1250,11 @@ window.addEventListener("DOMContentLoaded", async (event) => {
         syncData(100);
     };
 
+    // the first sync waits until both the transfer list and the filters have loaded
+    let transferListLoaded = false;
+    let filtersLoaded = false;
     const syncData = (delay) => {
-        if (syncRequestInProgress)
+        if (syncRequestInProgress || !transferListLoaded || !filtersLoaded)
             return;
 
         clearTimeout(syncMainDataTimeoutID);
@@ -1785,6 +1809,7 @@ window.addEventListener("DOMContentLoaded", async (event) => {
             handleDownloadParam();
             // show the first torrents at once, without updateMainData()'s pause
             torrentsTable.updateTable();
+            transferListLoaded = true;
             syncData(0);
         },
         column: "mainColumn",
