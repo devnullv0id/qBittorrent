@@ -117,6 +117,18 @@
     }
 }
 
+/* targets dialog windows loaded via iframes */
+:root.responsiveRelayout body:not(:has(#desktop)) {
+    & input[type="text"],
+    & input[type="number"],
+    & input[type="password"],
+    & input:not([type]),
+    & select,
+    & textarea {
+        max-width: 100%;
+    }
+}
+
 /* Windows on phones */
 :root.responsivePhone .mochaMaximizeButton {
     display: none;
@@ -131,6 +143,12 @@
     }
 }
 
+/* hidden until its page is in (responsive.js), but still focusable */
+.mocha.responsivePending {
+    opacity: 0 !important; /* override Mocha's fade in */
+    pointer-events: none;
+}
+
 /* no resizing on phones, which refit every window */
 :root.responsivePhone .mocha .handle {
     display: none;
@@ -139,4 +157,10 @@
 :root.responsivePhone .mocha .tab-menu {
     flex-wrap: wrap;
     row-gap: 4px;
+}
+
+/* About: same size for every tab */
+:root.responsiveRelayout #aboutpage .aboutTabContent {
+    height: 100%;
+    overflow: auto;
 }
