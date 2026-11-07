@@ -124,6 +124,120 @@
     }
 }
 
+/* Menu drawer on phones */
+#menuDrawerButton {
+    display: none;
+}
+
+@media (width < 760px) {
+    #desktopNavbar {
+        display: none;
+    }
+
+    /* contain the toolbar's margin, as Mocha sizes the page by the header's height */
+    #desktopHeader {
+        display: flow-root;
+    }
+
+    :root:has(#mochaToolbar.invisible) #desktopNavbar {
+        display: block;
+    }
+
+    #menuDrawerButton {
+        align-items: center;
+        background: none;
+        border: 0;
+        color: var(--color-text-default);
+        cursor: pointer;
+        display: inline-flex;
+        height: 24px;
+        justify-content: center;
+        padding: 0;
+        vertical-align: top;
+        width: 24px;
+
+        &::before {
+            background-color: currentcolor;
+            content: "";
+            height: 20px;
+            mask: url("../images/open-menu.svg") center / contain no-repeat;
+            width: 20px;
+        }
+    }
+
+    :root.menuDrawerOpen #desktopNavbar {
+        background-color: var(--color-background-primary);
+        border-right: var(--responsive-separator);
+        bottom: 0;
+        box-shadow: var(--responsive-drawer-shadow);
+        display: block;
+        left: 0;
+        overflow-y: auto;
+        position: fixed;
+        top: 0;
+        width: var(--responsive-drawer-width);
+        z-index: 1501;
+
+        & #menuDrawerHead {
+            display: flex;
+        }
+
+        & > ul > li {
+            border-bottom: var(--responsive-separator);
+            float: none;
+        }
+
+        /* menu names, with a chevron as in the Filters drawer */
+        & > ul > li > a {
+            align-items: center;
+            display: flex;
+            font-size: 14px;
+            justify-content: space-between;
+            padding-inline: 12px 8px;
+            text-align: start;
+
+            &::after {
+                background: url("../images/go-down.svg") center / 16px no-repeat;
+                content: "";
+                flex: none;
+                height: 16px;
+                transform: rotate(-90deg);
+                width: 16px;
+            }
+        }
+
+        & > ul > li.menuDrawerExpanded > a {
+            font-weight: bold;
+
+            &::after {
+                transform: none;
+            }
+        }
+
+        /* submenus expand in place, on the drawer's background */
+        & li ul {
+            background-color: var(--color-background-primary);
+            border-width: 0;
+            display: none;
+            max-height: none;
+            overflow: visible;
+            position: static;
+        }
+
+        & li.menuDrawerExpanded > ul {
+            display: block;
+        }
+    }
+
+    /* no hover left behind by a tap */
+    @media (hover: none) {
+        :root.menuDrawerOpen #desktopNavbar > ul > li > a:hover {
+            background-color: transparent;
+            color: var(--color-text-default);
+        }
+    }
+}
+
 /* View tabs and filter bar on phones */
 @media (width < 760px) {
     #mainWindowTabs {
