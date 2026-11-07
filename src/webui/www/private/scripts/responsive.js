@@ -37,13 +37,91 @@ window.qBittorrent.Responsive ??= (() => {
         };
     };
 
+    // the same breakpoints as responsive.css
     const queries = Object.freeze({
+        drawer: window.matchMedia("(width < 1100px)"),
         relayout: window.matchMedia("(pointer: coarse), (width < 1100px)"),
         small: window.matchMedia("(width < 760px), (height < 620px), (pointer: coarse) and (height < 900px)")
     });
 
     const root = document.documentElement;
     const localPreferences = new window.qBittorrent.LocalPreferences.LocalPreferences();
+
+    const addScrim = (onClick) => {
+        const scrim = document.createElement("div");
+        scrim.className = "responsiveScrim";
+        scrim.addEventListener("click", (_event) => onClick());
+        document.body.append(scrim);
+        return scrim;
+    };
+
+    const focusableSelector = "a[href], button:not([disabled]), input:not([disabled], [type='hidden']), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex='-1'])";
+    // keep the focus inside an open drawer
+    const trapFocus = (container) => {
+        const returnTo = document.activeElement;
+        // shown, and not hidden by visibility as the toggles of childless categories are
+        const focusable = () => [...container.querySelectorAll(focusableSelector)].filter((element) => (element.getClientRects().length > 0) && (getComputedStyle(element).visibility !== "hidden"));
+        const first = focusable()[0];
+        if (first !== undefined) {
+            first.focus();
+        }
+        else {
+            container.tabIndex = -1;
+            container.focus();
+        }
+        const onKeyDown = (event) => {
+            if (event.key !== "Tab")
+                return;
+
+            const items = focusable();
+            if (items.length === 0) {
+                event.preventDefault();
+                return;
+            }
+            const index = items.indexOf(document.activeElement);
+            if (event.shiftKey && (index <= 0)) {
+                event.preventDefault();
+                items.at(-1).focus();
+            }
+            else if (!event.shiftKey && ((index === -1) || (index === (items.length - 1)))) {
+                event.preventDefault();
+                items[0].focus();
+            }
+        };
+
+        const listening = new AbortController();
+        document.addEventListener("keydown", ((event) => onKeyDown(event)), { capture: true, signal: listening.signal });
+        return () => {
+            listening.abort();
+            if ((returnTo !== null) && returnTo.isConnected)
+                returnTo.focus();
+        };
+    };
+
+    // make a drawer's items reachable with Tab while it is open
+    const setKeyboardItems = (container, selector, on) => {
+        for (const item of container.querySelectorAll(selector)) {
+            if (on)
+                item.tabIndex = 0;
+            else
+                item.removeAttribute("tabindex");
+        }
+    };
+
+    const chooseWithKeys = (container, selector) => {
+        container.addEventListener("keydown", (event) => {
+            switch (event.key) {
+                case "Enter":
+                case " ":
+                    if (!event.target.matches(selector) || !event.target.hasAttribute("tabindex"))
+                        break;
+
+                    event.preventDefault();
+                    event.target.click();
+                    break;
+            }
+        });
+    };
 
     // on small screens, the properties panel shrinks until the list has this share of the page
     const MIN_TRANSFER_LIST_SHARE = 0.45;
@@ -125,9 +203,119 @@ window.qBittorrent.Responsive ??= (() => {
         });
     };
 
+    const filterItems = "ul.filterList span.link";
+
+    let filtersScrim = null;
+    let filtersObserver = null;
+    let releaseFiltersFocus = null;
+    // the rest of a double click or tap that closed a drawer would reach what the drawer covered
+    let drawerClosed = false;
+
+    const openFiltersDrawer = () => {
+        if (!queries.drawer.matches || root.classList.contains("filtersDrawerOpen"))
+            return;
+
+        const column = document.getElementById("filtersColumn");
+        const filters = document.getElementById("Filters");
+        root.classList.add("filtersDrawerOpen");
+        filtersScrim = addScrim(closeFiltersDrawer);
+        column.setAttribute("role", "dialog");
+        column.setAttribute("aria-modal", "true");
+        column.setAttribute("aria-labelledby", "filtersDrawerTitle");
+        document.getElementById("filtersButton").setAttribute("aria-expanded", "true");
+        setKeyboardItems(filters, filterItems, true);
+        // the filter lists are rebuilt as torrents change
+        filtersObserver = new MutationObserver(() => setKeyboardItems(filters, filterItems, true));
+        filtersObserver.observe(filters, { childList: true, subtree: true });
+        releaseFiltersFocus = trapFocus(column);
+    };
+
+    const closeFiltersDrawer = () => {
+        if (!root.classList.contains("filtersDrawerOpen"))
+            return;
+
+        const column = document.getElementById("filtersColumn");
+        root.classList.remove("filtersDrawerOpen");
+        filtersScrim.remove();
+        filtersScrim = null;
+        column.removeAttribute("role");
+        column.removeAttribute("aria-modal");
+        column.removeAttribute("aria-labelledby");
+        document.getElementById("filtersButton").setAttribute("aria-expanded", "false");
+        filtersObserver.disconnect();
+        filtersObserver = null;
+        setKeyboardItems(document.getElementById("Filters"), filterItems, false);
+        releaseFiltersFocus();
+        releaseFiltersFocus = null;
+        drawerClosed = true;
+    };
+
+    const initFiltersDrawer = () => {
+        const button = document.getElementById("filtersButton");
+        const column = document.getElementById("filtersColumn");
+        button.setAttribute("aria-controls", "filtersColumn");
+        button.addEventListener("click", (_event) => openFiltersDrawer());
+        column.addEventListener("click", (event) => {
+            if (event.target.closest("ul.filterList li, #filtersDrawerClose") !== null)
+                closeFiltersDrawer();
+        });
+        for (const type of ["click", "dblclick"]) {
+            document.addEventListener(type, (event) => {
+                if (!drawerClosed)
+                    return;
+                // a new click
+                if ((event.type === "click") && (event.detail < 2)) {
+                    drawerClosed = false;
+                    return;
+                }
+
+                event.preventDefault();
+                event.stopPropagation();
+            }, true);
+        }
+        chooseWithKeys(column, filterItems);
+        queries.drawer.addEventListener("change", (_event) => {
+            if (!queries.drawer.matches)
+                closeFiltersDrawer();
+        });
+        document.addEventListener("keydown", (event) => {
+            switch (event.key) {
+                case "Escape":
+                    // close the drawer, not also the window behind it
+                    if (root.classList.contains("filtersDrawerOpen"))
+                        event.stopPropagation();
+                    closeFiltersDrawer();
+                    break;
+            }
+        });
+
+        // the button moves to the menubar while the toolbar is hidden
+        const toolbar = document.getElementById("mochaToolbar");
+        const home = button.parentElement;
+        const homeNext = button.nextSibling;
+        const placeButton = () => {
+            if (toolbar.classList.contains("invisible"))
+                document.getElementById("desktopNavbar").append(button);
+            else if (button.parentElement !== home)
+                home.insertBefore(button, homeNext);
+        };
+        new MutationObserver(placeButton).observe(toolbar, { attributes: true, attributeFilter: ["class"] });
+        placeButton();
+    };
+
+    const initWindows = () => {
+        const windowObserver = new MutationObserver((mutations) => {
+            if (mutations.some((mutation) => [...mutation.addedNodes].some((node) => node.classList?.contains("mocha"))))
+                closeFiltersDrawer();
+        });
+        for (const container of new Set([document.getElementById("desktop"), document.body]))
+            windowObserver.observe(container, { childList: true });
+    };
     // called by client.js once the main window is built
     const init = () => {
         initLayout();
+        initFiltersDrawer();
+        initWindows();
     };
 
     return exports();
