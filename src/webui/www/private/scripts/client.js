@@ -1561,6 +1561,12 @@ window.addEventListener("DOMContentLoaded", async (event) => {
 
     // main window tabs
 
+    // Start, Stop, Remove and the queue buttons act on the transfer list: off in other views
+    const setTransferButtonsOff = (off) => {
+        for (const id of ["startButton", "stopButton", "deleteButton", "queueingButtons"])
+            document.getElementById(id).inert = off;
+    };
+
     const showTransfersTab = () => {
         const showFiltersSidebar = (clientData.get("show_filters_sidebar") ?? true) === true;
         if (showFiltersSidebar) {
@@ -1569,6 +1575,7 @@ window.addEventListener("DOMContentLoaded", async (event) => {
         }
         document.getElementById("mainColumn").classList.remove("invisible");
         document.getElementById("torrentsFilterToolbar").classList.remove("invisible");
+        setTransferButtonsOff(false);
 
         customSyncMainDataInterval = null;
         syncData(100);
@@ -1585,6 +1592,7 @@ window.addEventListener("DOMContentLoaded", async (event) => {
         document.getElementById("filtersColumn_handle").classList.add("invisible");
         document.getElementById("mainColumn").classList.add("invisible");
         document.getElementById("torrentsFilterToolbar").classList.add("invisible");
+        setTransferButtonsOff(true);
         MochaUI.Desktop.setDesktopSize();
     };
 
