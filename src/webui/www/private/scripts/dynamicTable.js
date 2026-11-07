@@ -102,6 +102,9 @@ window.qBittorrent.DynamicTable ??= (() => {
             this.rowHeight = (clientData.get("display_density") === "compact") ? 22 : 26;
             this.rows = new Map();
             this.renderedRows = [];
+            // the last result of sortRows(), which the next one starts from
+            this.sortedRows = [];
+            this.sortCall = 0;
             this.cachedElements = [];
             this.selectedRows = [];
             this.columns = [];
@@ -995,8 +998,41 @@ window.qBittorrent.DynamicTable ??= (() => {
             for (const row of this.getRowValues())
                 filteredRows.push(row);
 
-            filteredRows.sort(this.rowComparator());
-            return filteredRows;
+            return this.sortRows(filteredRows);
+        }
+
+        /**
+         * Sorts like a stable sort of the rows' Map order, starting from the last result so that it mostly finds
+         * runs in order.
+         * @param {Object[]} rows
+         * @returns {Object[]} a new array
+         */
+        sortRows(rows) {
+            const lastCall = this.sortCall;
+            const call = ++this.sortCall;
+            const added = [];
+            for (const [i, row] of rows.entries()) {
+                if (row.sortCall !== lastCall)
+                    added.push(row);
+                row.sortCall = call;
+                row.sortIndex = i;
+            }
+
+            const sorted = [];
+            for (const row of this.sortedRows) {
+                if (row.sortCall === call)
+                    sorted.push(row);
+            }
+            for (const row of added)
+                sorted.push(row);
+
+            const compare = this.rowComparator();
+            sorted.sort((row1, row2) => {
+                const result = compare(row1, row2);
+                return (result !== 0) ? result : (row1.sortIndex - row2.sortIndex);
+            });
+            this.sortedRows = sorted;
+            return sorted;
         }
 
         getTrByRowId(rowId) {
@@ -1262,6 +1298,7 @@ window.qBittorrent.DynamicTable ??= (() => {
         clear() {
             this.deselectAll();
             this.rows.clear();
+            this.sortedRows = [];
             if (this.useVirtualList) {
                 this.rerender();
             }
@@ -1986,8 +2023,7 @@ window.qBittorrent.DynamicTable ??= (() => {
                     filteredRows.push(row);
             }
 
-            filteredRows.sort(this.rowComparator());
-            return filteredRows;
+            return this.sortRows(filteredRows);
         }
 
         setupCommonEvents() {
@@ -2250,9 +2286,7 @@ window.qBittorrent.DynamicTable ??= (() => {
                 filteredRows = [...this.getRowValues()];
             }
 
-            filteredRows.sort(this.rowComparator());
-
-            return filteredRows;
+            return this.sortRows(filteredRows);
         }
     }
 
