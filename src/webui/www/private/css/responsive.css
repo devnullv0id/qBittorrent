@@ -2059,12 +2059,30 @@ td:has(> :disabled:not(#WebUIAPIKeyText)) {
         grid-column: 1 / -1;
     }
 
+    /* a row of its own, the choice below its name */
     & > .shareLimitsActionRow {
+        display: flex;
         flex-wrap: wrap;
+        gap: 8px;
+
+        & > label {
+            contain: none;
+        }
 
         & > select {
             flex: 1 1 100%;
         }
+    }
+}
+
+/* each field beside its name: in columns, a long name leaves its field no room */
+:root.responsivePhone .categoryFields {
+    display: flex;
+    flex-direction: column;
+
+    & > div {
+        align-items: center;
+        display: flex;
     }
 }
 
