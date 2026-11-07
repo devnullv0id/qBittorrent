@@ -260,6 +260,26 @@ window.qBittorrent.ContextMenu ??= (() => {
                         this.menu.scrollTop += Math.min(below, entryTop);
                 });
             });
+            // a tap leaves the entry hovered, so its submenu stays open: a second tap closes it, a third reopens it
+            let pointerType = "mouse";
+            this.menu.addEventListener("pointerdown", (event) => {
+                pointerType = event.pointerType;
+            }, true);
+            this.menu.addEventListener("click", (event) => {
+                const item = event.target.closest("li");
+                const submenu = item?.querySelector(":scope > ul") ?? null;
+                if ((pointerType === "mouse") || (submenu === null) || (getComputedStyle(submenu).position !== "static"))
+                    return;
+
+                const close = item.dataset.tappedOpen === "true";
+                item.dataset.tappedOpen = !close;
+                item.classList.toggle("submenuClosed", close);
+            });
+            this.menu.addEventListener("focusout", (event) => {
+                const item = event.target.closest("li");
+                if ((item !== null) && !item.contains(event.relatedTarget))
+                    this.forgetTappedSubmenus(item);
+            });
 
             // hide on body click, and on Escape
             document.body.addEventListener("click", ContextMenu.#onBodyClick);
@@ -321,17 +341,10 @@ window.qBittorrent.ContextMenu ??= (() => {
             if (lastShownContextMenu === null)
                 return;
 
-            const parentNode = event.target.parentNode;
-
-            // make sure the click was on a context menu item
-            if ((parentNode !== null) && (parentNode.tagName.toLowerCase() === "li")) {
-                const grandParentNode = parentNode.parentNode;
-                if ((grandParentNode !== null) && (grandParentNode.classList.contains("contextMenu"))) {
-                    const submenuNodes = parentNode.getElementsByTagName("ul");
-                    if (submenuNodes.length > 0)
-                        return;
-                }
-            }
+            // a click on an entry with a submenu keeps the menu open, at any depth and anywhere on the entry
+            const item = event.target.closest(".contextMenu li");
+            if ((item !== null) && (item.querySelector(":scope > ul") !== null))
+                return;
 
             lastShownContextMenu.hide();
             lastShownContextMenu.options.element = null;
@@ -349,7 +362,15 @@ window.qBittorrent.ContextMenu ??= (() => {
 
         // the items of one list that the keyboard moves through: those shown and enabled
         listItems(list) {
-            return [...list.querySelectorAll(":scope > li:not(.invisible, .disabled) > a")];
+            return [...list.querySelectorAll(":scope > li:not(.invisible, .disabled) > a")].filter((a) => a.getClientRects().length > 0);
+        }
+
+        // forget the taps, so that hovering or focusing opens submenus again
+        forgetTappedSubmenus(root) {
+            for (const item of [root, ...root.querySelectorAll("li")]) {
+                item.classList.remove("submenuClosed");
+                delete item.dataset.tappedOpen;
+            }
         }
 
         // the focus goes back to where it was when the menu opened
@@ -364,6 +385,7 @@ window.qBittorrent.ContextMenu ??= (() => {
         show(trigger) {
             if (lastShownContextMenu && (lastShownContextMenu !== this))
                 lastShownContextMenu.hide();
+            this.forgetTappedSubmenus(this.menu);
             this.menu.classList.add("visible");
             this.options.onShow.call(this);
             lastShownContextMenu = this;
