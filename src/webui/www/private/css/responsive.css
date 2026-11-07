@@ -1655,6 +1655,11 @@
         padding-top: 0;
     }
 
+    /* hidden until responsive.js has moved it after Stop */
+    #deleteButton:not(#stopButton + *) {
+        display: none;
+    }
+
     #propertiesPanel_header {
         height: auto;
 
