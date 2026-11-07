@@ -736,6 +736,10 @@ window.qBittorrent.Responsive ??= (() => {
 
     const isUserSized = (instance) => (instance.responsiveUserResized === true) || hasStoredSize(instance);
 
+    // on the desktop, dialogs are fitted to their page
+    const isDialog = (instance) => !ONE_SIZE_WINDOWS.has(instance.windowEl.id)
+        && ((instance.iframeEl !== undefined) || !instance.options.resizable || (instance.contentEl.querySelector(".dialogFooter") !== null));
+
     // what a window's fit depends on
     const fitState = (instance) => {
         const sizes = [root.clientWidth, root.clientHeight, instance.contentWrapperEl.style.width, instance.contentWrapperEl.style.height];
@@ -753,7 +757,7 @@ window.qBittorrent.Responsive ??= (() => {
             return;
 
         const phone = queries.phone.matches;
-        const fullScreen = fitWindowSize(instance, phone);
+        const { fullScreen, fitted } = fitWindowSize(instance, phone);
 
         // no dragging on phones
         if (phone)
@@ -770,7 +774,8 @@ window.qBittorrent.Responsive ??= (() => {
             windowEl.style.left = "0px";
             windowEl.style.top = "0px";
         }
-        else if (phone || wasFullScreen || (queries.relayout.matches && (instance.responsiveUserMoved !== true))) {
+        // Mocha centers a window at its opening size: recenter fitted windows until the user moves them
+        else if (phone || wasFullScreen || ((queries.relayout.matches || fitted) && (instance.responsiveUserMoved !== true))) {
             windowEl.style.left = `${Math.max(margin, Math.round((maxLeft + margin) / 2))}px`;
             windowEl.style.top = `${Math.max(margin, Math.round((maxTop + margin) / 2))}px`;
         }
@@ -779,13 +784,14 @@ window.qBittorrent.Responsive ??= (() => {
             windowEl.style.top = `${Math.max(margin, Math.min(windowEl.offsetTop, maxTop))}px`;
         }
         // a window fitted to its page stays unseen until the page is in, rather than show at two sizes
-        const fittedToPage = queries.relayout.matches && !ONE_SIZE_WINDOWS.has(windowEl.id);
+        const fittedToPage = queries.relayout.matches ? !ONE_SIZE_WINDOWS.has(windowEl.id)
+            : ((isDialog(instance) || windowEl.classList.contains("modalDialog")) && !isUserSized(instance));
         windowEl.classList.toggle("responsivePending", fittedToPage && (pageOf(instance) === null)
             && (instance.responsivePageWaited !== true));
         instance.responsiveFitState = fitState(instance);
     };
 
-    // returns whether the window is full screen
+    // returns whether the window is full screen and whether it was fitted to its page
     const fitWindowSize = (instance, phone) => {
         const windowEl = instance.windowEl;
         const wrapper = instance.contentWrapperEl;
@@ -811,6 +817,7 @@ window.qBittorrent.Responsive ??= (() => {
 
         let width = phone ? maxWidth : Math.min(maxWidth, wantedWidth);
         let height = Math.min(maxHeight, wantedHeight);
+        let fitted = false;
         let ownHeight = null;
         // a size the user gave a window is kept, except on phones
         const userSized = isUserSized(instance);
@@ -828,6 +835,15 @@ window.qBittorrent.Responsive ??= (() => {
             // room for the scrollbar
             if (pageOverflow(instance, width, height).height > 0)
                 width = Math.min(fitWidth, width + sidewaysScrollbarWidth(instance, width, height));
+            fitted = true;
+        }
+        // on the desktop, a dialog takes its page's height where it fits
+        else if (!queries.relayout.matches && !userSized && isDialog(instance)) {
+            const pageNeeds = pageHeight(instance, width, maxHeight);
+            if ((pageNeeds > 0) && (pageNeeds <= fitHeight)) {
+                height = pageNeeds;
+                fitted = true;
+            }
         }
         // a phone shows a page that fits as a card, else full screen
         const fullScreen = phone && (ownHeight !== null) && ((ownHeight === 0) || (ownHeight > fitHeight));
@@ -841,7 +857,7 @@ window.qBittorrent.Responsive ??= (() => {
         wrapper.style.height = instance.responsiveFittedSize?.height ?? wanted.height;
         setContentSize(instance, `${width}px`, `${height}px`);
         instance.responsiveFittedSize = { width: `${width}px`, height: `${height}px` };
-        return fullScreen;
+        return { fullScreen: fullScreen, fitted: fitted };
     };
 
     const fitWindows = () => {
@@ -931,8 +947,7 @@ window.qBittorrent.Responsive ??= (() => {
 
         // a window opened from the drawer would open behind it
         closeFiltersDrawer();
-        if (queries.relayout.matches)
-            raiseStoredSize(instance);
+        raiseStoredSize(instance);
         fitWindow(instance);
         // a page that takes long shows its window meanwhile
         setTimeout(() => {
@@ -989,10 +1004,7 @@ window.qBittorrent.Responsive ??= (() => {
                 // Mocha signals the resize only once the drag ends
                 instance.responsiveUserResized = true;
             });
-            drag?.addEvent("beforeStart", () => {
-                if (queries.relayout.matches)
-                    limitResize(instance);
-            });
+            drag?.addEvent("beforeStart", () => limitResize(instance));
         }
         // the edges that change the width
         for (const drag of [instance.resizable2, instance.resizable3, instance.resizable5])
