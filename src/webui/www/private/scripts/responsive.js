@@ -227,10 +227,25 @@ window.qBittorrent.Responsive ??= (() => {
         return true;
     };
 
+    // while the header slides, the list gets all of its height, which Mocha would share with the panel
+    let keptPropertiesHeight = 0;
+
+    const keepPropertiesPanel = () => {
+        const list = document.getElementById("transferList");
+        const properties = document.getElementById("propertiesPanel");
+        if ((keptPropertiesHeight === 0) || (properties.offsetHeight === 0) || (properties.offsetHeight === keptPropertiesHeight))
+            return false;
+
+        list.style.height = `${list.offsetHeight + properties.offsetHeight - keptPropertiesHeight}px`;
+        properties.style.height = `${keptPropertiesHeight}px`;
+        return true;
+    };
+
     // Mocha relayouts only when the browser window is resized
     const relayout = () => {
         MochaUI.Desktop.setDesktopSize();
-        if ((restoreProperties !== null) ? restorePropertiesPanel() : fitPropertiesPanel())
+        const kept = keepPropertiesPanel();
+        if (((restoreProperties !== null) ? restorePropertiesPanel() : fitPropertiesPanel()) || kept)
             MochaUI.Desktop.setDesktopSize();
     };
 
@@ -849,6 +864,99 @@ window.qBittorrent.Responsive ??= (() => {
         name();
     };
 
+    // a little longer than the transition in responsive.css
+    const SLIDE_TIME = 250;
+
+    // on small screens the header slides away as the list scrolls down, and back as it scrolls up
+    const initHeaderAutoHide = async () => {
+        const header = document.getElementById("desktopHeader");
+        const list = await whenElement("torrentsTableDiv");
+        let lockedUntil = 0;
+        let slideTimer = -1;
+        let slideFrame = 0;
+
+        // the list and panels follow the header's height while it slides, or it would push them under the status bar
+        const followSlide = () => {
+            relayout();
+            if (header.classList.contains("sliding"))
+                slideFrame = requestAnimationFrame(followSlide);
+        };
+
+        const endSlide = () => {
+            clearTimeout(slideTimer);
+            cancelAnimationFrame(slideFrame);
+            header.classList.remove("sliding");
+            header.style.removeProperty("height");
+            relayout();
+            keptPropertiesHeight = 0;
+            // ignore the scroll the relayout causes
+            lockedUntil = performance.now() + SLIDE_TIME;
+        };
+
+        const setHidden = (hidden) => {
+            if (root.classList.contains("headerHidden") === hidden)
+                return;
+
+            clearTimeout(slideTimer);
+            // the height before the first of overlapping slides
+            if (keptPropertiesHeight === 0)
+                keptPropertiesHeight = document.getElementById("propertiesPanel").offsetHeight;
+            header.classList.add("sliding");
+            // slide between fixed heights, as auto can't be animated
+            header.style.height = `${header.offsetHeight}px`;
+            void header.offsetHeight;
+            root.classList.toggle("headerHidden", hidden);
+            if (!hidden)
+                header.style.height = `${header.scrollHeight}px`;
+            if (getComputedStyle(header).transitionDuration === "0s") {
+                endSlide();
+            }
+            else {
+                slideTimer = setTimeout(endSlide, SLIDE_TIME);
+                cancelAnimationFrame(slideFrame);
+                slideFrame = requestAnimationFrame(followSlide);
+            }
+            // ignore the scrolls of the slide
+            lockedUntil = performance.now() + SLIDE_TIME;
+        };
+
+        const busy = () => header.contains(document.activeElement) && document.activeElement.matches("input, select");
+
+        // the header moves only after a whole row down or up, so that a finger's jitter leaves it
+        let lastTop = list.scrollTop;
+        let runDown = true;
+        let runFrom = lastTop;
+
+        // capturing: read the sizes before the list renders its rows
+        list.parentElement.addEventListener("scroll", (event) => {
+            if ((event.target !== list) || !queries.small.matches)
+                return;
+
+            const top = list.scrollTop;
+            if ((top !== lastTop) && ((top > lastTop) !== runDown)) {
+                runDown = top > lastTop;
+                runFrom = lastTop;
+            }
+            lastTop = top;
+            // the scrolls of a slide start no run
+            if (performance.now() < lockedUntil) {
+                runFrom = top;
+                return;
+            }
+
+            const rowHeight = window.torrentsTable.rowHeight;
+            if ((top <= rowHeight) || (!runDown && ((runFrom - top) >= rowHeight)))
+                setHidden(false);
+            else if (runDown && ((top - runFrom) >= rowHeight) && !root.classList.contains("headerHidden") && !busy() && ((list.scrollHeight - list.clientHeight) > (header.offsetHeight + 24)))
+                setHidden(true);
+        }, { capture: true, passive: true });
+        queries.small.addEventListener("change", (_event) => {
+            if (!queries.small.matches)
+                setHidden(false);
+        });
+        header.addEventListener("focusin", (event) => setHidden(false));
+    };
+
     // called by client.js once the main window is built
     const init = () => {
         initLayout();
@@ -856,6 +964,7 @@ window.qBittorrent.Responsive ??= (() => {
         initTouch();
         initWindows();
         initViewTabs();
+        initHeaderAutoHide();
     };
 
     return exports();
