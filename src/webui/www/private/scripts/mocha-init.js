@@ -45,7 +45,8 @@ window.qBittorrent.Dialog ??= (() => {
             baseModalOptions: baseModalOptions,
             limitWidthToViewport: limitWidthToViewport,
             limitHeightToViewport: limitHeightToViewport,
-            confirm: confirm
+            confirm: confirm,
+            alert: alert
         };
     };
 
@@ -122,6 +123,37 @@ window.qBittorrent.Dialog ??= (() => {
                 onYes: onYes
             }
         });
+    };
+
+    // a WebUI window instead of the browser's alert(); messages wait their turn, as alert()'s do
+    const messages = [];
+    const showMessage = () => {
+        new MochaUI.Modal({
+            ...baseModalOptions,
+            id: "messageDialog",
+            title: "qBittorrent",
+            contentURL: "views/message.html?v=${CACHEID}",
+            data: {
+                message: messages[0]
+            },
+            onCloseComplete: () => {
+                // once Mocha has let go of the window, which it does after this returns
+                setTimeout(() => {
+                    messages.shift();
+                    if (messages.length > 0) {
+                        showMessage();
+                        return;
+                    }
+
+                    baseModalOptions.onCloseComplete();
+                }, 0);
+            }
+        });
+    };
+    const alert = (message) => {
+        messages.push(message);
+        if (messages.length === 1)
+            showMessage();
     };
 
     return exports();
