@@ -145,7 +145,19 @@ window.qBittorrent.Dialog ??= (() => {
                         return;
                     }
 
-                    baseModalOptions.onCloseComplete();
+                    // a modal window the message showed over, such as a question whose action failed, stays modal
+                    const covered = Object.values(MochaUI.Windows.instances)
+                        .find((instance) => ((instance.options.type === "modal") || (instance.options.type === "modal2")) && !instance.isClosing);
+                    if (covered === undefined) {
+                        baseModalOptions.onCloseComplete();
+                        return;
+                    }
+                    MochaUI.currentModal = covered.windowEl;
+                    // back above the cover, where Mocha put it as it opened
+                    covered.windowEl.style.zIndex = 11000;
+                    MochaUI.Modal.modalOverlayCloseMorph.cancel();
+                    document.getElementById("modalOverlay").style.display = "block";
+                    MochaUI.Modal.modalOverlayOpenMorph.start({ opacity: 0.6 });
                 }, 0);
             }
         });
@@ -604,7 +616,7 @@ const initializeWindows = () => {
                     })
                     .then((response) => {
                         if (!response.ok) {
-                            alert("QBT_TR(Unable to delete torrents.)QBT_TR[CONTEXT=HttpServer]");
+                            window.qBittorrent.Dialog.alert("QBT_TR(Unable to delete torrents.)QBT_TR[CONTEXT=HttpServer]");
                             return;
                         }
 
@@ -653,7 +665,7 @@ const initializeWindows = () => {
             method: "POST",
         }).then((response) => {
             if (!response.ok) {
-                alert("QBT_TR(Unable to pause the session.)QBT_TR[CONTEXT=HttpServer]");
+                window.qBittorrent.Dialog.alert("QBT_TR(Unable to pause the session.)QBT_TR[CONTEXT=HttpServer]");
                 return;
             }
             updateMainData();
@@ -665,7 +677,7 @@ const initializeWindows = () => {
             method: "POST",
         }).then((response) => {
             if (!response.ok) {
-                alert("QBT_TR(Unable to resume the session.)QBT_TR[CONTEXT=HttpServer]");
+                window.qBittorrent.Dialog.alert("QBT_TR(Unable to resume the session.)QBT_TR[CONTEXT=HttpServer]");
                 return;
             }
             updateMainData();
@@ -698,7 +710,7 @@ const initializeWindows = () => {
                     })
                     .then((response) => {
                         if (!response.ok) {
-                            alert("QBT_TR(Unable to set Auto Torrent Management for the selected torrents.)QBT_TR[CONTEXT=HttpServer]");
+                            window.qBittorrent.Dialog.alert("QBT_TR(Unable to set Auto Torrent Management for the selected torrents.)QBT_TR[CONTEXT=HttpServer]");
                             return;
                         }
 
@@ -729,7 +741,7 @@ const initializeWindows = () => {
                     })
                     .then((response) => {
                         if (!response.ok) {
-                            alert("QBT_TR(Unable to recheck torrents.)QBT_TR[CONTEXT=HttpServer]");
+                            window.qBittorrent.Dialog.alert("QBT_TR(Unable to recheck torrents.)QBT_TR[CONTEXT=HttpServer]");
                             return;
                         }
 
@@ -847,7 +859,7 @@ const initializeWindows = () => {
                 })
                 .then((response) => {
                     if (!response.ok) {
-                        alert("QBT_TR(Unable to start torrents.)QBT_TR[CONTEXT=HttpServer]");
+                        window.qBittorrent.Dialog.alert("QBT_TR(Unable to start torrents.)QBT_TR[CONTEXT=HttpServer]");
                         return;
                     }
 
@@ -869,7 +881,7 @@ const initializeWindows = () => {
                 })
                 .then((response) => {
                     if (!response.ok) {
-                        alert("QBT_TR(Unable to force start torrents.)QBT_TR[CONTEXT=HttpServer]");
+                        window.qBittorrent.Dialog.alert("QBT_TR(Unable to force start torrents.)QBT_TR[CONTEXT=HttpServer]");
                         return;
                     }
 
@@ -890,7 +902,7 @@ const initializeWindows = () => {
                 })
                 .then((response) => {
                     if (!response.ok) {
-                        alert("QBT_TR(Unable to stop torrents.)QBT_TR[CONTEXT=HttpServer]");
+                        window.qBittorrent.Dialog.alert("QBT_TR(Unable to stop torrents.)QBT_TR[CONTEXT=HttpServer]");
                         return;
                     }
 
@@ -929,7 +941,7 @@ const initializeWindows = () => {
                     })
                     .then((response) => {
                         if (!response.ok) {
-                            alert("QBT_TR(Unable to delete torrents.)QBT_TR[CONTEXT=HttpServer]");
+                            window.qBittorrent.Dialog.alert("QBT_TR(Unable to delete torrents.)QBT_TR[CONTEXT=HttpServer]");
                             return;
                         }
 
