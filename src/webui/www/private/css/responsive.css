@@ -91,6 +91,20 @@ td:has(> :disabled:not(#WebUIAPIKeyText)) {
     }
 }
 
+/* Options, RSS Downloader and Rename Files with a mouse: selects as tall as text fields */
+@media not (pointer: coarse) {
+    :is(#preferencesPage, #rssdownloaderpage, #multiRenamePage) {
+        & select:not([multiple], #renameOptions) {
+            height: calc(1.5em + 8px);
+            padding-block: 3px;
+
+            :root.compact & {
+                height: calc(1.2em + 8px);
+            }
+        }
+    }
+}
+
 :where(input[type="button"], input[type="submit"], button) {
     --button-background: var(--color-button-face);
 }
