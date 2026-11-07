@@ -15,6 +15,15 @@
     min-width: 0; /* override Layout.css */
 }
 
+/* Pull to refresh on phones, which needs the root to scroll; not while a window or drawer is open */
+:root.responsivePhone:has(#desktop):not(
+        .filtersDrawerOpen,
+        .menuDrawerOpen,
+        :has(.mocha)
+    ) {
+    overflow-y: auto !important; /* override MochaUI's inline style */
+}
+
 /* Drawers */
 .responsiveScrim {
     background-color: hsl(0deg 0% 0% / 40%);
