@@ -1208,6 +1208,55 @@ window.qBittorrent.Responsive ??= (() => {
         });
     };
 
+    // on phones the toolbar's buttons scroll under its Menu button; an edge with more buttons beyond it fades
+    const initToolbarEdges = () => {
+        const strip = document.getElementById("toolbarButtons");
+        const menuButton = document.getElementById("menuDrawerButton");
+        const update = () => {
+            const end = strip.scrollWidth - strip.clientWidth;
+            strip.classList.toggle("moreBefore", strip.scrollLeft > 1);
+            strip.classList.toggle("moreAfter", strip.scrollLeft < (end - 1));
+            strip.style.setProperty("--toolbar-start", `${menuButton.getBoundingClientRect().right - strip.getBoundingClientRect().left}px`);
+        };
+        strip.addEventListener("scroll", (_event) => update(), { passive: true });
+        // the strip, and the buttons in it, which some settings show or hide
+        const sizeObserver = new ResizeObserver((_entries) => update());
+        sizeObserver.observe(strip);
+        for (const child of strip.children)
+            sizeObserver.observe(child);
+        update();
+    };
+
+    // small screens start with the properties panel collapsed; larger ones undo a collapse that only this made
+    const initPropertiesPanel = async () => {
+        const collapsed = localPreferences.get("properties_panel_collapsed");
+        if (queries.small.matches) {
+            if (collapsed === null) {
+                localPreferences.set("properties_panel_collapsed", "true");
+                localPreferences.set("properties_panel_collapsed_by_layout", "true");
+            }
+        }
+        else if (localPreferences.get("properties_panel_collapsed_by_layout") !== null) {
+            localPreferences.remove("properties_panel_collapsed_by_layout");
+            if (collapsed === "true")
+                localPreferences.remove("properties_panel_collapsed");
+        }
+        if (localPreferences.get("properties_panel_collapsed_by_layout") === null)
+            return;
+
+        // once the user's own click expands or collapses the panel, the stored state is theirs
+        const header = await whenElement("propertiesPanel_header");
+        let stored = null;
+        header.addEventListener("click", (event) => {
+            if (event.isTrusted)
+                stored = localPreferences.get("properties_panel_collapsed");
+        }, true);
+        header.addEventListener("click", (event) => {
+            if (event.isTrusted && (localPreferences.get("properties_panel_collapsed") !== stored))
+                localPreferences.remove("properties_panel_collapsed_by_layout");
+        });
+    };
+
     // called by client.js once the main window is built
     const init = () => {
         initLayout();
@@ -1220,6 +1269,8 @@ window.qBittorrent.Responsive ??= (() => {
         initCardCheckboxes();
         initCardSorting();
         initMenuDrawer();
+        initToolbarEdges();
+        initPropertiesPanel();
     };
 
     return exports();
