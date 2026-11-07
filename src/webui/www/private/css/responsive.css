@@ -120,6 +120,102 @@
     }
 }
 
+/* Status bar */
+:root.responsiveRelayout {
+    & #desktopFooterWrapper {
+        height: auto;
+    }
+
+    & #desktopFooter {
+        height: auto;
+        min-height: 28px;
+        overflow: visible !important; /* override inline style */
+
+        & > table,
+        & > table > tbody {
+            display: block;
+            width: auto !important;
+        }
+
+        & > table > tbody > tr {
+            align-items: center;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2px;
+            justify-content: flex-end;
+            min-height: 24px;
+            padding: 0 2px;
+        }
+
+        & :is(td.statusBarSeparator, td.speedLabel) {
+            align-self: stretch;
+        }
+
+        & td.speedLabel {
+            align-content: center;
+        }
+    }
+}
+
+/* Status bar on phones: the status on one row, the speeds on the next */
+@media (width < 760px) {
+    /* the separators between the free space, external IP and DHT nodes stay */
+    #desktopFooter
+        td.statusBarSeparator:not(:has(+ :is(#externalIPs, #DHTNodes))) {
+        display: none;
+    }
+
+    /* the speeds start a row of their own */
+    :root.responsiveRelayout #desktopFooter > table > tbody > tr::after {
+        content: "";
+        flex-basis: 100%;
+        order: 4;
+    }
+
+    /* no right margin, so that the speeds take halves of the screen */
+    :root.responsiveRelayout #desktopFooter > table {
+        margin-right: 0 !important; /* override inline style */
+    }
+
+    /* the icons at the ends of the first row, with what is between them centered */
+    #desktopFooter td:has(> #connectionStatus) {
+        margin-right: auto;
+        order: 1;
+    }
+
+    #desktopFooter
+        :is(#freeSpaceOnDisk, #externalIPs, #DHTNodes, td.statusBarSeparator) {
+        order: 2;
+    }
+
+    #desktopFooter td:has(> #alternativeSpeedLimits) {
+        margin-left: auto;
+        order: 3;
+    }
+
+    /* cut short rather than wrapped, so that the first row stays one row */
+    #desktopFooter :is(#freeSpaceOnDisk, #externalIPs, #DHTNodes) {
+        flex: 100 1 0;
+        max-width: max-content;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    #desktopFooter #externalIPs {
+        flex-grow: 1;
+    }
+
+    /* each speed centered in its half, wrapped when it is longer */
+    :root.responsiveRelayout #desktopFooter td.speedLabel {
+        flex: 1 1 0;
+        min-width: 0;
+        order: 5;
+        text-align: center;
+    }
+}
+
 /* targets dialog windows loaded via iframes */
 :root.responsiveRelayout body:not(:has(#desktop)) {
     & input[type="text"],
