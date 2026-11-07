@@ -1689,3 +1689,67 @@
         padding-left: 0;
     }
 }
+
+/* Toolbar on phones */
+#toolbarButtons {
+    display: contents;
+}
+
+@media (width < 760px) {
+    #mochaToolbar {
+        align-items: center;
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    #toolbarButtons {
+        /* half a button, over which an edge fades */
+        --fade: calc(var(--responsive-touch-target, 24px) / 2);
+
+        display: block;
+        flex: 1 1 0;
+        /* the buttons' own boxes space them: not the markup's spaces, nor the desktop's indent */
+        font-size: 0;
+        min-width: 0;
+        overflow: auto hidden;
+        scrollbar-width: none;
+        white-space: nowrap;
+
+        /* the Menu button stays in view, and the buttons scroll under it */
+        & #menuDrawerButton {
+            background: var(--color-background-primary);
+            left: 0;
+            position: sticky;
+        }
+
+        /* fade an edge with more buttons beyond it; --toolbar-start is set by responsive.js */
+        &.moreBefore,
+        &.moreAfter {
+            mask-image: linear-gradient(
+                to right,
+                #000000 var(--toolbar-start),
+                var(--before-edge, #000000) var(--toolbar-start),
+                #000000 calc(var(--toolbar-start) + var(--fade)),
+                #000000 calc(100% - var(--fade)),
+                var(--after-edge, #000000)
+            );
+        }
+
+        &.moreBefore {
+            --before-edge: transparent;
+        }
+
+        &.moreAfter {
+            --after-edge: transparent;
+        }
+    }
+
+    #mainWindowTabs {
+        flex: none;
+        float: none;
+    }
+
+    #torrentsFilterToolbar {
+        flex: 1 1 100%;
+    }
+}
