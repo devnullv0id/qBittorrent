@@ -296,11 +296,16 @@
             };
 
             const addRowsToTable = (rows, selectedRows) => {
+                const selectedRowIds = new Set(selectedRows);
                 // Opened from the transfer list (no rows given): start with every file selected
-                const isRowSelected = (rowId) => ((selectedRows === undefined) || selectedRows.includes(rowId.toString()));
+                const isRowSelected = (rowId) => ((selectedRows === undefined) || selectedRowIds.has(rowId.toString()));
                 let rowId = 0;
                 const rootNode = new window.qBittorrent.FileTree.FolderNode();
                 rootNode.autoCalculateCheckedState = false;
+                // Map<FolderNode, Map<folderName: String, FolderNode>>
+                const childFolders = new Map([
+                    [rootNode, new Map()]
+                ]);
 
                 for (const row of rows) {
                     const pathItems = row.path.split(window.qBittorrent.Filesystem.PathSeparator);
@@ -311,16 +316,8 @@
                         if (folderName === ".unwanted")
                             continue;
 
-                        let folderNode = null;
-                        if (parent.children !== null) {
-                            for (let i = 0; i < parent.children.length; ++i) {
-                                const childFolder = parent.children[i];
-                                if (childFolder.original === folderName) {
-                                    folderNode = childFolder;
-                                    break;
-                                }
-                            }
-                        }
+                        const parentFolders = childFolders.get(parent);
+                        let folderNode = parentFolders.get(folderName) ?? null;
 
                         if (folderNode === null) {
                             folderNode = new window.qBittorrent.FileTree.FolderNode();
@@ -334,6 +331,8 @@
                             folderNode.renamed = "";
                             folderNode.root = parent;
                             parent.addChild(folderNode);
+                            parentFolders.set(folderName, folderNode);
+                            childFolders.set(folderNode, new Map());
 
                             ++rowId;
                         }
