@@ -1096,6 +1096,39 @@ window.qBittorrent.Responsive ??= (() => {
         update();
     };
 
+    // the bar above the cards sorts them and opens the columns menu
+    const initCardSorting = async () => {
+        await whenElement("torrentsTableDiv");
+        const table = window.torrentsTable;
+        const select = document.getElementById("torrentsSortSelect");
+        const order = document.getElementById("torrentsSortOrder");
+        const update = () => {
+            if (!queries.phone.matches)
+                return;
+
+            const options = table.columns.filter((column) => column.caption !== "").map((column) => new Option(column.caption, column.name));
+            select.replaceChildren(...options);
+            select.value = table.columns[table.sortedColumn]?.name ?? "";
+            order.setAttribute("aria-pressed", (table.reverseSort === "1"));
+        };
+        select.addEventListener("change", (event) => {
+            table.setSortedColumn(select.value, table.reverseSort);
+            update();
+        });
+        order.addEventListener("click", (event) => {
+            table.setSortedColumn(table.sortedColumn);
+            update();
+        });
+        // the header's menu, below the button
+        document.getElementById("torrentsColumnsButton").addEventListener("click", (event) => {
+            event.stopPropagation();
+            const box = event.currentTarget.getBoundingClientRect();
+            table.fixedTableHeader.firstElementChild.dispatchEvent(new MouseEvent("contextmenu", { bubbles: true, cancelable: true, button: 2, clientX: box.left, clientY: box.bottom }));
+        });
+        queries.phone.addEventListener("change", (_event) => update());
+        update();
+    };
+
     // called by client.js once the main window is built
     const init = () => {
         initLayout();
@@ -1106,6 +1139,7 @@ window.qBittorrent.Responsive ??= (() => {
         initHeaderAutoHide();
         initCards();
         initCardCheckboxes();
+        initCardSorting();
     };
 
     return exports();
