@@ -52,6 +52,10 @@ window.qBittorrent.ColorScheme ??= (() => {
     // main window falls back to system preference until client.js calls update() after fetch
     update();
 
+    // dialog frames take the responsive layout from the main window, the only page that loads responsive.js
+    if (window.qBittorrent.Responsive === undefined)
+        window.parent.qBittorrent.Responsive?.addFrame(document);
+
     return exports();
 })();
 Object.freeze(window.qBittorrent.ColorScheme);
