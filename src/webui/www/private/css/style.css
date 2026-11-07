@@ -2,34 +2,42 @@
 
 /* Default rules */
 :root {
-    --color-accent-blue: hsl(210deg 65% 47%);
-    --color-text-blue: hsl(210deg 100% 42%);
-    --color-text-orange: hsl(26deg 100% 35%);
-    --color-text-red: hsl(0deg 100% 43%);
-    --color-text-green: hsl(110deg 94% 25%);
-    --color-text-white: hsl(0deg 0% 100%);
+    /* surfaces */
+    --color-surface-page: hsl(0deg 0% 100%);
+    --color-surface-chrome: hsl(0deg 0% 94%);
+    --color-surface-popup: hsl(0deg 0% 100%);
+    --color-overlay: hsl(0deg 0% 0% / 30%);
+
+    /* text */
+    --color-text: hsl(0deg 0% 33%);
+    --color-text-on-accent: hsl(0deg 0% 100%);
     --color-text-disabled: hsl(0deg 0% 60%);
-    --color-text-default: hsl(0deg 0% 33%);
     --color-text-placeholder: hsl(0deg 0% 42%);
-    --color-text-hover: var(--color-text-default);
-    --color-background-primary: hsl(0deg 0% 100%);
-    --color-background-blue: hsl(210deg 65% 47%);
-    --color-background-popup: hsl(0deg 0% 100%);
-    --color-background-default: hsl(0deg 0% 94%);
-    --color-background-hover: hsl(26deg 80% 88%);
-    --color-border-blue: hsl(210deg 42% 48%);
-    --color-border-default: hsl(0deg 0% 85%);
+    --color-text-hover: var(--color-text);
+
+    /* lines */
+    --color-border: hsl(0deg 0% 85%);
     --color-border-control: hsl(0deg 0% 54%);
+
+    /* states */
+    --color-selection: hsl(210deg 65% 47%);
+    --color-hover: hsl(26deg 80% 88%);
     --color-focus-ring: hsl(210deg 80% 40%);
     --color-icon-hover: brightness(0) invert(100%) sepia(100%) saturate(0%)
         hue-rotate(108deg) brightness(104%) contrast(104%);
+
+    /* signals */
+    --color-info: hsl(210deg 100% 42%);
+    --color-warning: hsl(26deg 100% 35%);
+    --color-error: hsl(0deg 100% 43%);
+    --color-success: hsl(110deg 94% 25%);
 
     & #torrentTrackersTableDiv tr {
         --color-tracker-disabled: hsl(240deg 4% 46%);
         --color-tracker-not-contacted: hsl(32deg 95% 33%);
         --color-tracker-working: hsl(142deg 76% 28%);
-        --color-tracker-updating: hsl(210deg 100% 42%);
-        --color-tracker-not-working: hsl(0deg 100% 43%);
+        --color-tracker-updating: var(--color-info);
+        --color-tracker-not-working: var(--color-error);
     }
 
     &:not(.dark) {
@@ -37,28 +45,25 @@
     }
 
     &.dark {
-        --color-accent-blue: hsl(210deg 42% 47%);
-        --color-text-blue: hsl(210deg 88.1% 73.5%);
-        --color-text-orange: hsl(26deg 65% 70%);
-        --color-text-red: hsl(0deg 100% 77%);
-        --color-text-green: hsl(110deg 70% 46%);
-        --color-text-default: hsl(0deg 0% 90%);
+        --color-surface-page: hsl(0deg 0% 7%);
+        --color-surface-chrome: hsl(0deg 0% 25%);
+        --color-surface-popup: hsl(0deg 0% 20%);
+        --color-text: hsl(0deg 0% 90%);
         --color-text-placeholder: hsl(0deg 0% 70%);
-        --color-background-primary: hsl(0deg 0% 7%);
-        --color-background-blue: hsl(210deg 42% 47%);
-        --color-background-popup: hsl(0deg 0% 20%);
-        --color-background-default: hsl(0deg 0% 25%);
-        --color-background-hover: hsl(26deg 35% 26%);
-        --color-border-default: hsl(0deg 0% 33%);
+        --color-border: hsl(0deg 0% 33%);
         --color-border-control: hsl(0deg 0% 56%);
+        --color-selection: hsl(210deg 42% 47%);
+        --color-hover: hsl(26deg 35% 26%);
         --color-focus-ring: hsl(210deg 90% 65%);
+        --color-info: hsl(210deg 88.1% 73.5%);
+        --color-warning: hsl(26deg 65% 70%);
+        --color-error: hsl(0deg 100% 77%);
+        --color-success: hsl(110deg 70% 46%);
 
         & #torrentTrackersTableDiv tr {
             --color-tracker-disabled: hsl(240deg 6% 83%);
             --color-tracker-not-contacted: hsl(39deg 100% 72%);
             --color-tracker-working: hsl(142deg 69% 58%);
-            --color-tracker-updating: hsl(210deg 88.1% 73.5%);
-            --color-tracker-not-working: hsl(0deg 100% 77%);
         }
 
         color-scheme: dark;
@@ -133,7 +138,7 @@ textarea,
 select {
     border: 1px solid var(--color-border-control);
     border-radius: 3px;
-    color: var(--color-text-default);
+    color: var(--color-text);
     padding: 3px;
 }
 
@@ -149,12 +154,12 @@ select {
 
 input[type="checkbox"],
 input[type="radio"] {
-    accent-color: var(--color-accent-blue);
+    accent-color: var(--color-selection);
     margin: 3px 3px 3px 4px;
 }
 
 input[type="range"] {
-    accent-color: var(--color-accent-blue);
+    accent-color: var(--color-selection);
 }
 
 input[type="button"],
@@ -187,8 +192,8 @@ button:disabled {
 /* Structure */
 
 body {
-    background-color: var(--color-background-primary);
-    color: var(--color-text-default);
+    background-color: var(--color-surface-page);
+    color: var(--color-text);
     font-family: Arial, Helvetica, sans-serif;
     font-size: 12px;
     line-height: 1.5;
@@ -203,7 +208,7 @@ body {
 
 /* targets dialog windows loaded via iframes */
 body:not(:has(#desktop)) {
-    background-color: var(--color-background-popup);
+    background-color: var(--color-surface-popup);
 }
 
 .invisible {
@@ -221,13 +226,13 @@ h4 {
 }
 
 h2 {
-    color: var(--color-text-default);
+    color: var(--color-text);
     font-size: 14px;
     font-weight: bold;
 }
 
 #mochaPage h3 {
-    border-bottom: 1px solid var(--color-border-default);
+    border-bottom: 1px solid var(--color-border);
     display: block;
     font-size: 12px;
     margin: 0 0 8px;
@@ -236,7 +241,7 @@ h2 {
 
 #error_div,
 #rename_error {
-    color: var(--color-text-red);
+    color: var(--color-error);
     float: left;
     font-size: 14px;
     font-weight: bold;
@@ -247,7 +252,7 @@ h4 {
 }
 
 a {
-    color: var(--color-text-orange);
+    color: var(--color-warning);
     cursor: pointer;
     text-decoration: none;
 }
@@ -273,7 +278,7 @@ dd {
 /* Forms */
 
 fieldset {
-    border: 1px solid var(--color-border-default);
+    border: 1px solid var(--color-border);
     border-radius: 1px;
     margin: 0 2px;
 }
@@ -281,9 +286,9 @@ fieldset {
 /* Code */
 
 pre {
-    background-color: var(--color-background-default);
-    border: 1px solid var(--color-border-default);
-    color: var(--color-text-green);
+    background-color: var(--color-surface-chrome);
+    border: 1px solid var(--color-border);
+    color: var(--color-success);
     display: block;
     font-family: "Courier New", Courier, monospace;
     font-size: 11px;
@@ -296,9 +301,9 @@ pre {
 /* Dividers */
 
 hr {
-    background-color: var(--color-background-default);
+    background-color: var(--color-surface-chrome);
     border: 0;
-    color: var(--color-text-default);
+    color: var(--color-text);
     height: 1px;
     margin-bottom: 6px;
 }
@@ -329,7 +334,7 @@ hr {
 }
 
 #properties {
-    background-color: var(--color-background-default);
+    background-color: var(--color-surface-chrome);
 }
 
 .scrollableMenu {
@@ -347,8 +352,8 @@ hr {
 /* context menu specific */
 
 .contextMenu {
-    background-color: var(--color-background-default);
-    border: 1px solid var(--color-border-default);
+    background-color: var(--color-surface-chrome);
+    border: 1px solid var(--color-border);
     display: none;
     opacity: 0;
     padding: 0;
@@ -371,11 +376,11 @@ hr {
 }
 
 .contextMenu .separator {
-    border-top: 1px solid var(--color-border-default);
+    border-top: 1px solid var(--color-border);
 }
 
 .contextMenu .separatorBottom {
-    border-bottom: 1px solid var(--color-border-default);
+    border-bottom: 1px solid var(--color-border);
 }
 
 .contextMenu li {
@@ -395,7 +400,7 @@ hr {
 
 .contextMenu li a {
     align-items: center;
-    color: var(--color-text-default);
+    color: var(--color-text);
     display: flex;
     gap: 2px;
     padding: 5px 20px 5px 5px;
@@ -405,7 +410,7 @@ hr {
 }
 
 .contextMenu li a:is(:hover, :focus-visible) {
-    background-color: var(--color-background-hover);
+    background-color: var(--color-hover);
     color: var(--color-text-hover);
 }
 
@@ -415,8 +420,8 @@ hr {
 }
 
 .contextMenu li ul {
-    background: var(--color-background-default);
-    border: 1px solid var(--color-border-default);
+    background: var(--color-surface-chrome);
+    border: 1px solid var(--color-border);
     left: -999em;
     margin: -29px 0 0 100%;
     padding: 0;
@@ -505,10 +510,7 @@ hr {
 
 /* separator lines in the theme's border color */
 #mochaToolbar .divider {
-    background-image: linear-gradient(
-        var(--color-border-default),
-        var(--color-border-default)
-    );
+    background-image: linear-gradient(var(--color-border), var(--color-border));
     background-position: left center;
     background-repeat: no-repeat;
     background-size: 1px 20px;
@@ -535,7 +537,7 @@ hr {
 }
 
 #torrentsFilterInput {
-    background-color: var(--color-background-default);
+    background-color: var(--color-surface-chrome);
     background-image: url("../images/edit-find.svg");
     background-position: 2px;
     background-repeat: no-repeat;
@@ -568,12 +570,12 @@ hr {
 }
 
 #torrentsFilterRegexBox:checked + label {
-    background-color: var(--color-background-default);
+    background-color: var(--color-surface-chrome);
     background-image: url("../images/regex.svg");
     background-position: center;
     background-repeat: no-repeat;
     background-size: 1.5em;
-    border: 1px solid var(--color-accent-blue);
+    border: 1px solid var(--color-selection);
     border-radius: 4px;
     display: inline-block;
     height: 26px;
@@ -607,7 +609,7 @@ hr {
 }
 
 fieldset.settings {
-    border: 1px solid var(--color-border-default);
+    border: 1px solid var(--color-border);
     padding: 4px 4px 6px 6px;
 }
 
@@ -689,7 +691,7 @@ ul.filterList span.link {
 /* only where the pointer hovers: a touch screen leaves the last tapped filter hovered */
 @media (hover: hover) {
     ul.filterList span.link:hover {
-        background-color: var(--color-background-hover);
+        background-color: var(--color-hover);
         color: var(--color-text-hover);
     }
 }
@@ -707,8 +709,8 @@ span.link :is(img, button) {
 
 /* after the hover and as specific, so the selected filter stays marked under the pointer */
 ul.filterList .selectedFilter > span.link {
-    background-color: var(--color-background-blue);
-    color: var(--color-text-white);
+    background-color: var(--color-selection);
+    color: var(--color-text-on-accent);
 }
 
 .subcategories,
@@ -873,10 +875,7 @@ td.noWrap {
 }
 
 td.statusBarSeparator {
-    background-image: linear-gradient(
-        var(--color-border-default),
-        var(--color-border-default)
-    );
+    background-image: linear-gradient(var(--color-border), var(--color-border));
     background-position: center 1px;
     background-repeat: no-repeat;
     background-size: 1px 18px;
@@ -886,7 +885,7 @@ td.statusBarSeparator {
 /* Statistics window */
 #statisticsContent {
     & table {
-        background-color: var(--color-background-default);
+        background-color: var(--color-surface-chrome);
         border-radius: 6px;
         margin-bottom: 6px;
         padding: 6px 10px;
@@ -897,7 +896,7 @@ td.statusBarSeparator {
     }
 
     & h3 {
-        color: var(--color-text-default);
+        color: var(--color-text);
         margin-bottom: 1px;
         padding: 2px;
     }
@@ -926,17 +925,17 @@ td.statusBarSeparator {
 }
 
 .red {
-    color: var(--color-text-red);
+    color: var(--color-error);
 }
 
 .green {
-    color: var(--color-text-green);
+    color: var(--color-success);
 }
 
 @media (hover: hover) {
     #torrentFilesTableDiv .dynamicTable tr.nonAlt:hover,
     #addTorrentFilesTableDiv .dynamicTable tr.nonAlt:hover {
-        background-color: var(--color-background-hover);
+        background-color: var(--color-hover);
         color: var(--color-text-hover);
     }
 }
@@ -958,7 +957,7 @@ td.statusBarSeparator {
 
 #rememberBtn {
     background: url("../images/object-locked.svg") center center / 24px
-        no-repeat var(--color-background-popup);
+        no-repeat var(--color-surface-popup);
     height: 38px;
     padding: 4px 6px;
     width: 38px;
