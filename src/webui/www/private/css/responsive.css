@@ -359,12 +359,12 @@
         width: auto;
     }
 
-    & li:not(.disabled):hover > ul {
+    & li:not(.disabled):is(:hover, :focus-within) > ul {
         display: block;
     }
 
     /* the chevron turns down while the submenu is open */
-    & li:not(.disabled):hover > .arrow-right::after {
+    & li:not(.disabled):is(:hover, :focus-within) > .arrow-right::after {
         transform: translateY(-75%) rotate(45deg);
     }
 }
