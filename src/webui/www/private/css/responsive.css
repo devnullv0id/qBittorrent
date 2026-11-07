@@ -116,3 +116,27 @@
         }
     }
 }
+
+/* Windows on phones */
+:root.responsivePhone .mochaMaximizeButton {
+    display: none;
+}
+
+.mocha.responsiveFullScreen {
+    border-radius: 0;
+    box-shadow: none;
+
+    & .mochaOverlay {
+        border-radius: 0;
+    }
+}
+
+/* no resizing on phones, which refit every window */
+:root.responsivePhone .mocha .handle {
+    display: none;
+}
+
+:root.responsivePhone .mocha .tab-menu {
+    flex-wrap: wrap;
+    row-gap: 4px;
+}
