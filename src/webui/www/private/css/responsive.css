@@ -8,6 +8,7 @@
     --responsive-card-height: 112px; /* also used in responsive.js */
     --responsive-card-menu-width: 44px; /* also used in responsive.js */
     --responsive-card-menu-height: 40px; /* also used in responsive.js */
+    --responsive-card-check-width: 40px; /* also used in responsive.js */
 }
 
 #desktop {
@@ -195,7 +196,8 @@
 
 @media (width < 480px) {
     /* hidden, but still read by screen readers */
-    #torrentsFilterToolbar label[for="torrentsFilterSelect"] {
+    #torrentsFilterToolbar label[for="torrentsFilterSelect"],
+    #torrentsSelectionCount > span {
         clip-path: inset(50%);
         height: 1px;
         overflow: hidden;
@@ -281,9 +283,32 @@
 }
 
 /* Torrent cards on phones */
+#torrentsSelectionBar {
+    display: none;
+}
+
 @media (width < 760px) {
     #torrentsTableFixedHeaderDiv {
         display: none;
+    }
+
+    #torrentsSelectionBar {
+        align-items: center;
+        border-bottom: var(--responsive-separator);
+        display: flex;
+        gap: var(--responsive-gap);
+        padding: 4px 12px;
+
+        & #torrentsSelectAll {
+            flex: none;
+            margin: 0;
+        }
+
+        & #torrentsSelectionCount {
+            flex: 1 0 auto;
+            font-weight: bold;
+            white-space: nowrap;
+        }
     }
 
     #transferList #torrentsTableDiv {
@@ -309,6 +334,26 @@
             padding: 0 12px;
             right: 0;
             width: auto !important;
+        }
+
+        /* selection checkbox */
+        & tbody tr::before {
+            align-self: start;
+            background-color: var(--color-background-popup);
+            border: 1px solid var(--color-border-default);
+            border-radius: 3px;
+            content: "";
+            grid-area: 1 / 1 / 5 / 2;
+            height: 20px;
+            width: 20px;
+        }
+
+        /* the check cut out of the box, so it shows the selected card's color */
+        & tbody tr.selected::before {
+            mask:
+                url("../images/checked-completed.svg") center / 14px no-repeat,
+                linear-gradient(#000000 0 0);
+            mask-composite: exclude;
         }
 
         /* menu button */
