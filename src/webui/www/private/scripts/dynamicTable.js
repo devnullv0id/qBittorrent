@@ -81,9 +81,15 @@ window.qBittorrent.DynamicTable ??= (() => {
 
     const localPreferences = new window.qBittorrent.LocalPreferences.LocalPreferences();
     const clientData = window.qBittorrent.ClientData ?? window.parent.qBittorrent.ClientData;
+    const responsive = window.qBittorrent.Responsive ?? window.parent.qBittorrent.Responsive;
 
     class DynamicTable {
         #DynamicTableHeaderContextMenuClass = null;
+
+        // responsive.js can change the row height
+        get rowHeight() {
+            return responsive?.rowHeight() ?? this.densityRowHeight;
+        }
 
         setup(dynamicTableDivId, dynamicTableFixedHeaderDivId, contextMenu) {
             this.dynamicTableDivId = dynamicTableDivId;
@@ -99,7 +105,7 @@ window.qBittorrent.DynamicTable ??= (() => {
             this.fixedTableHeaderColgroup = document.createElement("colgroup");
             this.fixedTableHeader.closest("table").prepend(this.fixedTableHeaderColgroup);
             this.tableBody = this.table.querySelector("tbody");
-            this.rowHeight = (clientData.get("display_density") === "compact") ? 22 : 26;
+            this.densityRowHeight = (clientData.get("display_density") === "compact") ? 22 : 26;
             this.rows = new Map();
             this.renderedRows = [];
             this.cachedElements = [];
@@ -1222,7 +1228,8 @@ window.qBittorrent.DynamicTable ??= (() => {
                 // for rerender(), as style.top reads back offsets of 1,000,000px or more rounded
                 tr.renderedTop = top;
                 tr.style.top = `${top}px`;
-                tr.style.height = `${this.rowHeight}px`;
+                // this.rowHeight may read the stylesheet, so read it once per render
+                tr.style.height = `${this.renderedRowHeight}px`;
             }
         }
 
@@ -1303,7 +1310,7 @@ window.qBittorrent.DynamicTable ??= (() => {
     class TorrentsTable extends DynamicTable {
         setupVirtualList() {
             super.setupVirtualList();
-            this.rowHeight = (clientData.get("display_density") === "compact") ? 18 : 22;
+            this.densityRowHeight = (clientData.get("display_density") === "compact") ? 18 : 22;
         }
 
         initColumns() {
