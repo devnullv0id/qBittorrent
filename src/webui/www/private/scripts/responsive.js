@@ -489,6 +489,20 @@ window.qBittorrent.Responsive ??= (() => {
         applyWindowTitleHeight();
         queries.coarse.addEventListener("change", (_event) => applyWindowTitleHeight());
 
+        // touch screens put Remove after Stop, apart from the buttons used most
+        const removeButton = document.getElementById("deleteButton");
+        const removeSpace = removeButton.previousSibling;
+        const removeHome = removeButton.nextSibling;
+        const placeRemoveButton = () => {
+            if (queries.coarse.matches)
+                document.getElementById("stopButton").after(removeSpace, removeButton);
+            else
+                removeHome.before(removeSpace, removeButton);
+            removeButton.classList.toggle("divider", queries.coarse.matches);
+        };
+        queries.coarse.addEventListener("change", (_event) => placeRemoveButton());
+        placeRemoveButton();
+
         const tableDiv = await whenElement("torrentsTableDiv");
         shownRowHeight = measureRowHeight(window.torrentsTable);
         queries.coarse.addEventListener("change", (_event) => keepFirstRow());
