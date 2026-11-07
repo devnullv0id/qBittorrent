@@ -11,9 +11,12 @@
     --color-button-border: var(--color-border-control);
     /* hover and press move the face towards it */
     --color-button-step: var(--color-text);
+    --color-button-danger-text: var(--color-text-on-accent);
 
     &.dark {
         --color-button-face: hsl(0deg 0% 30%);
+        /* the dark theme's error red is light */
+        --color-button-danger-text: hsl(0deg 0% 7%);
     }
 }
 
@@ -55,6 +58,14 @@ input[type="button"]:disabled {
         var(--color-button-face),
         var(--color-button-step) 14%
     );
+}
+
+/* the Remove button in the error color */
+#confirmDeletionButton {
+    --color-button-face: var(--color-error);
+    --color-button-border: var(--color-error);
+
+    color: var(--color-button-danger-text);
 }
 
 :is(
