@@ -91,6 +91,8 @@ window.qBittorrent.DynamicTable ??= (() => {
             this.tableBody = this.table.querySelector("tbody");
             this.rowHeight = (clientData.get("display_density") === "compact") ? 22 : 26;
             this.rows = new Map();
+            // counts changes to the rows' data, so that a render can tell which rows changed
+            this.rowVersion = 0;
             this.renderedRows = [];
             // the last result of sortRows(), which the next one starts from
             this.sortedRows = [];
@@ -946,6 +948,7 @@ window.qBittorrent.DynamicTable ??= (() => {
             }
 
             row["data"] = data;
+            row.version = ++this.rowVersion;
             for (const x in data) {
                 if (!Object.hasOwn(data, x))
                     continue;
@@ -1182,11 +1185,11 @@ window.qBittorrent.DynamicTable ??= (() => {
                     else {
                         this.updateRowElement(element, shownRow.row.rowId, shownRow.offset);
                     }
-                    updatedElements.push(element);
+                    updatedElements.push({ element: element, kept: false });
                 }
                 else if (!shownRow.kept || !onlyNewRows) {
                     this.updateRowElement(element, shownRow.row.rowId, shownRow.offset);
-                    updatedElements.push(element);
+                    updatedElements.push({ element: element, kept: shownRow.kept });
                 }
 
                 // keep the rows in order, which row colors and keyboard navigation follow
@@ -1199,9 +1202,22 @@ window.qBittorrent.DynamicTable ??= (() => {
             // update row classes
             this.setRowClass();
 
-            // update visible rows
-            for (const element of updatedElements)
+            // update visible rows; where allowed, an unchanged row in place updates only its clock cells
+            const columnsKey = this.skipsUnchangedRows ? this.columns.map(column => `${column.name}:${column.width}`).join() : null;
+            for (const { element, kept } of updatedElements) {
+                const row = this.rows.get(element.rowId);
+                if (kept && (columnsKey !== null) && (element.renderedVersion === row.version) && (element.renderedColumns === columnsKey)) {
+                    const tds = this.getRowCells(element);
+                    for (const [i, column] of this.columns.entries()) {
+                        if (column.readsClock)
+                            column.updateTd(tds[i], row);
+                    }
+                    continue;
+                }
                 this.updateRow(element, true);
+                element.renderedVersion = row.version;
+                element.renderedColumns = columnsKey;
+            }
 
             // restore focus so keyboard navigation continues working
             if (hadFocus) {
@@ -1328,6 +1344,9 @@ window.qBittorrent.DynamicTable ??= (() => {
     }
 
     class TorrentsTable extends DynamicTable {
+        // a torrent's cells show its data alone, so rerender() can leave the rows that didn't change alone
+        skipsUnchangedRows = true;
+
         setupVirtualList() {
             super.setupVirtualList();
             this.rowHeight = (clientData.get("display_density") === "compact") ? 18 : 22;
@@ -1740,6 +1759,8 @@ window.qBittorrent.DynamicTable ??= (() => {
                     td.title = formattedVal;
                 }
             };
+            // the time since changes without the torrent's data changing
+            this.columns["last_activity"].readsClock = true;
 
             // availability
             this.columns["availability"].updateTd = function(td, row) {
