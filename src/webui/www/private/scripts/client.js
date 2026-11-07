@@ -423,9 +423,10 @@ window.addEventListener("DOMContentLoaded", async (event) => {
 
     const saveColumnSizes = () => {
         // don't store the sizes the responsive layout sets
-        const { small } = window.qBittorrent.Responsive.queries;
+        const { drawer, small } = window.qBittorrent.Responsive.queries;
         const filters_width = document.getElementById("Filters").getSize().x;
-        localPreferences.set("filters_width", filters_width);
+        if (!drawer.matches && (filters_width > 0))
+            localPreferences.set("filters_width", filters_width);
         if (!small.matches) {
             const properties_height_rel = document.getElementById("propertiesPanel").getSize().y / Window.getSize().y;
             localPreferences.set("properties_height_rel", properties_height_rel);
@@ -509,12 +510,26 @@ window.addEventListener("DOMContentLoaded", async (event) => {
         }
     };
 
+    // while the filters are in a drawer, their button counts the filters that are on
+    const updateFiltersButton = () => {
+        const count = [
+            selectedStatus !== "all",
+            selectedCategory !== CATEGORIES_ALL,
+            selectedTag !== TAGS_ALL,
+            selectedTracker !== TRACKERS_ALL
+        ].filter(Boolean).length;
+        document.getElementById("filtersButton").classList.toggle("filtered", (count > 0));
+        document.getElementById("filtersCount").textContent = (count > 0) ? count : "";
+    };
+    updateFiltersButton();
+
     setStatusFilter = (name) => {
         const currentHash = torrentsTable.getCurrentTorrentID();
 
         localPreferences.set("selected_filter", name);
         selectedStatus = name;
         highlightSelectedStatus();
+        updateFiltersButton();
         updateMainData();
 
         const newHash = torrentsTable.getCurrentTorrentID();
@@ -527,6 +542,7 @@ window.addEventListener("DOMContentLoaded", async (event) => {
         localPreferences.set("selected_category", category);
         selectedCategory = category;
         highlightSelectedCategory();
+        updateFiltersButton();
         updateMainData();
 
         const newHash = torrentsTable.getCurrentTorrentID();
@@ -539,6 +555,7 @@ window.addEventListener("DOMContentLoaded", async (event) => {
         localPreferences.set("selected_tag", tag);
         selectedTag = tag;
         highlightSelectedTag();
+        updateFiltersButton();
         updateMainData();
 
         const newHash = torrentsTable.getCurrentTorrentID();
@@ -551,6 +568,7 @@ window.addEventListener("DOMContentLoaded", async (event) => {
         localPreferences.set("selected_tracker", tracker);
         selectedTracker = tracker;
         highlightSelectedTracker();
+        updateFiltersButton();
         updateMainData();
 
         const newHash = torrentsTable.getCurrentTorrentID();
@@ -1142,6 +1160,7 @@ window.addEventListener("DOMContentLoaded", async (event) => {
                                         if (selectedTracker === host) {
                                             selectedTracker = TRACKERS_ALL;
                                             localPreferences.set("selected_tracker", selectedTracker);
+                                            updateFiltersButton();
                                         }
                                     }
                                 }
