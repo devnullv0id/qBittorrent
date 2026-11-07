@@ -109,18 +109,20 @@ window.qBittorrent.Responsive ??= (() => {
     });
 
     const focusableSelector = "a[href], button:not([disabled]), input:not([disabled], [type='hidden']), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex='-1'])";
-    // keep the focus inside an open drawer
-    const trapFocus = (container) => {
+    // keep the focus inside an open drawer or modal window; takeFocus moves it there first
+    const trapFocus = (container, takeFocus = true) => {
         const returnTo = document.activeElement;
         // shown, and not hidden by visibility as the toggles of childless categories are
         const focusable = () => [...container.querySelectorAll(focusableSelector)].filter((element) => (element.getClientRects().length > 0) && (getComputedStyle(element).visibility !== "hidden"));
-        const first = focusable()[0];
-        if (first !== undefined) {
-            first.focus();
-        }
-        else {
-            container.tabIndex = -1;
-            container.focus();
+        if (takeFocus) {
+            const first = focusable()[0];
+            if (first !== undefined) {
+                first.focus();
+            }
+            else {
+                container.tabIndex = -1;
+                container.focus();
+            }
         }
         const onKeyDown = (event) => {
             if (event.key !== "Tab")
@@ -828,6 +830,25 @@ window.qBittorrent.Responsive ??= (() => {
             fitWindow(instance);
     };
 
+    // a window takes the focus as it opens, a modal one keeps it, and it goes back as the window closes
+    const holdWindowFocus = (instance) => {
+        const returnTo = document.activeElement;
+        const modal = (instance.options.type === "modal") || (instance.options.type === "modal2");
+        const releaseFocus = modal ? trapFocus(instance.windowEl, false) : null;
+        instance.windowEl.tabIndex = -1;
+        // focus the window, or the frame of a framed page, which can then focus its own field
+        if (!instance.windowEl.contains(document.activeElement))
+            (instance.iframeEl ?? instance.windowEl).focus({ preventScroll: true });
+
+        instance.addEvent("closeComplete", () => {
+            if (releaseFocus !== null)
+                releaseFocus();
+            // a window without a hold on the focus gives it back only if nothing else has it now
+            else if ((document.activeElement === document.body) && returnTo.isConnected)
+                returnTo.focus({ preventScroll: true });
+        });
+    };
+
     // on phones and touch screens, Back closes what shows on top of the page
     const backCloses = () => queries.phone.matches || queries.coarse.matches;
 
@@ -882,6 +903,7 @@ window.qBittorrent.Responsive ??= (() => {
             if (instance.windowEl.classList.contains("responsivePending"))
                 fitWindow(instance);
         }, PAGE_WAIT);
+        holdWindowFocus(instance);
         if (backCloses())
             addWindowLayer(instance);
         instance.addEvent("closeComplete", () => removeWindowLayer(instance));
