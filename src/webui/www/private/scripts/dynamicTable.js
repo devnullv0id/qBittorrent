@@ -88,7 +88,7 @@ window.qBittorrent.DynamicTable ??= (() => {
 
         // responsive.js can change the row height
         get rowHeight() {
-            return responsive?.rowHeight() ?? this.densityRowHeight;
+            return responsive?.rowHeight(this) ?? this.densityRowHeight;
         }
 
         setup(dynamicTableDivId, dynamicTableFixedHeaderDivId, contextMenu) {
