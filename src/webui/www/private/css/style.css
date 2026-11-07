@@ -88,6 +88,12 @@ a img,
     border: none;
 }
 
+/* WebKit sends no click after a canceled drag, so images and links don't start one */
+img,
+a {
+    -webkit-user-drag: none;
+}
+
 ul,
 ol {
     list-style: none;

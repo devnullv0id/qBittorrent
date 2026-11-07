@@ -34,6 +34,12 @@
                 }
             });
 
+            // images and links are never dragged: a click that moves a little still clicks, and none is dropped as an address
+            window.addEventListener("dragstart", (event) => {
+                if ((event.target.nodeName === "IMG") || (event.target.nodeName === "A"))
+                    event.preventDefault();
+            });
+
             const searchParams = new URLSearchParams(window.location.search);
 
             const source = searchParams.get("source");
