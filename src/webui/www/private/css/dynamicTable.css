@@ -161,6 +161,8 @@ div:has(> div.dynamicTableDiv):not(.invisible) {
 }
 
 .dynamicTableFixedHeaderDiv {
+    /* a line under every list's header: with alternating row colors the first row has its gray */
+    border-bottom: 1px solid var(--color-border);
     position: sticky;
     top: 0;
     z-index: 10;
@@ -168,12 +170,7 @@ div:has(> div.dynamicTableDiv):not(.invisible) {
 
 /* opaque background on the header table so body rows don't show through when scrolling under it */
 .dynamicTableFixedHeaderDiv table {
-    background-color: var(--color-surface-page);
-}
-
-#propertiesPanel .dynamicTableFixedHeaderDiv,
-#torrentsTableFixedHeaderDiv {
-    border-bottom: 1px solid var(--color-border);
+    background-color: var(--color-surface-chrome);
 }
 
 .dynamicTableDiv {
