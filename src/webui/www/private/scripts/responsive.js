@@ -959,7 +959,7 @@ window.qBittorrent.Responsive ??= (() => {
         header.addEventListener("focusin", (event) => setHidden(false));
     };
 
-    // the card's menu zone at its top right, or null
+    // the card's checkbox zone at its left, its menu zone at its top right, or null
     const cardZone = (event) => {
         const tr = queries.phone.matches ? event.target.closest?.("#torrentsTableDiv tbody tr") : null;
         if ((tr === undefined) || (tr === null))
@@ -967,6 +967,8 @@ window.qBittorrent.Responsive ??= (() => {
 
         const point = event.changedTouches?.[0] ?? event;
         const box = tr.getBoundingClientRect();
+        if (point.clientX < (box.left + cssLength("--responsive-card-check-width")))
+            return "check";
         if ((point.clientX >= (box.right - cssLength("--responsive-card-menu-width"))) && (point.clientY <= (box.top + cssLength("--responsive-card-menu-height"))))
             return "menu";
         return null;
@@ -1018,6 +1020,82 @@ window.qBittorrent.Responsive ??= (() => {
         }, true);
     };
 
+    // a card's checkbox toggles its torrent's selection, as a Ctrl+click does
+    const initCardCheckboxes = async () => {
+        const tableDiv = await whenElement("torrentsTableDiv");
+        const table = window.torrentsTable;
+
+        // a touch on the checkbox doesn't select the card alone or start a long press
+        tableDiv.addEventListener("touchstart", (event) => {
+            if (cardZone(event) === "check")
+                event.stopPropagation();
+        }, { capture: true, passive: true });
+        // a touch selects its card alone only once the finger rests, so that a swipe keeps the selection
+        let holdTimer = -1;
+        table.tableBody.addEventListener("touchstart", (event) => {
+            const rowId = event.target.closest("tr")?.rowId;
+            if (!queries.phone.matches || (rowId === undefined) || (table.selectedRowsIds().length === 0) || table.isRowSelected(rowId))
+                return;
+
+            event.stopPropagation();
+            clearTimeout(holdTimer);
+            holdTimer = setTimeout(() => {
+                table.deselectAll();
+                table.selectRow(rowId);
+            }, 400);
+        }, { passive: true });
+        for (const type of ["touchend", "touchcancel"])
+            table.tableBody.addEventListener(type, (_event) => clearTimeout(holdTimer), { passive: true });
+        tableDiv.addEventListener("scroll", (_event) => clearTimeout(holdTimer), { passive: true });
+        tableDiv.addEventListener("click", (event) => {
+            if (event.ctrlKey || (cardZone(event) !== "check"))
+                return;
+
+            event.stopPropagation();
+            event.target.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, ctrlKey: true, clientX: event.clientX, clientY: event.clientY }));
+        }, true);
+
+        const selectAll = document.getElementById("torrentsSelectAll");
+        const count = document.getElementById("torrentsSelectionCount");
+        const update = () => {
+            if (!queries.phone.matches)
+                return;
+
+            const selected = table.selectedRowsIds().length;
+            const all = (selected > 0) ? table.filteredRowCount : 0;
+            selectAll.checked = (selected > 0) && (selected >= all);
+            selectAll.indeterminate = (selected > 0) && (selected < all);
+            // a live region, which may be read out again when its text is rewritten
+            const [before, after = ""] = count.dataset.format.split("%1");
+            const text = (selected > 0) ? `${before}${selected}${after}` : "";
+            if (count.textContent !== text) {
+                // narrow phones show only the number, and the words around it only to screen readers
+                const words = [before, after].map((part) => {
+                    const span = document.createElement("span");
+                    span.textContent = part;
+                    return span;
+                });
+                count.replaceChildren(...((selected > 0) ? [words[0], selected.toString(), words[1]] : []));
+            }
+            for (const tr of table.tableBody.children)
+                tr.setAttribute("aria-selected", tr.classList.contains("selected"));
+        };
+        selectAll.addEventListener("click", (event) => {
+            if (selectAll.checked) {
+                table.selectAll();
+            }
+            else {
+                table.deselectAll();
+                table.setRowClass();
+            }
+            update();
+        });
+        const updateSoon = window.qBittorrent.Misc.createDebounceHandler(100, update);
+        new MutationObserver(updateSoon).observe(table.tableBody, { childList: true, subtree: true, attributes: true, attributeFilter: ["class"] });
+        queries.phone.addEventListener("change", (_event) => update());
+        update();
+    };
+
     // called by client.js once the main window is built
     const init = () => {
         initLayout();
@@ -1027,6 +1105,7 @@ window.qBittorrent.Responsive ??= (() => {
         initViewTabs();
         initHeaderAutoHide();
         initCards();
+        initCardCheckboxes();
     };
 
     return exports();
