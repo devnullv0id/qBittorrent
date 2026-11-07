@@ -151,22 +151,53 @@ window.qBittorrent.Responsive ??= (() => {
         };
     };
 
-    // make a drawer's items reachable with Tab while it is open
-    const setKeyboardItems = (container, selector, on) => {
-        for (const item of container.querySelectorAll(selector)) {
-            if (on)
-                item.tabIndex = 0;
-            else
-                item.removeAttribute("tabindex");
-        }
-    };
+    // what acts on a click but is no link, button or field: Tab reaches it, Enter or Space choose it
+    const keyboardItems = "#mochaToolbar a[id], #uploadButton > label, label[for='torrentsFilterRegexBox'], .tab-menu li a, ul.filterList span.link, #desktopNavbar a, #uploadLink";
+    // those that do something, rather than show something
+    const keyboardButtons = "#mochaToolbar a[id], #uploadButton > label, label[for='torrentsFilterRegexBox']";
 
-    const chooseWithKeys = (container, selector) => {
-        container.addEventListener("keydown", (event) => {
+    const initKeyboardItems = () => {
+        let tagQueued = false;
+        const tag = () => {
+            tagQueued = false;
+            for (const item of document.querySelectorAll(keyboardItems)) {
+                if (item.hasAttribute("tabindex"))
+                    continue;
+
+                item.tabIndex = 0;
+                if (item.matches(keyboardButtons))
+                    item.setAttribute("role", "button");
+            }
+        };
+        // finding the shown items lays out the page: do it when the browser is idle
+        const queueTag = () => {
+            if (tagQueued)
+                return;
+
+            tagQueued = true;
+            if (window.requestIdleCallback !== undefined)
+                requestIdleCallback(() => tagQueued && tag(), { timeout: 500 });
+            else
+                setTimeout(() => tagQueued && tag(), 100);
+        };
+        // filter lists, tabs and windows are built after load; the lists' rows hold no keyboard items
+        const holdsItems = (node) => (node.nodeType === Node.ELEMENT_NODE) && (node.matches(keyboardItems) || (node.querySelector(keyboardItems) !== null));
+        new MutationObserver((mutations) => {
+            if (mutations.some((mutation) => [...mutation.addedNodes, ...mutation.removedNodes].some(holdsItems)))
+                queueTag();
+        }).observe(document.body, { childList: true, subtree: true });
+        // and on Tab, as showing or hiding something, such as a drawer, changes the shown items
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Tab")
+                tag();
+        }, true);
+        queueTag();
+
+        document.addEventListener("keydown", (event) => {
             switch (event.key) {
                 case "Enter":
                 case " ":
-                    if (!event.target.matches(selector) || !event.target.hasAttribute("tabindex"))
+                    if (!event.target.matches(keyboardItems))
                         break;
 
                     event.preventDefault();
@@ -327,10 +358,7 @@ window.qBittorrent.Responsive ??= (() => {
         });
     };
 
-    const filterItems = "ul.filterList span.link";
-
     let filtersScrim = null;
-    let filtersObserver = null;
     let releaseFiltersFocus = null;
     let filtersLayer = null;
     // the rest of a double click or tap that closed a drawer would reach what the drawer covered
@@ -341,17 +369,12 @@ window.qBittorrent.Responsive ??= (() => {
             return;
 
         const column = document.getElementById("filtersColumn");
-        const filters = document.getElementById("Filters");
         root.classList.add("filtersDrawerOpen");
         filtersScrim = addScrim(closeFiltersDrawer);
         column.setAttribute("role", "dialog");
         column.setAttribute("aria-modal", "true");
         column.setAttribute("aria-labelledby", "filtersDrawerTitle");
         document.getElementById("filtersButton").setAttribute("aria-expanded", "true");
-        setKeyboardItems(filters, filterItems, true);
-        // the filter lists are rebuilt as torrents change
-        filtersObserver = new MutationObserver(() => setKeyboardItems(filters, filterItems, true));
-        filtersObserver.observe(filters, { childList: true, subtree: true });
         releaseFiltersFocus = trapFocus(column);
         filtersLayer = addHistoryLayer(closeFiltersDrawer);
     };
@@ -368,9 +391,6 @@ window.qBittorrent.Responsive ??= (() => {
         column.removeAttribute("aria-modal");
         column.removeAttribute("aria-labelledby");
         document.getElementById("filtersButton").setAttribute("aria-expanded", "false");
-        filtersObserver.disconnect();
-        filtersObserver = null;
-        setKeyboardItems(document.getElementById("Filters"), filterItems, false);
         releaseFiltersFocus();
         releaseFiltersFocus = null;
         removeHistoryLayer(filtersLayer);
@@ -401,7 +421,6 @@ window.qBittorrent.Responsive ??= (() => {
                 event.stopPropagation();
             }, true);
         }
-        chooseWithKeys(column, filterItems);
         queries.drawer.addEventListener("change", (_event) => {
             if (!queries.drawer.matches)
                 closeFiltersDrawer();
@@ -1257,9 +1276,6 @@ window.qBittorrent.Responsive ??= (() => {
         update();
     };
 
-    // "Add Torrent File..." is a label in a div, not a link
-    const menuItems = "#desktopNavbar a, #uploadLink";
-
     let menuDrawerScrim = null;
     let releaseMenuDrawerFocus = null;
     let menuDrawerLayer = null;
@@ -1275,7 +1291,6 @@ window.qBittorrent.Responsive ??= (() => {
         navbar.setAttribute("aria-modal", "true");
         navbar.setAttribute("aria-labelledby", "menuDrawerTitle");
         document.getElementById("menuDrawerButton").setAttribute("aria-expanded", "true");
-        setKeyboardItems(navbar, menuItems, true);
         releaseMenuDrawerFocus = trapFocus(navbar);
         menuDrawerLayer = addHistoryLayer(closeMenuDrawer);
     };
@@ -1294,7 +1309,6 @@ window.qBittorrent.Responsive ??= (() => {
         navbar.removeAttribute("aria-modal");
         navbar.removeAttribute("aria-labelledby");
         document.getElementById("menuDrawerButton").setAttribute("aria-expanded", "false");
-        setKeyboardItems(navbar, menuItems, false);
         releaseMenuDrawerFocus();
         releaseMenuDrawerFocus = null;
         removeHistoryLayer(menuDrawerLayer);
@@ -1323,7 +1337,6 @@ window.qBittorrent.Responsive ??= (() => {
             if (event.target.closest("li li") !== null)
                 closeMenuDrawer();
         }, true);
-        chooseWithKeys(navbar, menuItems);
         queries.phone.addEventListener("change", (_event) => {
             if (!queries.phone.matches)
                 closeMenuDrawer();
@@ -1403,6 +1416,7 @@ window.qBittorrent.Responsive ??= (() => {
         initMenuDrawer();
         initToolbarEdges();
         initPropertiesPanel();
+        initKeyboardItems();
         initHistoryLayers();
     };
 
