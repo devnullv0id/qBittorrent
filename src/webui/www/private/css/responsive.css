@@ -439,18 +439,22 @@ input[type="button"]:disabled {
         width: auto;
     }
 
-    & li:not(.disabled):is(:hover, :focus-within) > ul {
+    /* .submenuClosed: a second tap closed it (contextmenu.js) */
+    & li:not(.disabled, .submenuClosed):is(:hover, :focus-within) > ul {
         display: block;
     }
 
     /* the chevron turns down while the submenu is open */
-    & li:not(.disabled):is(:hover, :focus-within) > .arrow-right::after {
+    &
+        li:not(.disabled, .submenuClosed):is(:hover, :focus-within)
+        > .arrow-right::after {
         transform: translateY(-75%) rotate(45deg);
     }
 }
 
-/* the menu's torrent count: phones only */
-.contextMenuHeader {
+/* the menu's torrent count and More: phones only */
+.contextMenuHeader,
+:root:not(.responsivePhone) #torrentsTableMenuMore {
     display: none;
 }
 
@@ -469,6 +473,41 @@ input[type="button"]:disabled {
         font-weight: bold;
         padding: var(--space-4) var(--space-5);
         pointer-events: none;
+    }
+
+    /* closed, More still lays out its entries, so that the menu is as wide as they need */
+    &
+        > #torrentsTableMenuMore:is(:not(:hover, :focus-within), .submenuClosed)
+        > ul {
+        border-width: 0;
+        display: block;
+        height: 0;
+        overflow: hidden;
+        visibility: hidden;
+    }
+
+    /* More reads Less while it is open */
+    & > #torrentsTableMenuMore > a > .lessLabel,
+    &
+        > #torrentsTableMenuMore:not(.submenuClosed):is(:hover, :focus-within)
+        > a
+        > .moreLabel {
+        display: none;
+    }
+
+    &
+        > #torrentsTableMenuMore:not(.submenuClosed):is(:hover, :focus-within)
+        > a
+        > .lessLabel {
+        display: inline;
+    }
+
+    /* a tap on More hides the entries above it; a hover doesn't, as More would move away */
+    &
+        > li:not(.contextMenuHeader):has(
+            ~ #torrentsTableMenuMore[data-tapped-open="true"]
+        ) {
+        display: none;
     }
 
     & li a {
