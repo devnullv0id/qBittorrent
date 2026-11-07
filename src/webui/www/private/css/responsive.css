@@ -120,6 +120,96 @@
     }
 }
 
+/* View tabs and filter bar on phones */
+@media (width < 760px) {
+    #mainWindowTabs {
+        margin: 0;
+
+        & .tab-menu {
+            display: inline-flex;
+            margin: 0;
+        }
+
+        /* icons only */
+        & .tab-menu li a {
+            font-size: 0;
+            gap: 0;
+            justify-content: center;
+            margin-left: 4px;
+            min-width: var(--responsive-touch-target, 32px);
+        }
+    }
+
+    /* properties and Options tabs: icons only, except the selected tab */
+    :is(#propertiesTabs, #preferencesPage .tab-menu) li a {
+        font-size: 0;
+        gap: 0;
+        justify-content: center;
+        min-width: var(--responsive-touch-target, 32px);
+    }
+
+    :is(#propertiesTabs, #preferencesPage .tab-menu) li.selected a {
+        font-size: inherit;
+        gap: 5px;
+    }
+
+    #torrentsFilterToolbar {
+        align-items: center;
+        display: flex;
+        gap: 4px;
+        padding: 2px 4px;
+        width: 100%;
+
+        & #filtersButton {
+            flex: none;
+            margin-right: 0;
+        }
+
+        & #torrentsFilterInput {
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+
+        & label[for="torrentsFilterRegexBox"] {
+            flex: none;
+        }
+
+        & #torrentsFilterSelect {
+            flex: 0 1 auto;
+            min-width: 0;
+        }
+    }
+
+    #desktopNavbar > #filtersButton {
+        clear: both;
+        display: flex;
+        float: none;
+        justify-content: center;
+        margin: 0 4px 4px;
+        width: calc(100% - 8px);
+    }
+}
+
+@media (width < 480px) {
+    /* hidden, but still read by screen readers */
+    #torrentsFilterToolbar label[for="torrentsFilterSelect"] {
+        clip-path: inset(50%);
+        height: 1px;
+        overflow: hidden;
+        position: absolute;
+        white-space: nowrap;
+        width: 1px;
+    }
+}
+
+@media (width < 400px) {
+    /* icon only, to leave room for the filter field */
+    #torrentsFilterToolbar #filtersButton {
+        font-size: 0;
+        gap: 0;
+    }
+}
+
 /* Status bar */
 :root.responsiveRelayout {
     & #desktopFooterWrapper {
@@ -404,6 +494,35 @@
 
         & :is(input:not([type="checkbox"], [type="radio"]), select, textarea) {
             max-width: 100%;
+        }
+    }
+}
+
+/* Properties panel on phones */
+@media (width < 760px) {
+    #propertiesPanel_header {
+        height: auto;
+
+        & .toolbarTabs {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        & #propertiesTabs {
+            flex: 1 1 0;
+            min-width: 0;
+        }
+
+        /* file filter below the tabs */
+        & #torrentFilesFilterToolbar {
+            flex: 1 1 100%;
+            float: none;
+            margin: 0 4px 4px;
+            order: 1;
+        }
+
+        & #torrentFilesFilterInput {
+            width: 100%;
         }
     }
 }

@@ -834,12 +834,28 @@ window.qBittorrent.Responsive ??= (() => {
         // after Mocha's own resize handling
         window.addEventListener("resize", window.qBittorrent.Misc.createDebounceHandler(50, fitWindows));
     };
+
+    // phones show only the view tabs' icons: name them on hover
+    const initViewTabs = () => {
+        const name = () => {
+            for (const img of document.querySelectorAll("#mainWindowTabsList img")) {
+                if (queries.phone.matches)
+                    img.parentElement.title = img.alt;
+                else
+                    img.parentElement.removeAttribute("title");
+            }
+        };
+        queries.phone.addEventListener("change", (_event) => name());
+        name();
+    };
+
     // called by client.js once the main window is built
     const init = () => {
         initLayout();
         initFiltersDrawer();
         initTouch();
         initWindows();
+        initViewTabs();
     };
 
     return exports();
