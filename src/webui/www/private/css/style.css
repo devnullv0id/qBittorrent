@@ -10,6 +10,7 @@
     --color-text-white: hsl(0deg 0% 100%);
     --color-text-disabled: hsl(0deg 0% 60%);
     --color-text-default: hsl(0deg 0% 33%);
+    --color-text-placeholder: hsl(0deg 0% 42%);
     --color-background-primary: hsl(0deg 0% 100%);
     --color-background-blue: hsl(210deg 65% 55%);
     --color-background-popup: hsl(0deg 0% 100%);
@@ -37,6 +38,7 @@
         --color-text-blue: hsl(210deg 88.1% 73.5%);
         --color-text-orange: hsl(26deg 65% 70%);
         --color-text-default: hsl(0deg 0% 90%);
+        --color-text-placeholder: hsl(0deg 0% 70%);
         --color-background-primary: hsl(0deg 0% 7%);
         --color-background-blue: hsl(210deg 42% 48%);
         --color-background-popup: hsl(0deg 0% 20%);
@@ -120,6 +122,12 @@ select {
     border-radius: 3px;
     color: var(--color-text-default);
     padding: 3px;
+}
+
+/* lighter than the text, and still 4.5:1 against the field */
+::placeholder {
+    color: var(--color-text-placeholder);
+    opacity: 1; /* override Firefox's lower opacity */
 }
 
 select {
