@@ -59,6 +59,25 @@ td:has(> :disabled:not(#WebUIAPIKeyText)) {
             }
         }
     }
+
+    /* a field's bold name on a line of its own */
+    & label[style*="font-weight: bold"]:has(+ input[type="text"]) {
+        display: block;
+        margin-bottom: var(--space-3);
+    }
+}
+
+/* Share Ratio */
+div:has(> #setRatio) {
+    margin-top: var(--space-2);
+}
+
+/* on phones, a field wraps below its check box */
+:root.responsivePhone body:has(#setRatio) div[style*="margin-left: 40px"] {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3) 0.25em;
 }
 
 /* Options' rows */
@@ -1187,6 +1206,11 @@ td:has(> :disabled:not(#WebUIAPIKeyText)) {
     justify-content: center;
 }
 
+/* a button row right after a field: 6 px apart, so that its line shows */
+:is(input:not([type="hidden"]), select, textarea, fieldset) + .dialogFooter {
+    margin-top: var(--space-3);
+}
+
 .dialogFooter.alignEnd,
 .modalDialog .dialogFooter {
     justify-content: flex-end;
@@ -1973,6 +1997,26 @@ td:has(> :disabled:not(#WebUIAPIKeyText)) {
         flex: 1 0 auto;
         height: auto;
     }
+
+    /* 6 px below the rule buttons, counting their margin */
+    & #rulesFileButtons {
+        margin-top: 5px;
+    }
+
+    /* a rule's check boxes and notes clear of the tables around them */
+    & #ruleSettings > :not(table) + table,
+    & #ruleSettings > table + :not(table) {
+        margin-top: 3px;
+    }
+
+    & #lastMatchDiv {
+        margin-bottom: 3px;
+    }
+
+    /* the unit stays beside its field */
+    & td:has(> #ignoreDaysValue) {
+        white-space: nowrap;
+    }
 }
 
 /* columns stack in narrow windows */
@@ -2183,6 +2227,16 @@ td:has(> :disabled:not(#WebUIAPIKeyText)) {
 
     & #renameOptions {
         height: calc(1lh + 8px);
+    }
+
+    /* 6 px below the search and replacement fields, and the counter clear of the check boxes */
+    & :is(#multiRenameSearch, #multiRenameReplace) {
+        display: block;
+        margin-bottom: var(--space-3);
+    }
+
+    & .formRow:has(> #file_counter) {
+        margin-top: var(--space-2);
     }
 }
 
