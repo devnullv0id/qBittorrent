@@ -52,6 +52,45 @@ td:has(> :disabled:not(#WebUIAPIKeyText)) {
     color: var(--color-text-disabled);
 }
 
+/* Options' rows */
+#preferencesPage .PrefTab {
+    & table {
+        border-spacing: 0 2px;
+    }
+
+    & td {
+        padding: 2px 4px 2px 0;
+    }
+
+    & .formRow {
+        &:has(> :is(select, textarea, button)),
+        &:has(> input:not([type="checkbox"], [type="radio"])) {
+            margin-block: var(--space-3);
+        }
+    }
+
+    /* a full-width field below its name, and a button below its check box */
+    & .formRow > label + input[style*="width: 100%"],
+    & fieldset.settings > .formRow + button {
+        margin-top: var(--space-3) !important; /* override inline style */
+    }
+
+    /* a text area's name on a line of its own */
+    & fieldset.settings > label:has(+ br + textarea) {
+        display: block;
+        margin-bottom: var(--space-3);
+
+        & + br {
+            display: none;
+        }
+    }
+
+    /* 12 px from the choice before, less the space and the label's padding */
+    & label + input[type="radio"] {
+        margin-left: calc(var(--space-5) - 0.25em - 2px);
+    }
+}
+
 :where(input[type="button"], input[type="submit"], button) {
     --button-background: var(--color-button-face);
 }
@@ -1497,6 +1536,12 @@ td:has(> :disabled:not(#WebUIAPIKeyText)) {
 
         & .formRow[style*="padding-left"] {
             padding-left: var(--space-5) !important; /* override inline style */
+        }
+
+        /* nor the desktop's margin above a field or a button */
+        & .formRow > label + input[style*="width: 100%"],
+        & fieldset.settings > .formRow + button {
+            margin-top: 0 !important;
         }
 
         & :is([type="checkbox"], [type="radio"]) {
