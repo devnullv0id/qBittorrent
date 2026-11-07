@@ -309,6 +309,60 @@
             font-weight: bold;
             white-space: nowrap;
         }
+
+        & #torrentsSortSelect {
+            flex: 0 1 auto;
+            min-width: 0;
+            width: 100%;
+        }
+
+        & #torrentsSortOrder {
+            flex: none;
+            padding-inline: 6px;
+
+            /* the arrows of a sorted column */
+            &::before {
+                background: url("../images/go-up.svg") center / 14px no-repeat;
+                content: "";
+                display: inline-block;
+                height: 16px;
+                vertical-align: middle;
+                width: 16px;
+            }
+
+            &[aria-pressed="true"]::before {
+                background-image: url("../images/go-down.svg");
+            }
+        }
+
+        & #torrentsColumnsButton {
+            flex: none;
+        }
+    }
+
+    /* cards have no column widths to resize, and show only these columns */
+    #torrentsTableDiv_headerMenu {
+        &
+            li:not(
+                :has(
+                    > a:is(
+                            [href="#priority"],
+                            [href="#name"],
+                            [href="#progress"],
+                            [href="#status"],
+                            [href="#eta"],
+                            [href="#size"],
+                            [href="#dlspeed"],
+                            [href="#upspeed"]
+                        )
+                )
+            ) {
+            display: none;
+        }
+
+        & li.separator {
+            border-top: 0;
+        }
     }
 
     #transferList #torrentsTableDiv {
