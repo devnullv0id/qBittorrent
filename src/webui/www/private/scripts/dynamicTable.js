@@ -3311,6 +3311,23 @@ window.qBittorrent.DynamicTable ??= (() => {
 
             this.initColumnsFunctions();
         }
+
+        // phones grow the list to fit every file, so leave the virtual list and let the names wrap
+        setupVirtualList() {
+            const queries = responsive?.queries;
+            if ((queries !== undefined) && (queries.phone.matches || (queries.coarse.matches && queries.small.matches)))
+                this.useVirtualList = false;
+            this.dynamicTableDiv.classList.toggle("virtualList", this.useVirtualList);
+            super.setupVirtualList();
+        }
+
+        // on phones responsive.css lays out each file by its cells' columns
+        createRowElement(row, top) {
+            const tr = super.createRowElement(row, top);
+            for (const [i, td] of [...tr.children].entries())
+                td.dataset.col = this.columns[i].name;
+            return tr;
+        }
     }
 
     class RssFeedTable extends DynamicTable {
