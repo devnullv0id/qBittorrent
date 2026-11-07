@@ -1239,10 +1239,8 @@ window.qBittorrent.DynamicTable ??= (() => {
         removeRow(rowId) {
             this.selectedRows.erase(rowId);
             this.rows.delete(rowId);
-            if (this.useVirtualList) {
-                this.rerender();
-            }
-            else {
+            // callers update the virtual list once, after removing all rows
+            if (!this.useVirtualList) {
                 const tr = this.getTrByRowId(rowId);
                 tr?.remove();
             }
