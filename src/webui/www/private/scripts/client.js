@@ -439,10 +439,14 @@ window.addEventListener("DOMContentLoaded", async (event) => {
     let isRssPanelLoaded = false;
 
     const saveColumnSizes = () => {
+        // don't store the sizes the responsive layout sets
+        const { small } = window.qBittorrent.Responsive.queries;
         const filters_width = document.getElementById("Filters").getSize().x;
         localPreferences.set("filters_width", filters_width);
-        const properties_height_rel = document.getElementById("propertiesPanel").getSize().y / Window.getSize().y;
-        localPreferences.set("properties_height_rel", properties_height_rel);
+        if (!small.matches) {
+            const properties_height_rel = document.getElementById("propertiesPanel").getSize().y / Window.getSize().y;
+            localPreferences.set("properties_height_rel", properties_height_rel);
+        }
     };
 
     window.addEventListener("resize", window.qBittorrent.Misc.createDebounceHandler(500, (e) => {
@@ -640,6 +644,8 @@ window.addEventListener("DOMContentLoaded", async (event) => {
 
     // After Show Top Toolbar
     MochaUI.Desktop.setDesktopSize();
+
+    window.qBittorrent.Responsive.init();
 
     let syncMainDataLastResponseId = 0;
     const serverState = {};
@@ -1832,6 +1838,9 @@ window.addEventListener("DOMContentLoaded", async (event) => {
     let prop_h = localPreferences.get("properties_height_rel");
     if (prop_h !== null)
         prop_h = Number(prop_h) * Window.getSize().y;
+    // touch screens and narrow ones, with their taller controls, keep the larger part for the list
+    else if (window.qBittorrent.Responsive.queries.relayout.matches)
+        prop_h = document.documentElement.clientHeight / 3;
     else
         prop_h = Window.getSize().y / 2;
     new MochaUI.Panel({
