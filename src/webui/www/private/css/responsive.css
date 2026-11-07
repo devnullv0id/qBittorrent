@@ -2183,6 +2183,15 @@ td:has(> :disabled:not(#WebUIAPIKeyText)) {
     & #torrentFiles {
         margin-bottom: var(--space-3) !important;
     }
+
+    /* Replace and its arrow as one control, the arrow as tall as the button */
+    & div:has(> #renameButton) {
+        display: flex;
+    }
+
+    & #renameOptions {
+        height: calc(1lh + 8px);
+    }
 }
 
 /* Rename files on phones and short screens */
@@ -2327,7 +2336,9 @@ td:has(> :disabled:not(#WebUIAPIKeyText)) {
         min-width: var(--responsive-touch-target);
     }
 
+    /* as tall as Replace beside it */
     #renameOptions {
+        min-height: var(--responsive-touch-target);
         min-width: var(--responsive-touch-target);
         padding-left: var(--space-6);
     }
