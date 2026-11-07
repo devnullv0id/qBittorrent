@@ -183,6 +183,106 @@ window.qBittorrent.Responsive ??= (() => {
         // the arrow keys open and close a category instead
         for (const toggle of document.querySelectorAll("ul.filterList .categoryToggle"))
             toggle.tabIndex = -1;
+        updateMenubarStops();
+    };
+
+    // the menubar is one Tab stop too; in the phone menu drawer every name and item is one
+    const menuNames = () => [...document.querySelectorAll("#desktopNavbar > ul > li > a")];
+    const menuItems = (name) => [...name.parentElement.querySelectorAll(":scope > ul > li > :is(a, .anchor)")];
+    let lastFocusedMenuName = null;
+
+    const updateMenubarStops = () => {
+        const names = menuNames();
+        const stop = names.includes(lastFocusedMenuName) ? lastFocusedMenuName : names[0];
+        for (const name of names) {
+            name.tabIndex = (queries.phone.matches || (name === stop)) ? 0 : -1;
+            for (const item of menuItems(name))
+                item.tabIndex = queries.phone.matches ? 0 : -1;
+        }
+    };
+
+    const initMenubarKeys = () => {
+        const navbar = document.getElementById("desktopNavbar");
+        queries.phone.addEventListener("change", (_event) => updateMenubarStops());
+        navbar.addEventListener("focusin", (event) => {
+            const name = event.target.closest("#desktopNavbar > ul > li")?.firstElementChild;
+            if ((name === undefined) || (name === lastFocusedMenuName))
+                return;
+
+            lastFocusedMenuName = name;
+            updateMenubarStops();
+        });
+        // as the menu closes, the focus goes back to its name after a key, and out of the menubar after a click
+        navbar.addEventListener("click", (event) => {
+            if (root.classList.contains("menuDrawerOpen") || (event.target.closest("li li") === null) || !navbar.contains(document.activeElement))
+                return;
+
+            if (event.detail === 0)
+                event.target.closest("#desktopNavbar > ul > li").firstElementChild.focus({ preventScroll: true });
+            else
+                document.activeElement.blur();
+        }, true);
+
+        navbar.addEventListener("keydown", (event) => {
+            if (root.classList.contains("menuDrawerOpen"))
+                return;
+
+            const names = menuNames();
+            const topItem = event.target.closest("#desktopNavbar > ul > li");
+            if (topItem === null)
+                return;
+
+            const name = topItem.firstElementChild;
+            const index = names.indexOf(name);
+            const shown = (item) => item.getClientRects().length > 0;
+            const items = menuItems(name).filter(shown);
+            const onName = event.target === name;
+            const at = items.indexOf(event.target);
+            // a menu that was closed as an item was chosen opens again
+            const open = (target) => {
+                navbar.classList.remove("menuChosen");
+                target?.focus();
+            };
+            switch (event.key) {
+                case "ArrowRight":
+                case "ArrowLeft": {
+                    // from an item, to the next menu's first item
+                    const next = names.at((index + ((event.key === "ArrowRight") ? 1 : -1)) % names.length);
+                    open(next);
+                    if (!onName)
+                        menuItems(next).find(shown)?.focus();
+                    break;
+                }
+                case "ArrowDown":
+                    open(onName ? items[0] : items[(at + 1) % items.length]);
+                    break;
+                case "ArrowUp":
+                    open(onName ? items.at(-1) : items.at(at - 1));
+                    break;
+                case "Home":
+                    open(onName ? names[0] : items[0]);
+                    break;
+                case "End":
+                    open(onName ? names.at(-1) : items.at(-1));
+                    break;
+                case "Enter":
+                case " ":
+                    if (!onName)
+                        return;
+                    open(items[0]);
+                    break;
+                case "Escape":
+                    // back to the menu's name, and not also closing a window
+                    if (onName)
+                        return;
+                    event.stopPropagation();
+                    name.focus();
+                    break;
+                default:
+                    return;
+            }
+            event.preventDefault();
+        });
     };
 
     // the group and its shown items, if this is one of them
@@ -1566,6 +1666,7 @@ window.qBittorrent.Responsive ??= (() => {
         initPropertiesPanel();
         initKeyboardItems();
         initKeyboardGroups();
+        initMenubarKeys();
         initHistoryLayers();
     };
 
