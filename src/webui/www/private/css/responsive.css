@@ -500,6 +500,29 @@
 
 /* Properties panel on phones */
 @media (width < 760px) {
+    #propGeneral {
+        & table {
+            display: block;
+        }
+
+        & tbody {
+            column-gap: 8px;
+            display: grid;
+            grid-template-columns: max-content minmax(0, 1fr);
+        }
+
+        & tr {
+            display: contents;
+        }
+
+        & td {
+            display: block;
+            min-width: 0;
+            overflow-wrap: anywhere;
+            width: auto; /* override style.css */
+        }
+    }
+
     #propertiesPanel_header {
         height: auto;
 
@@ -523,6 +546,103 @@
 
         & #torrentFilesFilterInput {
             width: 100%;
+        }
+    }
+}
+
+/* Search tab */
+:root.responsiveRelayout #searchResults {
+    display: flex;
+    flex-direction: column;
+
+    & > * {
+        flex: none;
+    }
+
+    & > #searchResultsHeader,
+    & > #searchResultsFilters,
+    & #searchResultsHeaderContainer {
+        height: auto;
+    }
+
+    & > :last-child {
+        display: flow-root;
+        height: auto !important;
+    }
+
+    & > #searchResultsTableContainer,
+    & > #searchResultsNoPlugins,
+    & > #searchResultsNoSearches {
+        flex: 1 1 0;
+        height: auto;
+        min-height: 0;
+    }
+}
+
+/* Execution log */
+:root.responsiveRelayout #logView #logFilterBar {
+    height: auto;
+
+    & #filterTextInput {
+        flex: 1 1 160px;
+        min-width: 0;
+        width: auto;
+    }
+}
+
+:root.responsiveRelayout #rssView #rssButtonBar {
+    align-items: flex-start;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--responsive-gap);
+    height: auto;
+    overflow: visible;
+
+    & #rssFilterToolbar {
+        margin-left: auto;
+    }
+}
+
+/* RSS tab on phones; #RssPanel outweighs the view's own rules, which load later */
+@media (width < 760px) {
+    #RssPanel #rssView {
+        padding: 10px 10px 0;
+
+        & #rssButtonBar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            width: 100%;
+
+            & button {
+                margin: 0;
+                width: 100%;
+            }
+        }
+
+        & #rssFilterToolbar {
+            display: contents;
+        }
+
+        & #rssFilterInput {
+            grid-column: 1 / -1;
+            min-width: 0;
+            order: 1;
+            width: 100%;
+        }
+
+        & :is(#leftRssColumn, #centerRssColumn, #rightRssColumn) {
+            float: none;
+            height: auto;
+            margin: 0 0 10px;
+            width: 100%;
+        }
+
+        & #rssFeedTableDiv {
+            height: 30dvh;
+        }
+
+        & #rssArticleTableDiv {
+            height: 40dvh;
         }
     }
 }
