@@ -91,6 +91,7 @@ window.qBittorrent.DynamicTable ??= (() => {
             this.tableBody = this.table.querySelector("tbody");
             this.rowHeight = (clientData.get("display_density") === "compact") ? 22 : 26;
             this.rows = new Map();
+            this.renderedRows = [];
             this.cachedElements = [];
             this.selectedRows = [];
             this.columns = [];
@@ -490,7 +491,7 @@ window.qBittorrent.DynamicTable ??= (() => {
             this.fixedTableHeaderColgroup.children[pos].style.width = `${column.width}px`;
             // rerender on column resize
             if (this.useVirtualList)
-                this.rerender();
+                this.rerender(this.renderedRows);
 
             column.onResize?.(column.name);
         }
