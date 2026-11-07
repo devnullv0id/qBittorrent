@@ -54,6 +54,20 @@ td:has(> :disabled:not(#WebUIAPIKeyText)) {
     color: var(--color-text-disabled);
 }
 
+/* Windows: about two spaces between a name and its field, and a field and its unit */
+:where(.mochaContent, body:not(:has(#desktop))) {
+    & :is(label, select, [type="text"], [type="number"], [type="range"]) {
+        &:not(:has(+ [style*="margin-left"])) {
+            &:has(+ :is(label, select, span, button, [type="button"])),
+            &:is(label, select):has(
+                    + :is([type="text"], [type="number"], [type="range"])
+                ) {
+                margin-right: 0.25em;
+            }
+        }
+    }
+}
+
 /* Options' rows */
 #preferencesPage .PrefTab {
     & table {
@@ -1569,7 +1583,7 @@ td:has(> :disabled:not(#WebUIAPIKeyText)) {
 
         /* the rows' gaps space their items, not the desktop's margins */
         & :is(.formRow, td) > :is(label, input, select, button, span) {
-            margin-left: 0 !important;
+            margin-inline: 0 !important;
         }
 
         & .formRow[style*="padding-left"] {
@@ -2121,9 +2135,11 @@ td:has(> :disabled:not(#WebUIAPIKeyText)) {
 :root.responsivePhone .speedGrid {
     grid-template-columns: 24px auto minmax(0, 1fr) minmax(0, 80px) auto;
 
+    /* as wide as their column, less the space after them */
     & :is(input, select) {
+        justify-self: stretch;
         min-width: 0;
-        width: 100%;
+        width: auto;
     }
 }
 
