@@ -165,7 +165,8 @@ window.qBittorrent.Responsive ??= (() => {
         { group: "ul.filterList", items: "span.link", chosen: "li.selectedFilter > span.link", vertical: true }
     ];
     const lastFocusedItems = new WeakMap();
-    const shownItems = (group, spec) => [...group.querySelectorAll(spec.items)].filter((item) => item.getClientRects().length > 0);
+    // shown and not inert: the transfer buttons are inert in other views
+    const shownItems = (group, spec) => [...group.querySelectorAll(spec.items)].filter((item) => (item.getClientRects().length > 0) && (item.closest("[inert]") === null));
     // what an entry keeps when its filter list is built anew: its id
     const itemKey = (item) => item.closest("li[id]")?.id ?? item;
 
