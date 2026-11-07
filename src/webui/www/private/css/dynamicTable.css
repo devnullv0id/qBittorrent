@@ -113,6 +113,16 @@
     white-space: nowrap;
 }
 
+/* the file trees' check box for all files, centered */
+.dynamicTable th.column_checked:has(> input[type="checkbox"]) {
+    text-align: center;
+
+    & > input[type="checkbox"] {
+        margin: 0;
+        vertical-align: middle;
+    }
+}
+
 .dynamicTable tr:hover {
     cursor: pointer;
 }
