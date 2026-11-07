@@ -351,9 +351,16 @@ hr {
     visibility: hidden;
 }
 
+/* visible at once, so that an item can take the focus as the menu opens */
 .contextMenu.visible {
     opacity: 1;
+    transition: opacity 0.2s ease-in-out;
     visibility: visible;
+}
+
+/* focused when a pointer opens it; the items show the keyboard's focus */
+.contextMenu:focus-visible {
+    outline: none;
 }
 
 .contextMenu .separator {
@@ -390,9 +397,14 @@ hr {
     white-space: nowrap;
 }
 
-.contextMenu li a:hover {
+.contextMenu li a:is(:hover, :focus-visible) {
     background-color: var(--color-background-hover);
     color: var(--color-text-hover);
+}
+
+/* inside the item, where the edge of the menu doesn't cut it off */
+.contextMenu li a:focus-visible {
+    outline-offset: -2px;
 }
 
 .contextMenu li ul {
@@ -422,8 +434,8 @@ hr {
     transform: rotate(-45deg) translateY(-50%);
 }
 
-.contextMenu li:not(.disabled):hover > ul {
-    /* lists nested under hovered list items */
+.contextMenu li:not(.disabled):is(:hover, :focus-within) > ul {
+    /* lists nested under hovered or focused list items */
     left: auto;
 }
 
