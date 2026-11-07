@@ -1882,6 +1882,9 @@
         overflow: auto hidden;
         /* room for the focus ring, which the strip would clip */
         padding-block: 3px;
+        /* a button the keyboard reaches scrolls clear of the Menu button and the fades */
+        scroll-padding-inline: calc(var(--toolbar-start) + var(--fade))
+            var(--fade);
         scrollbar-width: none;
         white-space: nowrap;
 
