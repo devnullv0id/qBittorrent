@@ -462,7 +462,7 @@ window.qBittorrent.Search ??= (() => {
         if (rowsToSelect.length > 0)
             searchResultsTable.reselectRows(rowsToSelect);
 
-        document.getElementById("numSearchResultsVisible").textContent = searchResultsTable.getFilteredAndSortedRows().length;
+        document.getElementById("numSearchResultsVisible").textContent = searchResultsTable.filteredRowCount;
         document.getElementById("numSearchResultsTotal").textContent = searchResultsTable.getRowSize();
 
         updateSearchButtonState();
@@ -942,7 +942,7 @@ window.qBittorrent.Search ??= (() => {
 
     const searchFilterChanged = () => {
         searchResultsTable.updateTable();
-        document.getElementById("numSearchResultsVisible").textContent = searchResultsTable.getFilteredAndSortedRows().length;
+        document.getElementById("numSearchResultsVisible").textContent = searchResultsTable.filteredRowCount;
     };
 
     const loadSearchResultsData = (searchId) => {
@@ -1026,10 +1026,10 @@ window.qBittorrent.Search ??= (() => {
                         for (const row of newRows)
                             searchResultsTable.updateRowData(row);
 
-                        document.getElementById("numSearchResultsVisible").textContent = searchResultsTable.getFilteredAndSortedRows().length;
-                        document.getElementById("numSearchResultsTotal").textContent = searchResultsTable.getRowSize();
-
                         searchResultsTable.updateTable();
+
+                        document.getElementById("numSearchResultsVisible").textContent = searchResultsTable.filteredRowCount;
+                        document.getElementById("numSearchResultsTotal").textContent = searchResultsTable.getRowSize();
                     }
                     else if (newRows.length > 0) {
                         // update unread count for background tabs
