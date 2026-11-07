@@ -1922,6 +1922,12 @@ window.addEventListener("DOMContentLoaded", async (event) => {
     updateTabDisplay();
 
     const registerDragAndDrop = () => {
+        // images are never dragged: a click that moves a little still clicks, and none is dropped as a link
+        document.addEventListener("dragstart", (ev) => {
+            if (ev.target.nodeName === "IMG")
+                ev.preventDefault();
+        });
+
         document.getElementById("desktop").addEventListener("dragover", (ev) => {
             if (ev.preventDefault)
                 ev.preventDefault();
